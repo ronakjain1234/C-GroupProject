@@ -40,8 +40,6 @@ C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupPro
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\Microsoft.Win32.Registry.a32fqwbg5a.wasm
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\mscorlib.5q5u0swn6q.wasm
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MudBlazor.d77vteuu8h.wasm
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.08vv139ekx.pdb
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.dt5n3of7ru.wasm
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\netstandard.w8gk1pigg1.wasm
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.AppContext.uyzczx3u46.wasm
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Buffers.gb72qmeqj8.wasm
@@ -233,7 +231,6 @@ C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupPro
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Globalization.Calendars.9cby8evhb7.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Numerics.Vectors.zqmzbv142i.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Reflection.Metadata.ktv7t8t9fp.wasm.gz
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.dt5n3of7ru.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Net.w9eavbqlj2.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Security.Cryptography.7l7nzdtevg.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Security.SecureString.mhx91fa0v9.wasm.gz
@@ -248,7 +245,6 @@ C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupPro
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Threading.Thread.8svcmv6b7k.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Diagnostics.Debug.d7gsc5690v.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Drawing.Primitives.5f1v7y0rwb.wasm.gz
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.08vv139ekx.pdb.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Xml.XPath.XDocument.yeo34d112s.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Net.HttpListener.lfch2dzlma.wasm.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\System.Web.HttpUtility.kfn8vo7u5k.wasm.gz
@@ -1081,9 +1077,6 @@ C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupPro
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\9emhxzhvks-tjcz0u77k5.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\j8fehaqac2-tptq2av103.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\ow4k94baew-lfu7j35m59.gz
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\55gz048fpd-dt5n3of7ru.gz
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\7ubda96wg9-08vv139ekx.gz
-C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\jih5ggsu02-8173ctjbu3.gz
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\staticwebassets.development.json
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\staticwebassets.build.endpoints.json
@@ -1098,3 +1091,11 @@ C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupPro
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\refint\MyMudBlazorApp.dll
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\MyMudBlazorApp.pdb
 C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\ref\MyMudBlazorApp.dll
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.yaidm6u4ft.pdb
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.o1cqd3ts62.wasm
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.o1cqd3ts62.wasm.gz
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\bin\Debug\net9.0\wwwroot\_framework\MyMudBlazorApp.yaidm6u4ft.pdb.gz
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\MyMudBlazorApp.sourcelink.json
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\55gz048fpd-o1cqd3ts62.gz
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\7ubda96wg9-yaidm6u4ft.gz
+C:\Users\ronak\OneDrive - The University of Texas at Austin\Documents\C-GroupProject\MyMudBlazorApp\obj\Debug\net9.0\compressed\jih5ggsu02-qoipzdf1vh.gz

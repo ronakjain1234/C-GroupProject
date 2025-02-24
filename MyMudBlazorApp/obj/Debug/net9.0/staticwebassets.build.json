@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "T9ozD2df2n2rGTXAys5tLoZHi6Ep3bar76DL98z6GQU=",
+  "Hash": "FNjg76HfZ87lxN4zuYakuGuZtBD+22WRPz5zUXg9zSY=",
   "Source": "MyMudBlazorApp",
   "BasePath": "/",
   "Mode": "Root",
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "WasmResource",
       "AssetTraitValue": "manifest",
-      "Fingerprint": "8173ctjbu3",
-      "Integrity": "XFY/Zwo/66dHs7pekb0CrjGU/8D7UbsJBfeJBaF3dxk=",
+      "Fingerprint": "qoipzdf1vh",
+      "Integrity": "Jk6f3SWXJ4m0CI8u8xTXAguh6eisU1qdTgHev29iQDA=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "obj\\Debug\\net9.0\\blazor.boot.json"
@@ -955,8 +955,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "WasmResource",
       "AssetTraitValue": "symbol",
-      "Fingerprint": "08vv139ekx",
-      "Integrity": "MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c=",
+      "Fingerprint": "yaidm6u4ft",
+      "Integrity": "FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "obj\\Debug\\net9.0\\MyMudBlazorApp.pdb"
@@ -976,8 +976,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "WasmResource",
       "AssetTraitValue": "runtime",
-      "Fingerprint": "dt5n3of7ru",
-      "Integrity": "z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw=",
+      "Fingerprint": "o1cqd3ts62",
+      "Integrity": "hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\webcil\\MyMudBlazorApp.wasm"
@@ -5099,12 +5099,12 @@
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\System.Reflection.Metadata.wasm"
     },
     {
-      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-dt5n3of7ru.gz",
+      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-o1cqd3ts62.gz",
       "SourceId": "MyMudBlazorApp",
       "SourceType": "Computed",
       "ContentRoot": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "/",
-      "RelativePath": "_framework/MyMudBlazorApp#[.{fingerprint=dt5n3of7ru}]!.wasm.gz",
+      "RelativePath": "_framework/MyMudBlazorApp#[.{fingerprint=o1cqd3ts62}]!.wasm.gz",
       "AssetKind": "Build",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -5113,8 +5113,8 @@
       "RelatedAsset": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.wasm",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "1881t1x1mh",
-      "Integrity": "4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI=",
+      "Fingerprint": "bbgdejb551",
+      "Integrity": "133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.wasm"
@@ -5456,12 +5456,12 @@
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\System.Drawing.Primitives.wasm"
     },
     {
-      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-08vv139ekx.gz",
+      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-yaidm6u4ft.gz",
       "SourceId": "MyMudBlazorApp",
       "SourceType": "Computed",
       "ContentRoot": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "/",
-      "RelativePath": "_framework/MyMudBlazorApp#[.{fingerprint=08vv139ekx}]!.pdb.gz",
+      "RelativePath": "_framework/MyMudBlazorApp#[.{fingerprint=yaidm6u4ft}]!.pdb.gz",
       "AssetKind": "Build",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -5470,8 +5470,8 @@
       "RelatedAsset": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.pdb",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "zw7tbwlvrf",
-      "Integrity": "rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U=",
+      "Fingerprint": "ck7tfckfp6",
+      "Integrity": "dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.pdb"
@@ -7409,7 +7409,7 @@
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\System.Dynamic.Runtime.wasm"
     },
     {
-      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-8173ctjbu3.gz",
+      "Identity": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-qoipzdf1vh.gz",
       "SourceId": "MyMudBlazorApp",
       "SourceType": "Computed",
       "ContentRoot": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\",
@@ -7423,8 +7423,8 @@
       "RelatedAsset": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\blazor.boot.json",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "gqxl5yqubb",
-      "Integrity": "CKtDALAPymwQ5+xBlt1G0cE4dlfrCBH/RMqNfZRAUco=",
+      "Fingerprint": "tadruck3qh",
+      "Integrity": "FQqqDRn0QEU6D3erzJs/G32NzpOIEPEqYsZdn5GxjTc=",
       "CopyToOutputDirectory": "PreserveNewest",
       "CopyToPublishDirectory": "Never",
       "OriginalItemSpec": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\blazor.boot.json"
@@ -11279,11 +11279,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"XFY/Zwo/66dHs7pekb0CrjGU/8D7UbsJBfeJBaF3dxk=\""
+          "Value": "\"Jk6f3SWXJ4m0CI8u8xTXAguh6eisU1qdTgHev29iQDA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11293,18 +11293,18 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-XFY/Zwo/66dHs7pekb0CrjGU/8D7UbsJBfeJBaF3dxk="
+          "Value": "sha256-Jk6f3SWXJ4m0CI8u8xTXAguh6eisU1qdTgHev29iQDA="
         }
       ]
     },
     {
       "Route": "_framework/blazor.boot.json",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-8173ctjbu3.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-qoipzdf1vh.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000080121785"
+          "Quality": "0.000080096115"
         }
       ],
       "ResponseHeaders": [
@@ -11314,15 +11314,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12480"
+          "Value": "12484"
         },
         {
           "Name": "ETag",
-          "Value": "\"CKtDALAPymwQ5+xBlt1G0cE4dlfrCBH/RMqNfZRAUco=\""
+          "Value": "\"FQqqDRn0QEU6D3erzJs/G32NzpOIEPEqYsZdn5GxjTc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 16:53:40 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11342,19 +11342,19 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"XFY/Zwo/66dHs7pekb0CrjGU/8D7UbsJBfeJBaF3dxk=\""
+          "Value": "W/\"Jk6f3SWXJ4m0CI8u8xTXAguh6eisU1qdTgHev29iQDA=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-XFY/Zwo/66dHs7pekb0CrjGU/8D7UbsJBfeJBaF3dxk="
+          "Value": "sha256-Jk6f3SWXJ4m0CI8u8xTXAguh6eisU1qdTgHev29iQDA="
         }
       ]
     },
     {
       "Route": "_framework/blazor.boot.json.gz",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-8173ctjbu3.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\jih5ggsu02-qoipzdf1vh.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -11363,7 +11363,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12480"
+          "Value": "12484"
         },
         {
           "Name": "Content-Type",
@@ -11371,11 +11371,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"CKtDALAPymwQ5+xBlt1G0cE4dlfrCBH/RMqNfZRAUco=\""
+          "Value": "\"FQqqDRn0QEU6D3erzJs/G32NzpOIEPEqYsZdn5GxjTc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 16:53:40 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11393,7 +11393,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-CKtDALAPymwQ5+xBlt1G0cE4dlfrCBH/RMqNfZRAUco="
+          "Value": "sha256-FQqqDRn0QEU6D3erzJs/G32NzpOIEPEqYsZdn5GxjTc="
         }
       ]
     },
@@ -11459,7 +11459,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Fri, 17 Jan 2025 20:14:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11512,7 +11512,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Fri, 17 Jan 2025 20:14:04 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11604,7 +11604,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11665,7 +11665,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11757,7 +11757,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11857,7 +11857,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11918,7 +11918,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -11971,7 +11971,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -12055,7 +12055,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -12108,7 +12108,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:16 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -12888,7 +12888,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:22 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -12949,7 +12949,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:22 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -13086,7 +13086,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:22 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -13139,7 +13139,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Thu, 16 Jan 2025 19:03:22 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23455,168 +23455,7 @@
       ]
     },
     {
-      "Route": "_framework/MyMudBlazorApp.08vv139ekx.pdb",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.pdb",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "23992"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/octet-stream"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:08 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "08vv139ekx"
-        },
-        {
-          "Name": "label",
-          "Value": "_framework/MyMudBlazorApp.pdb"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c="
-        }
-      ]
-    },
-    {
-      "Route": "_framework/MyMudBlazorApp.08vv139ekx.pdb",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-08vv139ekx.gz",
-      "Selectors": [
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip",
-          "Quality": "0.000057408577"
-        }
-      ],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "17418"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/octet-stream"
-        },
-        {
-          "Name": "ETag",
-          "Value": "W/\"MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c=\""
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "08vv139ekx"
-        },
-        {
-          "Name": "label",
-          "Value": "_framework/MyMudBlazorApp.pdb"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c="
-        }
-      ]
-    },
-    {
-      "Route": "_framework/MyMudBlazorApp.08vv139ekx.pdb.gz",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-08vv139ekx.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "17418"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "application/octet-stream"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "08vv139ekx"
-        },
-        {
-          "Name": "label",
-          "Value": "_framework/MyMudBlazorApp.pdb.gz"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U="
-        }
-      ]
-    },
-    {
-      "Route": "_framework/MyMudBlazorApp.dt5n3of7ru.wasm",
+      "Route": "_framework/MyMudBlazorApp.o1cqd3ts62.wasm",
       "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.wasm",
       "Selectors": [],
       "ResponseHeaders": [
@@ -23626,7 +23465,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "17685"
+          "Value": "18197"
         },
         {
           "Name": "Content-Type",
@@ -23634,11 +23473,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw=\""
+          "Value": "\"hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:09 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23648,7 +23487,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "dt5n3of7ru"
+          "Value": "o1cqd3ts62"
         },
         {
           "Name": "label",
@@ -23656,18 +23495,18 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw="
+          "Value": "sha256-hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY="
         }
       ]
     },
     {
-      "Route": "_framework/MyMudBlazorApp.dt5n3of7ru.wasm",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-dt5n3of7ru.gz",
+      "Route": "_framework/MyMudBlazorApp.o1cqd3ts62.wasm",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-o1cqd3ts62.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000128982329"
+          "Quality": "0.000127210279"
         }
       ],
       "ResponseHeaders": [
@@ -23677,15 +23516,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7752"
+          "Value": "7860"
         },
         {
           "Name": "ETag",
-          "Value": "\"4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI=\""
+          "Value": "\"133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23705,13 +23544,13 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw=\""
+          "Value": "W/\"hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "dt5n3of7ru"
+          "Value": "o1cqd3ts62"
         },
         {
           "Name": "label",
@@ -23719,13 +23558,13 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw="
+          "Value": "sha256-hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY="
         }
       ]
     },
     {
-      "Route": "_framework/MyMudBlazorApp.dt5n3of7ru.wasm.gz",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-dt5n3of7ru.gz",
+      "Route": "_framework/MyMudBlazorApp.o1cqd3ts62.wasm.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-o1cqd3ts62.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -23734,7 +23573,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7752"
+          "Value": "7860"
         },
         {
           "Name": "Content-Type",
@@ -23742,11 +23581,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI=\""
+          "Value": "\"133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23764,7 +23603,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "dt5n3of7ru"
+          "Value": "o1cqd3ts62"
         },
         {
           "Name": "label",
@@ -23772,7 +23611,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI="
+          "Value": "sha256-133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0="
         }
       ]
     },
@@ -23787,7 +23626,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "23992"
+          "Value": "24232"
         },
         {
           "Name": "Content-Type",
@@ -23795,11 +23634,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c=\""
+          "Value": "\"FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:08 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23809,18 +23648,18 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c="
+          "Value": "sha256-FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0="
         }
       ]
     },
     {
       "Route": "_framework/MyMudBlazorApp.pdb",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-08vv139ekx.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-yaidm6u4ft.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000057408577"
+          "Quality": "0.000056902242"
         }
       ],
       "ResponseHeaders": [
@@ -23830,15 +23669,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "17418"
+          "Value": "17573"
         },
         {
           "Name": "ETag",
-          "Value": "\"rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U=\""
+          "Value": "\"dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23858,19 +23697,19 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c=\""
+          "Value": "W/\"FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c="
+          "Value": "sha256-FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0="
         }
       ]
     },
     {
       "Route": "_framework/MyMudBlazorApp.pdb.gz",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-08vv139ekx.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-yaidm6u4ft.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -23879,7 +23718,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "17418"
+          "Value": "17573"
         },
         {
           "Name": "Content-Type",
@@ -23887,11 +23726,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U=\""
+          "Value": "\"dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23909,7 +23748,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-rbdP+rDQ+rOdO9Ss9Q66II7Yz50dpgj4KqIRYNOJy3U="
+          "Value": "sha256-dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ="
         }
       ]
     },
@@ -23924,7 +23763,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "17685"
+          "Value": "18197"
         },
         {
           "Name": "Content-Type",
@@ -23932,11 +23771,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw=\""
+          "Value": "\"hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:09 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23946,18 +23785,18 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw="
+          "Value": "sha256-hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY="
         }
       ]
     },
     {
       "Route": "_framework/MyMudBlazorApp.wasm",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-dt5n3of7ru.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-o1cqd3ts62.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000128982329"
+          "Quality": "0.000127210279"
         }
       ],
       "ResponseHeaders": [
@@ -23967,15 +23806,15 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7752"
+          "Value": "7860"
         },
         {
           "Name": "ETag",
-          "Value": "\"4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI=\""
+          "Value": "\"133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -23995,19 +23834,19 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw=\""
+          "Value": "W/\"hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY=\""
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw="
+          "Value": "sha256-hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY="
         }
       ]
     },
     {
       "Route": "_framework/MyMudBlazorApp.wasm.gz",
-      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-dt5n3of7ru.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\55gz048fpd-o1cqd3ts62.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -24016,7 +23855,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "7752"
+          "Value": "7860"
         },
         {
           "Name": "Content-Type",
@@ -24024,11 +23863,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI=\""
+          "Value": "\"133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 24 Feb 2025 16:43:10 GMT"
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -24046,7 +23885,168 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-4RCcfPeiSs1/fkRVPaqnytKJgO2bYzbrJG8dYPCN3TI="
+          "Value": "sha256-133wFGc0hOtTpWbL/x+TSvd3vKfiiw+bqt6JyRDQfT0="
+        }
+      ]
+    },
+    {
+      "Route": "_framework/MyMudBlazorApp.yaidm6u4ft.pdb",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\bin\\Debug\\net9.0\\wwwroot\\_framework\\MyMudBlazorApp.pdb",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "24232"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/octet-stream"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 24 Feb 2025 17:01:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "yaidm6u4ft"
+        },
+        {
+          "Name": "label",
+          "Value": "_framework/MyMudBlazorApp.pdb"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0="
+        }
+      ]
+    },
+    {
+      "Route": "_framework/MyMudBlazorApp.yaidm6u4ft.pdb",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-yaidm6u4ft.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000056902242"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17573"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/octet-stream"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "yaidm6u4ft"
+        },
+        {
+          "Name": "label",
+          "Value": "_framework/MyMudBlazorApp.pdb"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0="
+        }
+      ]
+    },
+    {
+      "Route": "_framework/MyMudBlazorApp.yaidm6u4ft.pdb.gz",
+      "AssetFile": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\Debug\\net9.0\\compressed\\7ubda96wg9-yaidm6u4ft.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "17573"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/octet-stream"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 24 Feb 2025 17:01:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "yaidm6u4ft"
+        },
+        {
+          "Name": "label",
+          "Value": "_framework/MyMudBlazorApp.pdb.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-dBXXzfJWPiOxeGG4ZaDdua14tC5DJ6dOp6XMVNdzIeQ="
         }
       ]
     },

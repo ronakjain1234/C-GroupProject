@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "MyMudBlazorApp",
   "resources": {
-    "hash": "sha256-nhr+2EIxKqNJn03mlhZNyv3HRTEx7Oc0XtllH25uerI=",
+    "hash": "sha256-LXvnlLnAzEORoj3/5YEaPuvQAiieyoqBWf+Hb9yBt9I=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Authorization.esv38zo127.wasm": "Microsoft.AspNetCore.Authorization.wasm",
       "Microsoft.AspNetCore.Components.cwj0bpb71v.wasm": "Microsoft.AspNetCore.Components.wasm",
@@ -204,8 +204,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "MyMudBlazorApp.dt5n3of7ru.wasm": "MyMudBlazorApp.wasm",
-      "MyMudBlazorApp.08vv139ekx.pdb": "MyMudBlazorApp.pdb"
+      "MyMudBlazorApp.o1cqd3ts62.wasm": "MyMudBlazorApp.wasm",
+      "MyMudBlazorApp.yaidm6u4ft.pdb": "MyMudBlazorApp.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.8bti36lthm.js": "sha256-HFADmT26AarHu4tMjFaTPxINmQjBJGtdPN+CKjtNMFE="
@@ -418,10 +418,10 @@
       "WindowsBase.tuf34ieu7y.wasm": "sha256-Bd+l972cOS1eVeLzrQNlgD6LPWV1QXBSzJhv8Tx1WGI=",
       "mscorlib.5q5u0swn6q.wasm": "sha256-g9cI1sECkF7bxMqOSB+W0a4utdDsqTrqZzyiAEeA65g=",
       "netstandard.w8gk1pigg1.wasm": "sha256-QFR5QNPfvyZTexW3IA/AFx6ZmIF/TecvOUsSK4gM4po=",
-      "MyMudBlazorApp.dt5n3of7ru.wasm": "sha256-z48ah3EA+WSAjO5av5vsMQwABOMKkzpmXhtlHqUeDdw="
+      "MyMudBlazorApp.o1cqd3ts62.wasm": "sha256-hFdeSBcj9v6KYmDomaiPmFWJ4bu8AZ2GCu0hzuBEOmY="
     },
     "pdb": {
-      "MyMudBlazorApp.08vv139ekx.pdb": "sha256-MLN4N81gp2ef2LzmkycA8ASgAJNN7T8AI/YNa8lBQ/c="
+      "MyMudBlazorApp.yaidm6u4ft.pdb": "sha256-FtSS92IVKXD6aMwhAqg99w3PTUsUeNOdSwO0ZRSwLi0="
     }
   },
   "cacheBootResources": true,
