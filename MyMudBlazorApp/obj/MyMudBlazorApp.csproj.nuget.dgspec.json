@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj": {}
+    "/home/eal/Projects/C-GroupProject/MyMudBlazorApp/MyMudBlazorApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj": {
+    "/home/eal/Projects/C-GroupProject/MyMudBlazorApp/MyMudBlazorApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj",
+        "projectUniqueName": "/home/eal/Projects/C-GroupProject/MyMudBlazorApp/MyMudBlazorApp.csproj",
         "projectName": "MyMudBlazorApp",
-        "projectPath": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj",
-        "packagesPath": "C:\\Users\\ronak\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ronak\\OneDrive - The University of Texas at Austin\\Documents\\C-GroupProject\\MyMudBlazorApp\\obj\\",
+        "projectPath": "/home/eal/Projects/C-GroupProject/MyMudBlazorApp/MyMudBlazorApp.csproj",
+        "packagesPath": "/home/eal/.nuget/packages/",
+        "outputPath": "/home/eal/Projects/C-GroupProject/MyMudBlazorApp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\ronak\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/eal/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -36,9 +36,9 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "direct"
+          "auditMode": "all"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -46,23 +46,23 @@
           "dependencies": {
             "Microsoft.AspNetCore.Components.WebAssembly": {
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.0, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly.DevServer": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.2, )"
+              "version": "[9.0.0, )"
             },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.2, )",
+              "version": "[9.0.0, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.2, )",
+              "version": "[9.0.0, )",
               "autoReferenced": true
             },
             "MudBlazor": {
@@ -84,7 +84,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[9.0.2, 9.0.2]"
+              "version": "[9.0.0, 9.0.0]"
             }
           ],
           "frameworkReferences": {
@@ -92,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/home/eal/.dotnet/sdk/9.0.100/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {
