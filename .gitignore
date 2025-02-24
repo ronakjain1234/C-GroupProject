@@ -1,3 +1,5 @@
 MyMudBlazorApp/obj/Debug
 MyMudBlazorApp/bin/
 .idea
+MyMudBlazorApp/obj/project.packagespec.json
+MyMudBlazorApp/obj/rider.project.restore.info
