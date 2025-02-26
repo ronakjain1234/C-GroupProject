@@ -1,0 +1,35 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization.Infrastructure
+@using MyMudBlazorApp.Objects
+
+<PageTitle>Company</PageTitle>
+
+<h1>Company</h1>
+
+<MudTable Items="@Elements.Take(1)" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>E-Mail</MudTh>
+        <MudTh>Roles</MudTh>
+        <MudTh>Buttons</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
+        <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning" >Edit User</MudButton>
+        <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Error" >Delete User</MudButton>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private IEnumerable<User> Elements = new List<User>();
+    
+    protected override Task OnInitializedAsync()
+    {
+        var company = new Objects.Company("JP Morgan");
+        company.AddUser(new User("Elias", "EAL@DTU.dk"));
+        Elements = company.GetUsers();
+        return Task.CompletedTask;
+    }
+}
