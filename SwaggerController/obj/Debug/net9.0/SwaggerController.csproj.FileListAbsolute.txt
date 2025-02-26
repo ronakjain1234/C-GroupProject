@@ -1,0 +1,8 @@
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.csproj.AssemblyReference.cache
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.AssemblyInfoInputs.cache
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.AssemblyInfo.cs
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.csproj.CoreCompileInputs.cache
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\CatalinaMihai\source\repos\C-GroupProject\SwaggerController\obj\Debug\net9.0\SwaggerController.sourcelink.json

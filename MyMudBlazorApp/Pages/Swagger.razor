@@ -1,0 +1,15 @@
+﻿@page "/swagger"
+@inject IJSRuntime JS
+
+<h3>API Documentation</h3>
+
+<button @onclick="LoadSwagger">Load Swagger</button>
+
+<div id="swagger-ui"></div>
+
+@code {
+    private async Task LoadSwagger()
+    {
+        await JS.InvokeVoidAsync("loadSwaggerUI", "https://localhost:5001/swagger/v1/swagger.json");
+    }
+}

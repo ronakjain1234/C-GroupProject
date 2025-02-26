@@ -9,7 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.2" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.23" />
     <PackageReference Include="MudBlazor" Version="8.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.0" />
   </ItemGroup>
 
 </Project>

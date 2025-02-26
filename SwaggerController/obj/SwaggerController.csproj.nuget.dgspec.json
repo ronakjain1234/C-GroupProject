@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj": {}
+    "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\SwaggerController.csproj": {}
   },
   "projects": {
-    "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj": {
+    "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\SwaggerController.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj",
-        "projectName": "MyMudBlazorApp",
-        "projectPath": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\MyMudBlazorApp\\MyMudBlazorApp.csproj",
+        "projectUniqueName": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\SwaggerController.csproj",
+        "projectName": "SwaggerController",
+        "projectPath": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\SwaggerController.csproj",
         "packagesPath": "C:\\Users\\CatalinaMihai\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\MyMudBlazorApp\\obj\\",
+        "outputPath": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,14 +50,9 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
-            "Microsoft.AspNetCore.Components.WebAssembly": {
+            "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
-              "version": "[9.0.0, )"
-            },
-            "Microsoft.AspNetCore.Components.WebAssembly.DevServer": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[9.0.2, )"
             },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
@@ -71,11 +66,15 @@
               "version": "[9.0.2, )",
               "autoReferenced": true
             },
-            "MudBlazor": {
+            "Swashbuckle.AspNetCore.Swagger": {
               "target": "Package",
-              "version": "[8.3.0, )"
+              "version": "[7.3.0, )"
             },
-            "Swashbuckle.AspNetCore": {
+            "Swashbuckle.AspNetCore.SwaggerGen": {
+              "target": "Package",
+              "version": "[7.3.0, )"
+            },
+            "Swashbuckle.AspNetCore.SwaggerUI": {
               "target": "Package",
               "version": "[7.3.0, )"
             }

@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "dgSpecHash": "JRUGyUp8PKI=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\CatalinaMihai\\source\\repos\\C-GroupProject\\SwaggerController\\SwaggerController.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.2\\microsoft.aspnetcore.openapi.9.0.2.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.net.illink.tasks\\9.0.2\\microsoft.net.illink.tasks.9.0.2.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.2\\microsoft.net.sdk.webassembly.pack.9.0.2.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.openapi\\1.6.22\\microsoft.openapi.1.6.22.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\7.3.0\\swashbuckle.aspnetcore.swagger.7.3.0.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\7.3.0\\swashbuckle.aspnetcore.swaggergen.7.3.0.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\7.3.0\\swashbuckle.aspnetcore.swaggerui.7.3.0.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.net.sdk.compilers.toolset\\9.0.200\\microsoft.net.sdk.compilers.toolset.9.0.200.nupkg.sha512",
+    "C:\\Users\\CatalinaMihai\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\9.0.2\\microsoft.netcore.app.runtime.mono.browser-wasm.9.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

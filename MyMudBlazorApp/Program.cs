@@ -1,11 +1,41 @@
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using MyMudBlazorApp;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 
-var builder = WebAssemblyHostBuilder.CreateDefault(args);
-builder.RootComponents.Add<App>("#app");
-builder.RootComponents.Add<HeadOutlet>("head::after");
+var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
-await builder.Build().RunAsync();
+// Register Swagger
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "MyMudBlazor API",
+        Version = "v1"
+    });
+});
+
+var app = builder.Build();
+
+// Enable Swagger
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyMudBlazor API V1");
+        c.RoutePrefix = "swagger"; // Swagger UI available at /swagger
+    });
+}
+
+app.UseRouting();
+app.UseAuthorization();
+
+app.MapControllers(); // Ensure API endpoints are available
+
+app.Run();

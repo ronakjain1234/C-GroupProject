@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.3.0" />
+  </ItemGroup>
+
+</Project>
