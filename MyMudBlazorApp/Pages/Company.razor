@@ -67,10 +67,10 @@
 
 <div class="entirePage">
     <div class="mainContent">
-        <h1>Company</h1>
+        <h1 style="color: white">Company</h1>
         <MudTable class="companyTable" Items="@Elements" Filter="new Func<User,bool>(FilterFunc1)">
             <ToolBarContent>
-                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudTextField Style="color: white" @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Style="color: white">Name</MudTh>
@@ -88,7 +88,7 @@
                 </MudTd>
             </RowTemplate>
             <PagerContent>
-                <MudTablePager />
+                <MudTablePager Style="color: white"/>
             </PagerContent>
         </MudTable>
     </div>
