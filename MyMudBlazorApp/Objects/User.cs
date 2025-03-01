@@ -21,6 +21,10 @@ public class User
         foreach (Role role in Roles)
         {
             sb.Append(role.Name);
+            if (role != Roles.Last())
+            {
+                sb.Append(", ");
+            }
         }
 
         return sb.ToString();
