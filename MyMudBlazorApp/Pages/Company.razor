@@ -1,35 +1,130 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Authorization.Infrastructure
+@using MudBlazor.Utilities
 @using MyMudBlazorApp.Objects
 
 <PageTitle>Company</PageTitle>
 
-<h1>Company</h1>
+<style>
+    .companySideBar {
+        width: 200px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        padding: 16px;
+        background-color: var(--mud-palette-primary-lighten);
+    }
 
-<MudTable Items="@Elements.Take(1)" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
-    <HeaderContent>
-        <MudTh>Name</MudTh>
-        <MudTh>E-Mail</MudTh>
-        <MudTh>Roles</MudTh>
-        <MudTh>Buttons</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Email">@context.Email</MudTd>
-        <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
-        <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning" >Edit User</MudButton>
-        <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Error" >Delete User</MudButton>
-    </RowTemplate>
-</MudTable>
+    .mainContent {
+        margin-left: 220px;
+        padding: 20px;
+    }
+
+    .entirePage {
+        background-color: var(--mud-palette-primary);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .companyTable {
+        background-color: var(--mud-palette-primary-lighten);
+        border-radius: 8px;
+    }
+
+    .mud-table-row {
+        width: fit-content;
+        background-color: var(--mud-palette-primary-lighten);
+    }
+
+    .sideBarButtons {
+        margin-top: 220px;
+    }
+    
+    .mud-table-th, .mud-table td {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .mt-0
+    {
+        color: white;
+    }
+</style>
+
+<MudPaper Class="companySideBar">
+    <MudStack Class="sideBarButtons" Spacing="4">
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Back</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Profile</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Settings</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true">Delete Company</MudButton>
+    </MudStack>
+</MudPaper>
+
+<div class="entirePage">
+    <div class="mainContent">
+        <h1>Company</h1>
+        <MudTable class="companyTable" Items="@Elements" Filter="new Func<User,bool>(FilterFunc1)">
+            <ToolBarContent>
+                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh Style="color: white">Name</MudTh>
+                <MudTh Style="color: white">Email</MudTh>
+                <MudTh Style="color: white">Roles</MudTh>
+                <MudTh Style="color: white">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name" Style="color: white">@context.Name</MudTd>
+                <MudTd DataLabel="Email" Style="color: white">@context.Email</MudTd>
+                <MudTd DataLabel="Roles" Style="color: white">@context.RolesToString()</MudTd>
+                <MudTd DataLabel="Actions" Style="color: white">
+                    <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning">Edit User</MudButton>
+                    <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Error">Delete User</MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </div>
+</div>
 
 @code {
     private IEnumerable<User> Elements = new List<User>();
-    
+    private string searchString1 = "";
     protected override Task OnInitializedAsync()
     {
         var company = new Objects.Company("JP Morgan");
         company.AddUser(new User("Elias", "EAL@DTU.dk"));
+        company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
+        company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
+        company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
+        company.GetUsers().First().Roles.Add(new Role("DEAN"));
+        company.GetUsers().First().Roles.Add(new Role("PHAR"));
+        company.GetUsers().First().Roles.Add(new Role("BUILD"));
+
         Elements = company.GetUsers();
         return Task.CompletedTask;
     }
+    
+    private bool FilterFunc1(User element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
 }
+    
