@@ -13,7 +13,7 @@
         left: 0;
         top: 0;
         padding: 16px;
-        background-color: var(--mud-palette-primary-lighten);
+        background-color: #636363;
     }
 
     .mainContent {
@@ -22,19 +22,19 @@
     }
 
     .entirePage {
-        background-color: var(--mud-palette-primary);
+        background-color: white;
         min-height: 100vh;
         padding: 20px;
     }
 
     .companyTable {
-        background-color: var(--mud-palette-primary-lighten);
+        background-color: white;
         border-radius: 8px;
     }
 
     .mud-table-row {
         width: fit-content;
-        background-color: var(--mud-palette-primary-lighten);
+        background-color: white;
     }
 
     .sideBarButtons {
@@ -50,45 +50,47 @@
         white-space: nowrap;
     }
     
-    .mt-0
+    .sidebarButton
     {
-        color: white;
+        color:  #ffffff;
+        background-color: #3b3b3b;
     }
+    
 </style>
 
 <MudPaper Class="companySideBar">
     <MudStack Class="sideBarButtons" Spacing="4">
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Back</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Profile</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">Settings</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" FullWidth="true">Delete Company</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Back</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Profile</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Settings</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" Color="Color.Error" FullWidth="true">Delete Company</MudButton>
     </MudStack>
 </MudPaper>
 
 <div class="entirePage">
     <div class="mainContent">
-        <h1 style="color: white">Company</h1>
+        <h1 style="color: black">Company</h1>
         <MudTable class="companyTable" Items="@Elements" Filter="new Func<User,bool>(FilterFunc1)">
             <ToolBarContent>
-                <MudTextField Style="color: white" @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh Style="color: white">Name</MudTh>
-                <MudTh Style="color: white">Email</MudTh>
-                <MudTh Style="color: white">Roles</MudTh>
-                <MudTh Style="color: white">Actions</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Roles</MudTh>
+                <MudTh>Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Name" Style="color: white">@context.Name</MudTd>
-                <MudTd DataLabel="Email" Style="color: white">@context.Email</MudTd>
-                <MudTd DataLabel="Roles" Style="color: white">@context.RolesToString()</MudTd>
-                <MudTd DataLabel="Actions" Style="color: white">
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Email" >@context.Email</MudTd>
+                <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
+                <MudTd DataLabel="Actions">
                     <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning">Edit User</MudButton>
                     <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Error">Delete User</MudButton>
                 </MudTd>
             </RowTemplate>
             <PagerContent>
-                <MudTablePager Style="color: white"/>
+                <MudTablePager/>
             </PagerContent>
         </MudTable>
     </div>
