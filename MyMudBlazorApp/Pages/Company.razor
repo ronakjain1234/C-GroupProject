@@ -41,7 +41,7 @@
         margin-top: 220px;
     }
     
-    .mud-table-th, .mud-table td {
+    .mud-table th, .mud-table td {
         width: 200px;
         min-width: 200px;
         max-width: 200px;
@@ -70,7 +70,8 @@
 <div class="entirePage">
     <div class="mainContent">
         <h1 style="color: black">Company</h1>
-        <MudTable class="companyTable" Items="@Elements" Filter="new Func<User,bool>(FilterFunc1)">
+        <MudTable class="companyTable" Items="@Elements" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+                  @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
@@ -82,7 +83,7 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">@context.Name</MudTd>
-                <MudTd DataLabel="Email" >@context.Email</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Warning">Edit User</MudButton>
@@ -97,6 +98,7 @@
 </div>
 
 @code {
+    private HashSet<User> _selectedItems = new HashSet<User>();
     private IEnumerable<User> Elements = new List<User>();
     private string searchString1 = "";
     protected override Task OnInitializedAsync()
