@@ -61,20 +61,32 @@
         color: orange;
     }
     
+    .row
+    {
+        display: flex;
+        flex-direction: row;
+    }
+    
 </style>
 
 <MudPaper Class="companySideBar">
     <MudStack Class="sideBarButtons" Spacing="4">
         <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Back</MudButton>
-        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Profile</MudButton>
-        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Settings</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Create User</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Delete @_selectedItems.Count Users</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Make Company Admin</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Add Roles</MudButton>
+        <MudButton Class="sidebarButton" Variant="Variant.Filled" FullWidth="true">Remove Roles</MudButton>
         <MudButton Class="sidebarButton" Variant="Variant.Filled" Color="Color.Error" FullWidth="true">Delete Company</MudButton>
     </MudStack>
 </MudPaper>
 
 <div class="entirePage">
     <div class="mainContent">
-        <h1 style="color: black">Company</h1>
+        <div class="row">
+            <h1 Style="color: black">Company</h1>
+            <MudButton Style="width: 50px"><MudIcon Icon="@Icons.Material.Filled.Edit"></MudIcon></MudButton>
+        </div>
         <MudTable class="companyTable" Items="@Elements" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
                   @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
