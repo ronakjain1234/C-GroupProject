@@ -1,0 +1,237 @@
+﻿@page "/roles"
+
+
+@using MudBlazor
+@using MyMudBlazorApp.Models
+@inject ISnackbar Snackbar
+
+   
+<MudContainer>
+    <MudTypography Variant="Variant.h4">Roles</MudTypography>
+
+    <MudGrid>
+        <MudItem xs="12">
+            <MudTypography Variant="Variant.h6">Available Roles</MudTypography>
+            <MudIconButton Icon="@Icons.Material.Filled.AddCircle" Color="Color.Secondary" OnClick="AddRole"/>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Elevation="1" Class="p-4 mt-2">
+        @foreach (var role in RolesList)
+        {
+            <MudGrid Class="mb-2">
+                <MudItem xs="8">
+                    <MudTextField Value="@role" ReadOnly="false" FullWidth="true" />
+                </MudItem>
+                <MudItem xs="2">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => AddEndpoint(role)">Add Group of Endpoint</MudButton>
+                </MudItem>
+                <MudItem xs="2">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveRole(role)" />
+                </MudItem>
+            </MudGrid>
+        }
+    </MudPaper>
+</MudContainer>
+
+
+
+
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudButton Color="Color.Primary"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Settings"
+               OnClick="OpenDialog"
+               Class="mb-4">Manage Endpoints</MudButton>
+
+    @if (_isOpen)
+    {
+        <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
+            <MudPaper Elevation="24" Class="pa-4" Style="min-width: 800px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h5">Endpoint Management</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDialog" />
+                </div>
+                
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudPaper Elevation="0" Class="pa-4">
+                            <MudText Typo="Typo.h6" GutterBottom="true">Module ESMA</MudText>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                                      StartIcon="@Icons.Material.Filled.CheckCircle" 
+                                      OnClick="@(() => ToggleModuleSelection("ESMA"))"
+                                      Class="mb-3">Select All</MudButton>
+                            
+                            <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Select</MudTh>
+                                    <MudTh>Endpoint</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd>
+                                        <MudCheckBox T="bool" 
+                                                   Dense="true"
+                                                   @bind-Checked="@context.IsSelected"
+                                                   Color="Color.Primary"/>
+                                    </MudTd>
+                                    <MudTd>@context.Name</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudPaper>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudPaper Elevation="0" Class="pa-4">
+                            <MudText Typo="Typo.h6" GutterBottom="true">Module Calculations</MudText>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" 
+                                      StartIcon="@Icons.Material.Filled.CheckCircle" 
+                                      OnClick="@(() => ToggleModuleSelection("Calculations"))"
+                                      Class="mb-3">Select All</MudButton>
+                            
+                            <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Select</MudTh>
+                                    <MudTh>Endpoint</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd>
+                                        <MudCheckBox T="bool" 
+                                                   Dense="true"
+                                                   @bind-Checked="@context.IsSelected"
+                                                   Color="Color.Primary"/>
+                                    </MudTd>
+                                    <MudTd>@context.Name</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+
+                <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
+
+                <div class="d-flex justify-space-between">
+                    <MudButton Color="Color.Error" 
+                              Variant="Variant.Filled" 
+                              StartIcon="@Icons.Material.Filled.Close" 
+                              OnClick="CloseDialog">Close</MudButton>
+                              
+                    <MudButton Color="Color.Primary" 
+                              Variant="Variant.Filled" 
+                              StartIcon="@Icons.Material.Filled.Save" 
+                              OnClick="SaveAndClose"
+                              Disabled="@(!HasSelectedEndpoints())">Save Selection</MudButton>
+                </div>
+            </MudPaper>
+        </MudOverlay>
+    }
+
+    @if (savedEndpoints?.Any() == true)
+    {
+        <MudPaper Elevation="2" Class="pa-4 mt-4">
+            <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">Selected Endpoints</MudText>
+            <MudTable Items="@savedEndpoints" Dense="true" Hover="false" ReadOnly="true">
+                <ColGroup>
+                    <col style="width: 50px;" />
+                    <col />
+                </ColGroup>
+                <RowTemplate>
+                    <MudTd>
+                        <MudIcon Icon="@Icons.Material.Filled.Link" />
+                    </MudTd>
+                    <MudTd DataLabel="Endpoint">@context</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    private List<string> RolesList = new List<string> { "Admin", "User", "Manager", "Editor", "Viewer" };
+
+    private void AddRole()
+    {
+        RolesList.Add("New Role");
+    }
+
+    private void RemoveRole(string role)
+    {
+        RolesList.Remove(role);
+    }
+
+    private void AddEndpoint(string role)
+    {
+        Console.WriteLine($"Adding endpoint for {role}");
+    }
+    private bool _isOpen;
+    private List<string> savedEndpoints = new();
+
+    private List<Endpoint> EsmaEndpoints = new()
+    {
+        new Endpoint { Name = "Test ESMA Endpoint 1" },
+        new Endpoint { Name = "Test ESMA Endpoint 2" },
+        new Endpoint { Name = "Test ESMA Endpoint 3" }
+    };
+
+    private List<Endpoint> CalculationEndpoints = new()
+    {
+        new Endpoint { Name = "Test Calculation Endpoint 1" },
+        new Endpoint { Name = "Test Calculation Endpoint 2" },
+        new Endpoint { Name = "Test Calculation Endpoint 3" }
+    };
+
+    private void OpenDialog()
+    {
+        _isOpen = true;
+        StateHasChanged();
+    }
+
+    private void CloseDialog()
+    {
+        _isOpen = false;
+        StateHasChanged();
+    }
+
+    private bool HasSelectedEndpoints()
+    {
+        return (EsmaEndpoints?.Any(e => e.IsSelected) ?? false) || 
+               (CalculationEndpoints?.Any(e => e.IsSelected) ?? false);
+    }
+
+    private void ToggleModuleSelection(string module)
+    {
+        var endpoints = module == "ESMA" ? EsmaEndpoints : CalculationEndpoints;
+        if (endpoints == null) return;
+
+        bool allSelected = endpoints.All(e => e.IsSelected);
+        foreach (var endpoint in endpoints)
+        {
+            endpoint.IsSelected = !allSelected;
+        }
+        StateHasChanged();
+    }
+
+    private void SaveAndClose()
+    {
+        SaveSelection();
+        CloseDialog();
+    }
+
+    private void SaveSelection()
+    {
+        var selectedEndpoints = EsmaEndpoints.Concat(CalculationEndpoints)
+            .Where(e => e.IsSelected)
+            .Select(e => e.Name)
+            .ToList();
+
+        if (selectedEndpoints.Any())
+        {
+            savedEndpoints = selectedEndpoints;
+            Snackbar.Add("Endpoints saved successfully!", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Please select at least one endpoint", Severity.Warning);
+        }
+    }
+}
