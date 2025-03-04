@@ -4,15 +4,26 @@
 <MudThemeProvider />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden; /* Prevents horizontal scrolling */
+            }
 
+            .app-bar {
+                width: 100vw; /* Ensures full width */
+                top: 0;
+                left: 0;
+            }
+        </style>
+
+        <MudAppBar Class="app-bar" Color="Color.Primary" Position="Position.Fixed">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+            <MudSpacer />
+            <MudAvatar Color="Color.Secondary" Size="Size.Medium">RJ</MudAvatar>
+        </MudAppBar>
         <article class="content px-4">
             @Body
         </article>
