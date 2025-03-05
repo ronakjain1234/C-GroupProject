@@ -1,0 +1,153 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization.Infrastructure
+@using MudBlazor.Utilities
+@using MyMudBlazorApp.Objects
+
+<PageTitle>@_company.Name</PageTitle>
+
+<style>
+    .companySideBar {
+        width: 200px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        padding: 16px;
+        background-color: #636363;
+    }
+
+    .mainContent {
+        margin-left: 220px;
+        padding: 20px;
+    }
+
+    .entirePage {
+        background-color: white;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .companyTable {
+        background-color: white;
+        border-radius: 8px;
+    }
+
+    .mud-table-row {
+        width: fit-content;
+        background-color: white;
+    }
+    
+    .mud-checkbox-true 
+    {
+        color: green;    
+    }
+    .mud-checkbox-false  .mud-checkbox-null {
+        color:  black;
+    }
+
+    .sideBarButtons {
+        margin-top: 35px;
+    }
+    
+    .mud-table th, .mud-table td {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .sidebarButton
+    {
+        color:  #ffffff;
+        background-color: #3b3b3b;
+    }
+    
+    .headerRow
+    {
+        display: flex;
+        flex-direction: row;
+    }
+    
+</style>
+
+<MudPaper Class="companySideBar">
+    <MudStack Class="sideBarButtons" Spacing="4">
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.ArrowBack" Label="Back" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Create" Label="Create User" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Delete" Label="Delete" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Upgrade" Label="Make Admin"/>
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Add" Label="Add Roles" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.ManageAccounts" Label="Manage Roles" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Remove" Label="Remove Roles" />
+        <MudFab Class="sidebarButton" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Label="Delete Company" />
+    </MudStack>
+</MudPaper>
+
+<div class="entirePage">
+    <div class="mainContent">
+        <div class="headerRow">
+            <h1 Style="color: black">@_company.Name</h1>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" />
+        </div>
+        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+                  @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
+            <ToolBarContent>
+                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Roles</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="github" Size="Size.Medium"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium"/>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+        </MudTable>
+    </div>
+</div>
+
+@code {
+    private HashSet<User> _selectedItems = new HashSet<User>();
+    private Objects.Company _company = new Objects.Company("");
+    private string searchString1 = "";
+    protected override Task OnInitializedAsync()
+    {
+        _company = new Objects.Company("JP Morgan");
+        _company.AddUser(new User("Elias", "EAL@DTU.dk"));
+        _company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
+        _company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
+        _company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
+        _company.GetUsers().First().Roles.Add(new Role("DEAN"));
+        _company.GetUsers().First().Roles.Add(new Role("PHAR"));
+        _company.GetUsers().First().Roles.Add(new Role("BUILD"));
+        return Task.CompletedTask;
+    }
+    
+    private bool FilterFunc1(User element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+}
+    
