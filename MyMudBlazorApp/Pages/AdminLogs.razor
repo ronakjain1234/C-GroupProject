@@ -1,0 +1,83 @@
+@page "/admin/logs"
+@using MyMudBlazorApp.Models
+@using MyMudBlazorApp.Services
+@using MudBlazor
+@using System.Threading.Tasks
+@inject ILogService LogService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h4" Class="mb-4">Admin Event Logs</MudText>
+
+    <MudPaper Class="pa-4">
+        <MudTextField @bind-Value="searchString" 
+                     Placeholder="Search" 
+                     Adornment="Adornment.Start" 
+                     AdornmentIcon="@Icons.Material.Filled.Search" 
+                     IconSize="Size.Medium" 
+                     Class="mt-0 mb-4"
+                     Immediate="true"
+                     OnDebounceIntervalElapsed="SearchChanged"/>
+
+        <MudTable Items="@FilteredLogs"
+                  Dense="true"
+                  Hover="true"
+                  FixedHeader="true"
+                  Height="500px">
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="@((LogEntry x) => x.Timestamp)">Timestamp</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="@((LogEntry x) => x.Level)">Level</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="@((LogEntry x) => x.Message)">Message</MudTableSortLabel></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Timestamp">@context.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+                <MudTd DataLabel="Level">
+                    <MudChip T="string" Size="Size.Small" Color="@GetLevelColor(context.Level)">
+                        @context.Level
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Message">@context.Message</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+            <NoRecordsContent>
+                <MudText>No matching records found</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private string searchString = "";
+    private IEnumerable<LogEntry> _logs = new List<LogEntry>();
+    private IEnumerable<LogEntry> FilteredLogs => _logs.Where(log => 
+        string.IsNullOrWhiteSpace(searchString) || 
+        log.Message.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+        log.Level.Contains(searchString, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        _logs = await LogService.GetLogsAsync();
+        StateHasChanged();
+    }
+
+    private async Task SearchChanged()
+    {
+        StateHasChanged();
+    }
+
+    private Color GetLevelColor(string level) => level?.ToLower() switch
+    {
+        "error" => Color.Error,
+        "warning" => Color.Warning,
+        "information" => Color.Info,
+        "success" => Color.Success,
+        _ => Color.Default
+    };
+} 

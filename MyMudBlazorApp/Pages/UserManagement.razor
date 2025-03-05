@@ -1,0 +1,199 @@
+@page "/user-management"
+@using MudBlazor
+@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject ISnackbar Snackbar
+
+<MudContainer>
+    <MudText Typo="Typo.h4" Class="mb-4">User Management</MudText>
+
+    <MudPaper Class="pa-4">
+        <MudTable T="string" Items="@_banks" Dense="true" Hover="true" 
+                 MultiSelection="true" @bind-SelectedItems="_selectedBanks"
+                 HeaderClass="mud-theme-primary">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Banks</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" 
+                          Color="Color.Primary"
+                          OnClick="@(() => _isUserDialogVisible = true)"
+                          Disabled="@(!_selectedBanks.Any())"
+                          StartIcon="@Icons.Material.Filled.Group">
+                    Manage Users
+                </MudButton>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Bank Name</MudTh>
+                <MudTh>Selected Users</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Bank Name">@context</MudTd>
+                <MudTd DataLabel="Selected Users">
+                    @{
+                        var selectedUsers = GetSelectedUsers(context);
+                        @foreach (var user in selectedUsers)
+                        {
+                            <MudChip T="string" Size="Size.Small" Class="ma-1">@user</MudChip>
+                        }
+                    }
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+
+<MudOverlay @bind-Visible="_isUserDialogVisible" DarkBackground="true">
+    <MudPaper Class="pa-6" Style="max-width: 1200px; margin: 32px auto;">
+        <MudText Typo="Typo.h5" Class="mb-4">Manage Users for Selected Banks</MudText>
+
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="0" Class="pa-4">
+                    <MudText Typo="Typo.h6" Class="mb-4">Selected Users</MudText>
+                @foreach (var bank in _selectedBanks)
+                {
+                        <MudExpansionPanel Text="@bank" Class="mb-2">
+                            <MudList T="string" Dense="true" Clickable="true">
+                            @foreach (var user in GetSelectedUsers(bank))
+                            {
+                                <MudListItem T="string">
+                                    <div class="d-flex align-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-2" />
+                                        <MudText>@user</MudText>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Remove" 
+                                                     Size="Size.Small"
+                                                     OnClick="@(() => RemoveUser(bank, user))"
+                                                     Class="ml-auto" />
+                                    </div>
+                                </MudListItem>
+                            }
+                        </MudList>
+                    </MudExpansionPanel>
+                }
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+                <MudPaper Elevation="0" Class="pa-4">
+                    <MudText Typo="Typo.h6" Class="mb-4">Available Users</MudText>
+                @foreach(var userType in _userTypes)
+                {
+                        <MudExpansionPanel Text="@userType" Icon="@GetUserTypeIcon(userType)" Class="mb-2">
+                            <MudList T="string" Dense="true" Clickable="true">
+                            @foreach(var user in GetAvailableUsers(userType))
+                            {
+                                <MudListItem T="string">
+                                    <div class="d-flex align-center">
+                                        <MudText>@user</MudText>
+                                        <MudSpacer />
+                                        @foreach (var bank in _selectedBanks)
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Add" 
+                                                         Size="Size.Small"
+                                                         OnClick="@(() => AddUser(bank, user))"
+                                                         Class="ml-2" />
+                                        }
+                                    </div>
+                                </MudListItem>
+                            }
+                        </MudList>
+                    </MudExpansionPanel>
+                }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
+
+        <div class="d-flex justify-end gap-2">
+            <MudButton Color="Color.Error" 
+                      Variant="Variant.Filled" 
+                      StartIcon="@Icons.Material.Filled.Close" 
+                   OnClick="CloseUserDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" 
+                      Variant="Variant.Filled" 
+                      StartIcon="@Icons.Material.Filled.Save" 
+                      OnClick="SaveChanges">Save Changes</MudButton>
+        </div>
+    </MudPaper>
+</MudOverlay>
+
+@code {
+    private HashSet<string> _selectedBanks = new();
+    private bool _isUserDialogVisible;
+    
+    private readonly List<string> _banks = new() { "DNB Bank", "Danske Bank", "DeltaconiX" };
+    private readonly List<string> _userTypes = new() { "Intern", "Contractor" };
+    
+    private readonly Dictionary<string, HashSet<string>> _selectedUsersByBank = new()
+    {
+        ["DNB Bank"] = new() { "John Doe" },
+        ["Danske Bank"] = new() { "Alice Johnson" },
+        ["DeltaconiX"] = new() { "Jane Smith" }
+    };
+
+    private readonly Dictionary<string, List<string>> _allUsersByType = new()
+    {
+        ["Intern"] = new() { "John Doe", "Jane Smith", "Mark Brown", "Sarah Wilson" },
+        ["Contractor"] = new() { "Alice Johnson", "Bob Wilson", "Carol White", "David Miller" }
+    };
+
+    private List<string> GetSelectedUsers(string bank) => 
+        _selectedUsersByBank.TryGetValue(bank, out var users) 
+            ? users.ToList() 
+            : new List<string>();
+
+    private List<string> GetAvailableUsers(string userType)
+    {
+        if (!_allUsersByType.TryGetValue(userType, out var allUsers))
+            return new List<string>();
+
+        var allSelectedUsers = _selectedBanks
+            .SelectMany(bank => _selectedUsersByBank.GetValueOrDefault(bank, new HashSet<string>()))
+            .ToHashSet();
+
+        return allUsers.Where(u => !allSelectedUsers.Contains(u)).ToList();
+    }
+
+    private void AddUser(string bank, string user)
+    {
+        if (!_selectedUsersByBank.ContainsKey(bank))
+        {
+            _selectedUsersByBank[bank] = new HashSet<string>();
+        }
+        _selectedUsersByBank[bank].Add(user);
+        Snackbar.Add($"Added {user} to {bank}", Severity.Success);
+    }
+
+    private void RemoveUser(string bank, string user)
+    {
+        if (_selectedUsersByBank.ContainsKey(bank))
+        {
+            _selectedUsersByBank[bank].Remove(user);
+            Snackbar.Add($"Removed {user} from {bank}", Severity.Info);
+        }
+    }
+
+    private async Task CloseUserDialog()
+    {
+        _isUserDialogVisible = false;
+        Snackbar.Add("Changes discarded", Severity.Info);
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveChanges()
+    {
+        Snackbar.Add("Changes saved successfully", Severity.Success);
+        CloseUserDialog();
+        await Task.CompletedTask;
+    }
+
+    private string GetUserTypeIcon(string userType) => userType switch
+    {
+        "Intern" => Icons.Material.Filled.School,
+        "Contractor" => Icons.Material.Filled.Work,
+        _ => Icons.Material.Filled.Person
+    };
+}

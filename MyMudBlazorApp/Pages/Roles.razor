@@ -1,215 +1,406 @@
 ﻿@page "/roles"
 
-
 @using MudBlazor
 @using MyMudBlazorApp.Models
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
 @inject ISnackbar Snackbar
 
-   
-<MudContainer>
-    <MudTypography Variant="Variant.h4">Roles</MudTypography>
+<style>
+.mud-table th, .mud-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 8px 16px;
+    vertical-align: middle;
+}
 
-    <MudGrid>
-        <MudItem xs="12">
-            <MudTypography Variant="Variant.h6">Available Roles</MudTypography>
-            <MudIconButton Icon="@Icons.Material.Filled.AddCircle" Color="Color.Secondary" OnClick="AddRole"/>
-        </MudItem>
-    </MudGrid>
+.rolesTable {
+    margin-top: 16px;
+}
 
-    <MudPaper Elevation="1" Class="p-4 mt-2">
-        @foreach (var role in RolesList)
-        {
-            <MudGrid Class="mb-2">
-                <MudItem xs="8">
-                    <MudTextField Value="@role" ReadOnly="false" FullWidth="true" />
+.search-field {
+    margin-left: 16px;
+}
+
+.role-name-cell {
+    min-width: 800px;
+}
+
+.actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.page-title {
+    margin-bottom: 16px;
+}
+
+.endpoint-table {
+    margin-top: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.endpoint-paper {
+    background-color: #fafafa;
+    height: 100%;
+}
+
+.module-title {
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+</style>
+
+<div class="entirePage">
+    <div class="mainContent">
+        <MudContainer Class="pa-4">
+            <div class="d-flex align-center gap-4 page-title">
+                <MudText Typo="Typo.h4">Roles</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Error" Size="Size.Medium" OnClick="AddRole" />
+            </div>
+        </MudContainer>
+
+        <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<string, bool>(FilterFunc1)" MultiSelection="true"
+                  @bind-SelectedItems="_selectedItems" Hover="true">
+            <ToolBarContent>
+                <MudTextField @bind-Value="searchString1" 
+                            Placeholder="Search roles" 
+                            Adornment="Adornment.Start"
+                            AdornmentIcon="@Icons.Material.Filled.Search" 
+                            IconSize="Size.Medium" 
+                            Class="mt-0 mb-4 search-field"
+                            Immediate="true"
+                            DebounceInterval="300"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh Style="width: 50px;">
+                    <MudTableHeaderCheckbox T="string" />
+                </MudTh>
+                <MudTh Class="role-name-cell">Role Name</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Style="width: 50px;">
+                    <MudTableCheckbox T="string" Value="context" />
+                </MudTd>
+                <MudTd DataLabel="Role Name" Class="role-name-cell">
+                    <MudTextField Value="@context" ReadOnly="false" Class="mt-0 mb-0" />
+                </MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        <MudButton StartIcon="@Icons.Material.Filled.Add" 
+                                  OnClick="() => AddEndpoint(context)"
+                                  Size="Size.Small">Add Group</MudButton>
+                        <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
+                                  OnClick="() => CloneRole(context)"
+                                  Size="Size.Small">Clone</MudButton>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                     Color="Color.Error"
+                                     Size="Size.Small"
+                                     OnClick="() => RemoveRole(context)" />
+                    </MudButtonGroup>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <div class="d-flex align-center">
+                    <MudTablePager />
+                    <MudSpacer />
+                    <MudButton Color="Color.Primary" 
+                              Variant="Variant.Outlined"
+                              StartIcon="@Icons.Material.Filled.Settings"
+                              OnClick="MakeChoicesForSelectedRoles"
+                              Disabled="@(!_selectedItems.Any())"
+                              Size="Size.Small"
+                              Class="ml-4">Make Choices</MudButton>
+                </div>
+            </PagerContent>
+        </MudTable>
+    </div>
+</div>
+
+@if (_isOpen)
+{
+    <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4" Style="min-width: 800px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            <div class="d-flex justify-space-between align-center mb-4">
+                <div>
+                    <MudText Typo="Typo.h5">Endpoint Management</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Role: @_currentRole</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDialog" />
+            </div>
+            
+            <MudGrid Spacing="4">
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="0" Class="pa-4 endpoint-paper">
+                        <MudText Typo="Typo.h6" Class="module-title">Module ESMA</MudText>
+                        <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true" Class="endpoint-table"
+                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
+                                 @bind-SelectedItems="_selectedEsmaEndpoints">
+                            <HeaderContent>
+                                <MudTh Style="width: 80px;">
+                                    <MudTableHeaderCheckbox T="Endpoint" />
+                                </MudTh>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Description</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Style="width: 80px;">
+                                    <MudTableCheckbox T="Endpoint" Value="context" />
+                                </MudTd>
+                                <MudTd>@context.Name</MudTd>
+                                <MudTd>@context.Description</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
                 </MudItem>
-                <MudItem xs="2">
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => AddEndpoint(role)">Add Group of Endpoint</MudButton>
-                </MudItem>
-                <MudItem xs="2">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveRole(role)" />
+
+                <MudItem xs="12" md="6">
+                    <MudPaper Elevation="0" Class="pa-4 endpoint-paper">
+                        <MudText Typo="Typo.h6" Class="module-title">Module Calculations</MudText>
+                        <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true" Class="endpoint-table"
+                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
+                                 @bind-SelectedItems="_selectedCalculationEndpoints">
+                            <HeaderContent>
+                                <MudTh Style="width: 80px;">
+                                    <MudTableHeaderCheckbox T="Endpoint" />
+                                </MudTh>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Description</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Style="width: 80px;">
+                                    <MudTableCheckbox T="Endpoint" Value="context" />
+                                </MudTd>
+                                <MudTd>@context.Name</MudTd>
+                                <MudTd>@context.Description</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
-        }
-    </MudPaper>
-</MudContainer>
 
+            <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
 
-
-
-
-<MudContainer MaxWidth="MaxWidth.Large">
-    <MudButton Color="Color.Primary"
-               Variant="Variant.Filled"
-               StartIcon="@Icons.Material.Filled.Settings"
-               OnClick="OpenDialog"
-               Class="mb-4">Manage Endpoints</MudButton>
-
-    @if (_isOpen)
-    {
-        <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
-            <MudPaper Elevation="24" Class="pa-4" Style="min-width: 800px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
-                <div class="d-flex justify-space-between align-center mb-4">
-                    <MudText Typo="Typo.h5">Endpoint Management</MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDialog" />
-                </div>
-                
-                <MudGrid>
-                    <MudItem xs="12" md="6">
-                        <MudPaper Elevation="0" Class="pa-4">
-                            <MudText Typo="Typo.h6" GutterBottom="true">Module ESMA</MudText>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" 
-                                      StartIcon="@Icons.Material.Filled.CheckCircle" 
-                                      OnClick="@(() => ToggleModuleSelection("ESMA"))"
-                                      Class="mb-3">Select All</MudButton>
-                            
-                            <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Select</MudTh>
-                                    <MudTh>Endpoint</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd>
-                                        <MudCheckBox T="bool" 
-                                                   Dense="true"
-                                                   @bind-Checked="@context.IsSelected"
-                                                   Color="Color.Primary"/>
-                                    </MudTd>
-                                    <MudTd>@context.Name</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        </MudPaper>
-                    </MudItem>
-
-                    <MudItem xs="12" md="6">
-                        <MudPaper Elevation="0" Class="pa-4">
-                            <MudText Typo="Typo.h6" GutterBottom="true">Module Calculations</MudText>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" 
-                                      StartIcon="@Icons.Material.Filled.CheckCircle" 
-                                      OnClick="@(() => ToggleModuleSelection("Calculations"))"
-                                      Class="mb-3">Select All</MudButton>
-                            
-                            <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true">
-                                <HeaderContent>
-                                    <MudTh>Select</MudTh>
-                                    <MudTh>Endpoint</MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd>
-                                        <MudCheckBox T="bool" 
-                                                   Dense="true"
-                                                   @bind-Checked="@context.IsSelected"
-                                                   Color="Color.Primary"/>
-                                    </MudTd>
-                                    <MudTd>@context.Name</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        </MudPaper>
-                    </MudItem>
-                </MudGrid>
-
-                <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
-
-                <div class="d-flex justify-space-between">
-                    <MudButton Color="Color.Error" 
-                              Variant="Variant.Filled" 
-                              StartIcon="@Icons.Material.Filled.Close" 
-                              OnClick="CloseDialog">Close</MudButton>
-                              
-                    <MudButton Color="Color.Primary" 
-                              Variant="Variant.Filled" 
-                              StartIcon="@Icons.Material.Filled.Save" 
-                              OnClick="SaveAndClose"
-                              Disabled="@(!HasSelectedEndpoints())">Save Selection</MudButton>
-                </div>
-            </MudPaper>
-        </MudOverlay>
-    }
-
-    @if (savedEndpoints?.Any() == true)
-    {
-        <MudPaper Elevation="2" Class="pa-4 mt-4">
-            <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">Selected Endpoints</MudText>
-            <MudTable Items="@savedEndpoints" Dense="true" Hover="false" ReadOnly="true">
-                <ColGroup>
-                    <col style="width: 50px;" />
-                    <col />
-                </ColGroup>
-                <RowTemplate>
-                    <MudTd>
-                        <MudIcon Icon="@Icons.Material.Filled.Link" />
-                    </MudTd>
-                    <MudTd DataLabel="Endpoint">@context</MudTd>
-                </RowTemplate>
-            </MudTable>
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseDialog">Close</MudButton>
+                          
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Save" 
+                          OnClick="SaveAndClose"
+                          Disabled="@(!HasSelectedEndpoints())">Save Selection</MudButton>
+            </div>
         </MudPaper>
-    }
-</MudContainer>
+    </MudOverlay>
+}
+
+@foreach (var roleEndpoints in _roleEndpoints)
+{
+    <MudPaper Elevation="2" Class="pa-4 mt-4">
+        <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
+            Selected Endpoints for Role: @roleEndpoints.Key
+        </MudText>
+        <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true">
+            <ColGroup>
+                <col style="width: 50px;" />
+                <col />
+            </ColGroup>
+            <RowTemplate>
+                <MudTd>
+                    <MudIcon Icon="@Icons.Material.Filled.Link" />
+                </MudTd>
+                <MudTd DataLabel="Endpoint">@context</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+}
 
 @code {
+    private string searchString1 = "";
+    private bool _isOpen;
+    private string _currentRole = "";
+    private Dictionary<string, HashSet<string>> _roleEndpoints = new();
     private List<string> RolesList = new List<string> { "Admin", "User", "Manager", "Editor", "Viewer" };
+    private HashSet<string> _selectedItems = new HashSet<string>();
+    private HashSet<Endpoint> _selectedEsmaEndpoints = new();
+    private HashSet<Endpoint> _selectedCalculationEndpoints = new();
+
+    private List<Endpoint> EsmaEndpoints = new()
+    {
+        new Endpoint { 
+            Name = "Test ESMA Endpoint 1",
+            Description = "Retrieves ESMA financial data",
+            Module = "ESMA",
+            Path = "/api/esma/financial-data",
+            Method = "GET",
+            IsActive = true
+        },
+        new Endpoint { 
+            Name = "Test ESMA Endpoint 2",
+            Description = "Updates ESMA market statistics",
+            Module = "ESMA",
+            Path = "/api/esma/market-stats",
+            Method = "POST",
+            IsActive = true
+        },
+        new Endpoint { 
+            Name = "Test ESMA Endpoint 3",
+            Description = "Fetches ESMA regulatory reports",
+            Module = "ESMA",
+            Path = "/api/esma/regulatory-reports",
+            Method = "GET",
+            IsActive = true
+        }
+    };
+
+    private List<Endpoint> CalculationEndpoints = new()
+    {
+        new Endpoint { 
+            Name = "Test Calculation Endpoint 1",
+            Description = "Performs risk assessment calculations",
+            Module = "Calculations",
+            Path = "/api/calc/risk-assessment",
+            Method = "POST",
+            IsActive = true
+        },
+        new Endpoint { 
+            Name = "Test Calculation Endpoint 2",
+            Description = "Calculates market volatility metrics",
+            Module = "Calculations",
+            Path = "/api/calc/volatility",
+            Method = "GET",
+            IsActive = true
+        },
+        new Endpoint { 
+            Name = "Test Calculation Endpoint 3",
+            Description = "Generates performance analytics",
+            Module = "Calculations",
+            Path = "/api/calc/performance",
+            Method = "GET",
+            IsActive = true
+        }
+    };
+
+    private IEnumerable<Endpoint> AllEndpoints => EsmaEndpoints.Concat(CalculationEndpoints);
+
+    protected override void OnInitialized()
+    {
+        ConfigureSnackbar();
+    }
+
+    private void ConfigureSnackbar()
+    {
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
+        Snackbar.Configuration.SnackbarVariant = Variant.Filled;
+        Snackbar.Configuration.ShowTransitionDuration = 200;
+        Snackbar.Configuration.HideTransitionDuration = 200;
+        Snackbar.Configuration.VisibleStateDuration = 2000;
+    }
 
     private void AddRole()
     {
-        RolesList.Add("New Role");
+        var newRole = "New Role";
+        RolesList.Add(newRole);
+        StateHasChanged();
     }
 
     private void RemoveRole(string role)
     {
         RolesList.Remove(role);
-    }
-
-    private void AddEndpoint(string role)
-    {
-        Console.WriteLine($"Adding endpoint for {role}");
-    }
-    private bool _isOpen;
-    private List<string> savedEndpoints = new();
-
-    private List<Endpoint> EsmaEndpoints = new()
-    {
-        new Endpoint { Name = "Test ESMA Endpoint 1" },
-        new Endpoint { Name = "Test ESMA Endpoint 2" },
-        new Endpoint { Name = "Test ESMA Endpoint 3" }
-    };
-
-    private List<Endpoint> CalculationEndpoints = new()
-    {
-        new Endpoint { Name = "Test Calculation Endpoint 1" },
-        new Endpoint { Name = "Test Calculation Endpoint 2" },
-        new Endpoint { Name = "Test Calculation Endpoint 3" }
-    };
-
-    private void OpenDialog()
-    {
-        _isOpen = true;
+        _roleEndpoints.Remove(role);
         StateHasChanged();
     }
 
-    private void CloseDialog()
+    private void CloneRole(string role)
     {
-        _isOpen = false;
-        StateHasChanged();
-    }
-
-    private bool HasSelectedEndpoints()
-    {
-        return (EsmaEndpoints?.Any(e => e.IsSelected) ?? false) || 
-               (CalculationEndpoints?.Any(e => e.IsSelected) ?? false);
-    }
-
-    private void ToggleModuleSelection(string module)
-    {
-        var endpoints = module == "ESMA" ? EsmaEndpoints : CalculationEndpoints;
-        if (endpoints == null) return;
-
-        bool allSelected = endpoints.All(e => e.IsSelected);
-        foreach (var endpoint in endpoints)
+        var newRole = $"{role}_Copy";
+        RolesList.Add(newRole);
+        
+        // Clone endpoints if they exist
+        if (_roleEndpoints.ContainsKey(role))
         {
-            endpoint.IsSelected = !allSelected;
+            _roleEndpoints[newRole] = new HashSet<string>(_roleEndpoints[role]);
         }
+        
         StateHasChanged();
     }
+
+    private bool FilterFunc1(string role) => 
+        string.IsNullOrWhiteSpace(searchString1) || 
+        role.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
+
+    private void OpenDialog() => _isOpen = true;
+    private void CloseDialog() => _isOpen = false;
+
+    private void AddEndpoint(string role) => OpenEndpointDialog(new[] { role });
+    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems);
+
+    private void OpenEndpointDialog(IEnumerable<string> roles)
+    {
+        if (!roles.Any()) return;
+
+        _currentRole = string.Join(", ", roles);
+        _selectedEsmaEndpoints.Clear();
+        _selectedCalculationEndpoints.Clear();
+
+        // Get common endpoints across all selected roles
+        var commonEndpoints = GetCommonEndpoints(roles);
+        
+        // Pre-select common endpoints
+        PreSelectEndpoints(commonEndpoints);
+        
+        OpenDialog();
+    }
+
+    private HashSet<string> GetCommonEndpoints(IEnumerable<string> roles)
+    {
+        var rolesList = roles.ToList();
+        if (!rolesList.Any()) return new HashSet<string>();
+
+        // Get endpoints of first role, or empty if role has no endpoints
+        var commonEndpoints = _roleEndpoints.TryGetValue(rolesList[0], out var firstRoleEndpoints)
+            ? new HashSet<string>(firstRoleEndpoints)
+            : new HashSet<string>();
+
+        // Intersect with other roles' endpoints
+        foreach (var role in rolesList.Skip(1))
+        {
+            if (_roleEndpoints.TryGetValue(role, out var roleEndpoints))
+            {
+                commonEndpoints.IntersectWith(roleEndpoints);
+            }
+            else
+            {
+                commonEndpoints.Clear();
+                break;
+            }
+        }
+
+        return commonEndpoints;
+    }
+
+    private void PreSelectEndpoints(HashSet<string> endpointNames)
+    {
+        if (endpointNames == null || !endpointNames.Any()) return;
+
+        _selectedEsmaEndpoints = new HashSet<Endpoint>(
+            EsmaEndpoints.Where(e => endpointNames.Contains(e.Name))
+        );
+
+        _selectedCalculationEndpoints = new HashSet<Endpoint>(
+            CalculationEndpoints.Where(e => endpointNames.Contains(e.Name))
+        );
+    }
+
+    private bool HasSelectedEndpoints() => 
+        _selectedEsmaEndpoints.Any() || _selectedCalculationEndpoints.Any();
 
     private void SaveAndClose()
     {
@@ -219,19 +410,52 @@
 
     private void SaveSelection()
     {
-        var selectedEndpoints = EsmaEndpoints.Concat(CalculationEndpoints)
-            .Where(e => e.IsSelected)
+        var selectedEndpoints = _selectedEsmaEndpoints
+            .Concat(_selectedCalculationEndpoints)
             .Select(e => e.Name)
-            .ToList();
+            .ToHashSet();
 
         if (selectedEndpoints.Any())
         {
-            savedEndpoints = selectedEndpoints;
-            Snackbar.Add("Endpoints saved successfully!", Severity.Success);
+            SaveEndpointsToRoles(selectedEndpoints);
+            ShowSuccessMessage();
         }
         else
         {
-            Snackbar.Add("Please select at least one endpoint", Severity.Warning);
+            RemoveEndpointsFromRoles();
+            ShowWarningMessage();
         }
+    }
+
+    private void SaveEndpointsToRoles(HashSet<string> endpoints)
+    {
+        foreach (var role in _selectedItems)
+        {
+            _roleEndpoints[role] = endpoints;
+        }
+    }
+
+    private void RemoveEndpointsFromRoles()
+    {
+        foreach (var role in _selectedItems)
+        {
+            _roleEndpoints.Remove(role);
+        }
+    }
+
+    private void ShowSuccessMessage() =>
+        ShowSnackbar($"Endpoints saved successfully for roles: {_currentRole}!", Severity.Info);
+
+    private void ShowWarningMessage() =>
+        ShowSnackbar("Please select at least one endpoint", Severity.Warning);
+
+    private void ShowSnackbar(string message, Severity severity)
+    {
+        Snackbar.Add(message, severity, config =>
+        {
+            config.ShowCloseIcon = true;
+            config.Action = "Dismiss";
+            config.ActionColor = Color.Surface;
+        });
     }
 }
