@@ -91,7 +91,7 @@
             <h1 Style="color: black">@_company.Name</h1>
             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" />
         </div>
-        <MudTable class="companyTable" Items="@Elements" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
                   @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -121,7 +121,6 @@
 @code {
     private HashSet<User> _selectedItems = new HashSet<User>();
     private Objects.Company _company = new Objects.Company("");
-    private IEnumerable<User> Elements = new List<User>();
     private string searchString1 = "";
     protected override Task OnInitializedAsync()
     {
@@ -133,8 +132,6 @@
         _company.GetUsers().First().Roles.Add(new Role("DEAN"));
         _company.GetUsers().First().Roles.Add(new Role("PHAR"));
         _company.GetUsers().First().Roles.Add(new Role("BUILD"));
-
-        Elements = _company.GetUsers();
         return Task.CompletedTask;
     }
     
