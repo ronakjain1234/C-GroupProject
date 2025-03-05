@@ -3,7 +3,7 @@
 @using MudBlazor.Utilities
 @using MyMudBlazorApp.Objects
 
-<PageTitle>Company</PageTitle>
+<PageTitle>@_company.Name</PageTitle>
 
 <style>
     .companySideBar {
@@ -35,6 +35,14 @@
     .mud-table-row {
         width: fit-content;
         background-color: white;
+    }
+    
+    .mud-checkbox-true 
+    {
+        color: green;    
+    }
+    .mud-checkbox-false  .mud-checkbox-null {
+        color:  black;
     }
 
     .sideBarButtons {
@@ -112,20 +120,21 @@
 
 @code {
     private HashSet<User> _selectedItems = new HashSet<User>();
+    private Objects.Company _company = new Objects.Company("");
     private IEnumerable<User> Elements = new List<User>();
     private string searchString1 = "";
     protected override Task OnInitializedAsync()
     {
-        var company = new Objects.Company("JP Morgan");
-        company.AddUser(new User("Elias", "EAL@DTU.dk"));
-        company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
-        company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
-        company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
-        company.GetUsers().First().Roles.Add(new Role("DEAN"));
-        company.GetUsers().First().Roles.Add(new Role("PHAR"));
-        company.GetUsers().First().Roles.Add(new Role("BUILD"));
+        _company = new Objects.Company("JP Morgan");
+        _company.AddUser(new User("Elias", "EAL@DTU.dk"));
+        _company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
+        _company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
+        _company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
+        _company.GetUsers().First().Roles.Add(new Role("DEAN"));
+        _company.GetUsers().First().Roles.Add(new Role("PHAR"));
+        _company.GetUsers().First().Roles.Add(new Role("BUILD"));
 
-        Elements = company.GetUsers();
+        Elements = _company.GetUsers();
         return Task.CompletedTask;
     }
     
