@@ -13,6 +13,7 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.WebHost.UseUrls("http://localhost:5000");
 
 
         var app = builder.Build();
