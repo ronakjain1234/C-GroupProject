@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using DatabaseHandler.Data;
 namespace BackendAPIService;
 
 public class Program
@@ -9,6 +11,9 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
         var app = builder.Build();
         
@@ -17,6 +22,12 @@ public class Program
             app.MapOpenApi();
             app.UseSwagger();
             app.UseSwaggerUI();
+            //TODO The code below should be removed later
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
         }
         app.UseHttpsRedirection();
         app.UseAuthorization();
