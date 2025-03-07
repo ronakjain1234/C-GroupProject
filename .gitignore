@@ -5,3 +5,6 @@ MyMudBlazorApp/obj/project.packagespec.json
 MyMudBlazorApp/obj/rider.project.restore.info
 MyMudBlazorApp/obj/
 BackendAPIService/obj
+DatabaseHandler/bin/
+DatabaseHandler/obj/
+BackendAPIService/bin/
