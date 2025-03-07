@@ -9,7 +9,7 @@ public class Role
         Name = name;
     }
     [Key]
-    public int ID { get; set; }
+    public int RoleID { get; set; }
     
     public string Name { get; set; }
     

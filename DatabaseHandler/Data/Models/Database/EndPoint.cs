@@ -10,6 +10,6 @@ public class EndPoint
     }
     
     [Key]
-    public int ID { get; set; }
+    public int EndPointID { get; set; }
     public string Path { get; set; }
 }
