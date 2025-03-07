@@ -1,14 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace DatabaseHandler.Data.Models;
+namespace DatabaseHandler.Data.Models.Database;
 
-public class DBCompany
+public class Company
 {
-    public DBCompany(string companyName)
+    public Company(string companyName)
     {
         CompanyName = companyName;
     }
     
     [Key]
+    public int CompanyID { get; set; }
     public string CompanyName { get; set; }
 }

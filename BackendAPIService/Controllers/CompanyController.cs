@@ -1,16 +1,14 @@
 using BackendAPIService.ResponseObjects;
 using DatabaseHandler.Data;
-using DatabaseHandler.Data.Models;
+using Database = DatabaseHandler.Data.Models.Database;
+using Web = MyMudBlazorApp.Objects;
 using Microsoft.AspNetCore.Mvc;
-using MyMudBlazorApp.Objects;
-
 namespace BackendAPIService.Controllers;
 
 [ApiController]
-[Route("api/companies")]
 public class CompanyController : ControllerBase
 {
-    private ApplicationDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
     
     public CompanyController(ApplicationDbContext context)
     {
@@ -18,18 +16,19 @@ public class CompanyController : ControllerBase
     }
     
     [HttpGet]
-    [Route("/getCompanies")]
-    public ActionResult<List<Company>> Get(int userID, int limit = 50, int offset = 0, string? searchString = null)
+    [Route("api/companies/getCompanies")]
+    public ActionResult<List<Web.Company>> Get(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
-        return Ok(_dbContext.Companies.First().CompanyName);
+        return Ok(_dbContext.Companies);
         throw new NotImplementedException();
     }
 
     [HttpGet]
-    [Route("/createCompany")]
+    [Route("api/companies/createCompany")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
-        _dbContext.Companies.Add(new DBCompany(companyName));
+        _dbContext.Companies.Add(new Database.Company(companyName));
+        _dbContext.SaveChanges();
         return Ok();
         throw new NotImplementedException();
     }
