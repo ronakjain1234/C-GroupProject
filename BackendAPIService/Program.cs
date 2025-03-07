@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using DatabaseHandler.Data;
+using DatabaseHandler;
 namespace BackendAPIService;
 
 public class Program

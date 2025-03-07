@@ -1,7 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using DatabaseHandler.Data.Models.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace DatabaseHandler.Data;
+namespace DatabaseHandler;
 
 public class ApplicationDbContext : DbContext
 {

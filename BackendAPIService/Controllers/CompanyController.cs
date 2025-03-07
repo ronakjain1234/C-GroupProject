@@ -1,5 +1,5 @@
 using BackendAPIService.ResponseObjects;
-using DatabaseHandler.Data;
+using DatabaseHandler;
 using Database = DatabaseHandler.Data.Models.Database;
 using Web = MyMudBlazorApp.Objects;
 using Microsoft.AspNetCore.Mvc;

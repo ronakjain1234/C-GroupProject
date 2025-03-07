@@ -1,4 +1,4 @@
-using DatabaseHandler.Data;
+using DatabaseHandler;
 using Microsoft.AspNetCore.Mvc;
 using MyMudBlazorApp.Objects;
 
