@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
+[Route("api/company/")]
 public class CompanyController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
@@ -16,7 +17,7 @@ public class CompanyController : ControllerBase
     }
     
     [HttpGet]
-    [Route("api/companies/getCompanies")]
+    [Route("get")]
     public ActionResult<List<Web.Company>> Get(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         return Ok(_dbContext.Companies);
@@ -24,7 +25,7 @@ public class CompanyController : ControllerBase
     }
 
     [HttpGet]
-    [Route("api/companies/createCompany")]
+    [Route("create")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
         _dbContext.Companies.Add(new Database.Company(companyName));

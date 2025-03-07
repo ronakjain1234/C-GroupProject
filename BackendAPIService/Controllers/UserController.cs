@@ -5,7 +5,7 @@ using MyMudBlazorApp.Objects;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
-[Route("api/users")]
+[Route("api/user")]
 public class UserController : ControllerBase
 {
     private ApplicationDbContext _dbContext;
@@ -16,7 +16,7 @@ public class UserController : ControllerBase
     }
     
     [HttpGet]
-    [Route("/getUsers")]
+    [Route("get")]
     public ActionResult<List<User>> GetUsers()
     {
         throw new NotImplementedException();
