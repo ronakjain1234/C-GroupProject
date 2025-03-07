@@ -8,7 +8,7 @@ namespace BackendAPIService.Controllers;
 public class UserController : ControllerBase
 {
     [HttpGet]
-    [Route("/get")]
+    [Route("/getUsers")]
     public ActionResult<List<User>> GetUsers()
     {
         throw new NotImplementedException();

@@ -9,14 +9,14 @@ namespace BackendAPIService.Controllers;
 public class CompanyController : ControllerBase
 {
     [HttpGet]
-    [Route("/get")]
+    [Route("/getCompanies")]
     public ActionResult<List<Company>> Get(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         throw new NotImplementedException();
     }
 
     [HttpGet]
-    [Route("/create")]
+    [Route("/createCompany")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
         throw new NotImplementedException();
