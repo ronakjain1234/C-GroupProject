@@ -12,5 +12,6 @@ public class Role
     public int RoleID { get; set; }
     
     public string Name { get; set; }
-    
+    [ConcurrencyCheck]
+    public DateTime LastChange {get; set;}
 }
