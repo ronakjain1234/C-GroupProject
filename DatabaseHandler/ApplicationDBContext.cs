@@ -18,7 +18,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
-    public DbSet<CompanyUser> CompanyUser { get; set; }
+    public DbSet<CompanyUser> CompanyUsers { get; set; }
+    public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

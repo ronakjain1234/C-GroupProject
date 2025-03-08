@@ -7,12 +7,6 @@ using Microsoft.EntityFrameworkCore;
 [PrimaryKey("CompanyID", "EndPointID")]
 public class CompanyEndPoint
 {
-
-    public CompanyEndPoint(int companyID, int endpointID)
-    {
-        CompanyID = companyID;
-        EndPointID = endpointID;
-    }
     
     [ForeignKey("Companies")]
     public int CompanyID { get; set; }
