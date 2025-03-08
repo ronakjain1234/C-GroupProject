@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using DatabaseHandler.Data.Models.Database;
+using DatabaseHandler.Data.Models.Database.LookupTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseHandler;
@@ -17,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
+    public DbSet<CompanyUser> CompanyUser { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

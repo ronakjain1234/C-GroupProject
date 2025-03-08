@@ -55,6 +55,19 @@ namespace DatabaseHandler.Migrations
                     b.ToTable("EndPoints");
                 });
 
+            modelBuilder.Entity("DatabaseHandler.Data.Models.Database.LookupTables.CompanyUser", b =>
+                {
+                    b.Property<int>("CompanyID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CompanyID", "UserID");
+
+                    b.ToTable("CompanyUser");
+                });
+
             modelBuilder.Entity("DatabaseHandler.Data.Models.Database.Module", b =>
                 {
                     b.Property<int>("ModuleID")
