@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 [PrimaryKey("CompanyID", "RoleID")]
-public class CompanyRoles
+public class CompanyRole
 {
     
     [ForeignKey("Companies")]
