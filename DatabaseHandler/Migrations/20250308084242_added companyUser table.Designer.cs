@@ -3,6 +3,7 @@ using System;
 using DatabaseHandler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatabaseHandler.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250308084242_added companyUser table")]
+    partial class addedcompanyUsertable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -62,10 +65,6 @@ namespace DatabaseHandler.Migrations
 
                     b.Property<int>("UserID")
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastChange")
-                        .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
 
                     b.HasKey("CompanyID", "UserID");
 

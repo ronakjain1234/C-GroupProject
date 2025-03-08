@@ -6,8 +6,10 @@ namespace DatabaseHandler.Data.Models.Database.LookupTables;
 [PrimaryKey("CompanyID", "UserID")]
 public class CompanyUser
 {
-    [ForeignKey("Company")]
+    [ForeignKey("Companies")]
     public int CompanyID { get; set; }
-    [ForeignKey("User")]
+    [ForeignKey("Users")]
     public int UserID { get; set; }
+    [ConcurrencyCheck]
+    public DateTime LastChange {get; set;}
 }

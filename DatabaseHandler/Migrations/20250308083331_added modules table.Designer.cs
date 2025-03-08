@@ -3,6 +3,7 @@ using System;
 using DatabaseHandler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DatabaseHandler.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250308083331_added modules table")]
+    partial class addedmodulestable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -53,23 +56,6 @@ namespace DatabaseHandler.Migrations
                     b.HasKey("EndPointID");
 
                     b.ToTable("EndPoints");
-                });
-
-            modelBuilder.Entity("DatabaseHandler.Data.Models.Database.LookupTables.CompanyUser", b =>
-                {
-                    b.Property<int>("CompanyID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastChange")
-                        .IsConcurrencyToken()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("CompanyID", "UserID");
-
-                    b.ToTable("CompanyUser");
                 });
 
             modelBuilder.Entity("DatabaseHandler.Data.Models.Database.Module", b =>
