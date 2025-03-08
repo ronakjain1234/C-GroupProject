@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Module> Modules { get; set; }
     public DbSet<CompanyUser> CompanyUsers { get; set; }
     public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
+    public DbSet<CompanyRoles> CompanyRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
