@@ -20,10 +20,14 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
     
+    // Referencing Tables
+    
+    
     // "Mixed Tables"
     public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
     public DbSet<CompanyUser> CompanyUsers { get; set; }
     public DbSet<CompanyRoles> CompanyRoles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
