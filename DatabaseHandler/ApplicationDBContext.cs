@@ -13,13 +13,16 @@ public class ApplicationDbContext : DbContext
     }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+    // "Primitives"
     public DbSet<Company> Companies { get; set; }
     public DbSet<EndPoint> EndPoints { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
-    public DbSet<CompanyUser> CompanyUsers { get; set; }
+    
+    // "Mixed Tables"
     public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
+    public DbSet<CompanyUser> CompanyUsers { get; set; }
     public DbSet<CompanyRoles> CompanyRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
