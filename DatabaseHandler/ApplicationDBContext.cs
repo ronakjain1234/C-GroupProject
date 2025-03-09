@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using DatabaseHandler.Data.Models.Database;
 using DatabaseHandler.Data.Models.Database.LookupTables;
+using DatabaseHandler.Data.Models.Database.ReferencingTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseHandler;
@@ -21,7 +22,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Module> Modules { get; set; }
     
     // Referencing Tables
-    
+    public DbSet<UserEmail> UserEmail { get; set; }
+    public DbSet<UserEmail> UserPassword { get; set; }
     
     // "Mixed Tables"
     public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
