@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using DatabaseHandler.Data.Models.Database;
-using DatabaseHandler.Data.Models.Database.LookupTables;
+using DatabaseHandler.Data.Models.Database.MixedTables;
 using DatabaseHandler.Data.Models.Database.ReferencingTables;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +30,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserCompany> UserCompanies { get; set; }
     public DbSet<CompanyRole> CompanyRoles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<ModuleEndPoint> ModuleEndPoints { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
