@@ -11,6 +11,8 @@ public class UserCompany
     public int UserID { get; set; }
     [ForeignKey("Companies")]
     public int CompanyID { get; set; }
+    public DateTime ValidUntil {get; set;}
+
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}
 }
