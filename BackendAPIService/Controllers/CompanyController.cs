@@ -28,7 +28,7 @@ public class CompanyController : ControllerBase
     [Route("create")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
-        _dbContext.Companies.Add(new Database.Company(companyName));
+        _dbContext.Companies.Add(new Database.Company());
         _dbContext.SaveChanges();
         return Ok();
         throw new NotImplementedException();
