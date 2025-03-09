@@ -25,9 +25,9 @@ public class ApplicationDbContext : DbContext
     
     // "Mixed Tables"
     public DbSet<CompanyEndPoint> CompanyEndPoints { get; set; }
-    public DbSet<CompanyUser> CompanyUsers { get; set; }
+    public DbSet<UserCompany> UserCompanies { get; set; }
     public DbSet<CompanyRole> CompanyRoles { get; set; }
-    public DbSet<UserRole> UserRoles { get; set; }  
+    public DbSet<UserRole> UserRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

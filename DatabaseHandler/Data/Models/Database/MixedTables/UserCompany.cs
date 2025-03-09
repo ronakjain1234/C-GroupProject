@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseHandler.Data.Models.Database.LookupTables;
 [PrimaryKey("CompanyID", "UserID")]
-public class CompanyUser
+public class UserCompany
 {
-    [ForeignKey("Companies")]
-    public int CompanyID { get; set; }
+    
     [ForeignKey("Users")]
     public int UserID { get; set; }
+    [ForeignKey("Companies")]
+    public int CompanyID { get; set; }
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}
 }
