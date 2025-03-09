@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<CompanyRole> CompanyRoles { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<ModuleEndPoint> ModuleEndPoints { get; set; }
+    public DbSet<RoleEndPoint> RoleEndPoints { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
