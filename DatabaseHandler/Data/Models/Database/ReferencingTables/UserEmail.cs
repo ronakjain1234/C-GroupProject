@@ -9,4 +9,7 @@ public class UserEmail
     public int UserID { get; set; }
     [Key]
     public string Email { get; set; }
+    
+    [ConcurrencyCheck]
+    public DateTime LastChange {get; set;}
 }

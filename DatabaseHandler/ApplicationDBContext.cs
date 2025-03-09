@@ -23,7 +23,7 @@ public class ApplicationDbContext : DbContext
     
     // Referencing Tables
     public DbSet<UserEmail> UserEmail { get; set; }
-    public DbSet<UserEmail> UserPassword { get; set; }
+    public DbSet<UserPassword> UserPassword { get; set; }
     public DbSet<UserCreator> UserCreator { get; set; }
     public DbSet<UserActive> UserActive { get; set; }
     

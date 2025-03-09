@@ -9,4 +9,7 @@ public class UserActive
     [ForeignKey("Users")]
     public int UserID { get; set; }
     public bool Active { get; set; }
+    
+    [ConcurrencyCheck]
+    public DateTime LastChange {get; set;}
 }
