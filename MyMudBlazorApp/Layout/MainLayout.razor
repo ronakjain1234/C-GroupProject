@@ -1,30 +1,52 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
+@inject NavigationManager Navigation
 
 <MudThemeProvider />
-<MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h6">My Application</MudText>
-        <MudSpacer />
-    </MudAppBar>
-    
-    <MudDrawer @bind-Open="@_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-    
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="my-4">
+<MudPopoverProvider />
+
+<div class="page">
+    <main>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
+            }
+
+            .app-bar {
+                width: 100vw;
+                top: 0;
+                left: 0;
+            }
+        </style>
+
+        @if (!ShouldHideAppBar())
+        {
+            <MudAppBar Class="app-bar" Color="Color.Primary" Fixed="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+                <MudSpacer />
+                <MudAvatar Color="Color.Secondary" Size="Size.Medium">RJ</MudAvatar>
+            </MudAppBar>
+        }
+
+        <article class="content px-4">
             @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+        </article>
+    </main>
+</div>
 
 @code {
-    private bool _drawerOpen = true;
-
-    private void DrawerToggle()
+    private bool ShouldHideAppBar()
+{
+    var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+    
+    // Define routes where AppBar should be hidden
+    var hiddenRoutes = new List<string>
     {
-        _drawerOpen = !_drawerOpen;
-    }
+        "/login"
+    };
+
+    return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
+}
 }
