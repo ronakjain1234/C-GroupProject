@@ -19,6 +19,10 @@
                 top: 0;
                 left: 0;
             }
+
+            .content {
+                padding-top: 64px; /* Adjust based on the height of your app bar */
+            }
         </style>
 
         @if (!ShouldHideAppBar())
@@ -38,15 +42,15 @@
 
 @code {
     private bool ShouldHideAppBar()
-{
-    var currentPath = new Uri(Navigation.Uri).AbsolutePath;
-    
-    // Define routes where AppBar should be hidden
-    var hiddenRoutes = new List<string>
     {
-        "/login"
-    };
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        
+        // Define routes where AppBar should be hidden
+        var hiddenRoutes = new List<string>
+        {
+            "/login"
+        };
 
-    return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
-}
+        return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
+    }
 }
