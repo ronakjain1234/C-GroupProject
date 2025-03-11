@@ -16,7 +16,8 @@
 }
 
 .rolesTable {
-    margin-top: 16px;
+    overflow-y: auto;
+    max-height: 500px; /* Adjust as needed */
 }
 
 .search-field {
@@ -41,91 +42,177 @@
     margin-top: 8px;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto 
 }
 
 .endpoint-paper {
     background-color: #fafafa;
-    height: 100%;
+    padding: 12px;
 }
 
 .module-title {
     font-weight: 500;
     margin-bottom: 16px;
 }
+
+/* Styling for tabs */
+.mud-tabs-panels {
+    padding: 0 !important;
+}
+
+.mud-tab-slider {
+    background-color: var(--mud-palette-primary);
+}
+
+.swipeable-tabs .mud-tabs-toolbar {
+    justify-content: center;
+}
+
+.swipeable-tabs .mud-tabs-panels {
+    min-height: 350px;
+}
+
+.compact-dialog {
+    width: 700px;
+    max-width: 90vw;
+    max-height: 80vh;
+}
+
+/* Styling for main content tabs */
+.main-tabs {
+    margin-top: 16px;
+}
+
+.empty-selection {
+    padding: 32px;
+    text-align: center;
+    color: var(--mud-palette-text-secondary);
+}
+.entirePage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 </style>
 
 <div class="entirePage">
-    <div class="mainContent">
-        <MudContainer Class="pa-4">
-            <div class="d-flex align-center gap-4 page-title">
-                <MudText Typo="Typo.h4">Roles</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Error" Size="Size.Medium" OnClick="AddRole" />
-            </div>
-        </MudContainer>
+    <MudContainer Class="pa-4">
+        <div class="d-flex align-center gap-4 page-title">
+            <MudText Typo="Typo.h4">Roles</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Error" Size="Size.Medium" OnClick="AddRole" />
+        </div>
+    </MudContainer>
 
-        <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<string, bool>(FilterFunc1)" MultiSelection="true"
-                  @bind-SelectedItems="_selectedItems" Hover="true">
-            <ToolBarContent>
-                <MudTextField @bind-Value="searchString1" 
-                            Placeholder="Search roles" 
-                            Adornment="Adornment.Start"
-                            AdornmentIcon="@Icons.Material.Filled.Search" 
-                            IconSize="Size.Medium" 
-                            Class="mt-0 mb-4 search-field"
-                            Immediate="true"
-                            DebounceInterval="300"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh Style="width: 50px;">
-                    <MudTableHeaderCheckbox T="string" />
-                </MudTh>
-                <MudTh Class="role-name-cell">Role Name</MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd Style="width: 50px;">
-                    <MudTableCheckbox T="string" Value="context" />
-                </MudTd>
-                <MudTd DataLabel="Role Name" Class="role-name-cell">
-                    <MudTextField Value="@context" ReadOnly="false" Class="mt-0 mb-0" />
-                </MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-                        <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                  OnClick="() => AddEndpoint(context)"
-                                  Size="Size.Small">Add Group</MudButton>
-                        <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
-                                  OnClick="() => CloneRole(context)"
-                                  Size="Size.Small">Clone</MudButton>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                                     Color="Color.Error"
-                                     Size="Size.Small"
-                                     OnClick="() => RemoveRole(context)" />
-                    </MudButtonGroup>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <div class="d-flex align-center">
-                    <MudTablePager />
-                    <MudSpacer />
-                    <MudButton Color="Color.Primary" 
-                              Variant="Variant.Outlined"
-                              StartIcon="@Icons.Material.Filled.Settings"
-                              OnClick="MakeChoicesForSelectedRoles"
-                              Disabled="@(!_selectedItems.Any())"
-                              Size="Size.Small"
-                              Class="ml-4">Make Choices</MudButton>
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-3" Class="main-tabs swipeable-tabs" Centered="true">
+        <MudTabPanel Text="Roles Management">
+            <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<string, bool>(FilterFunc1)" MultiSelection="true"
+                      @bind-SelectedItems="_selectedItems" Hover="true">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="searchString1" 
+                                Placeholder="Search roles" 
+                                Adornment="Adornment.Start"
+                                AdornmentIcon="@Icons.Material.Filled.Search" 
+                                IconSize="Size.Medium" 
+                                Class="mt-0 mb-4 search-field"
+                                Immediate="true"
+                                DebounceInterval="300"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh Style="width: 50px;">
+                        <MudTableHeaderCheckbox T="string" />
+                    </MudTh>
+                    <MudTh Class="role-name-cell">Role Name</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd Style="width: 50px;">
+                        <MudTableCheckbox T="string" Value="context" />
+                    </MudTd>
+                    <MudTd DataLabel="Role Name" Class="role-name-cell">
+                        <MudTextField Value="@context" ReadOnly="false" Class="mt-0 mb-0" />
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                            <MudButton StartIcon="@Icons.Material.Filled.Add" 
+                                      OnClick="() => AddEndpoint(context)"
+                                      Size="Size.Small">Add Group</MudButton>
+                            <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
+                                      OnClick="() => CloneRole(context)"
+                                      Size="Size.Small">Clone</MudButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                         Color="Color.Error"
+                                         Size="Size.Small"
+                                         OnClick="() => RemoveRole(context)" />
+                        </MudButtonGroup>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <div class="d-flex align-center">
+                        <MudTablePager />
+                        <MudSpacer />
+                        <MudButton Color="Color.Primary" 
+                                  Variant="Variant.Outlined"
+                                  StartIcon="@Icons.Material.Filled.Settings"
+                                  OnClick="MakeChoicesForSelectedRoles"
+                                  Disabled="@(!_selectedItems.Any())"
+                                  Size="Size.Small"
+                                  Class="ml-4">Make Choices</MudButton>
+                    </div>
+                </PagerContent>
+            </MudTable>
+        </MudTabPanel>
+        
+        <MudTabPanel Text="Selected Endpoints">
+            @if (!_roleEndpoints.Any())
+            {
+                <div class="empty-selection">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large" Class="mb-2" />
+                    <MudText Typo="Typo.h6">No endpoint selections available</MudText>
+                    <MudText Typo="Typo.body2" Class="mt-2">
+                        Select a role and click "Add Group" to assign endpoints.
+                    </MudText>
                 </div>
-            </PagerContent>
-        </MudTable>
-    </div>
+            }
+            else
+            {
+                @foreach (var roleEndpoints in _roleEndpoints)
+                {
+                    <MudPaper Elevation="2" Class="pa-4 mt-4">
+                        <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
+                            Selected Endpoints for Role: @roleEndpoints.Key
+                        </MudText>
+                        <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true">
+                            <ColGroup>
+                                <col style="width: 50px;" />
+                                <col />
+                            </ColGroup>
+                            <RowTemplate>
+                                <MudTd>
+                                    <MudIcon Icon="@Icons.Material.Filled.Link" />
+                                </MudTd>
+                                <MudTd DataLabel="Endpoint">@context</MudTd>
+                            </RowTemplate>
+                            <NoRecordsContent>
+                                <div class="empty-selection">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Medium" Class="mb-2" />
+                                    <MudText Typo="Typo.body1">No endpoints assigned to this role</MudText>
+                                </div>
+                            </NoRecordsContent>
+                        </MudTable>
+                    </MudPaper>
+                }
+            }
+        </MudTabPanel>
+    </MudTabs>
 </div>
 
 @if (_isOpen)
 {
     <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
-        <MudPaper Elevation="24" Class="pa-4" Style="min-width: 800px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
-            <div class="d-flex justify-space-between align-center mb-4">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
                 <div>
                     <MudText Typo="Typo.h5">Endpoint Management</MudText>
                     <MudText Typo="Typo.subtitle1" Color="Color.Primary">Role: @_currentRole</MudText>
@@ -133,10 +220,9 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDialog" />
             </div>
             
-            <MudGrid Spacing="4">
-                <MudItem xs="12" md="6">
-                    <MudPaper Elevation="0" Class="pa-4 endpoint-paper">
-                        <MudText Typo="Typo.h6" Class="module-title">Module ESMA</MudText>
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0" Class="swipeable-tabs" Centered="true">
+                <MudTabPanel Text="Module ESMA">
+                    <MudPaper Elevation="0" Class="endpoint-paper">
                         <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true" Class="endpoint-table"
                                  Elevation="0" Style="background-color: white;" MultiSelection="true"
                                  @bind-SelectedItems="_selectedEsmaEndpoints">
@@ -156,11 +242,10 @@
                             </RowTemplate>
                         </MudTable>
                     </MudPaper>
-                </MudItem>
-
-                <MudItem xs="12" md="6">
-                    <MudPaper Elevation="0" Class="pa-4 endpoint-paper">
-                        <MudText Typo="Typo.h6" Class="module-title">Module Calculations</MudText>
+                </MudTabPanel>
+                
+                <MudTabPanel Text="Module Calculations">
+                    <MudPaper Elevation="0" Class="endpoint-paper">
                         <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true" Class="endpoint-table"
                                  Elevation="0" Style="background-color: white;" MultiSelection="true"
                                  @bind-SelectedItems="_selectedCalculationEndpoints">
@@ -180,17 +265,17 @@
                             </RowTemplate>
                         </MudTable>
                     </MudPaper>
-                </MudItem>
-            </MudGrid>
+                </MudTabPanel>
+            </MudTabs>
 
-            <MudDivider DividerType="DividerType.Middle" Class="my-6"/>
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
 
             <div class="d-flex justify-end gap-2">
                 <MudButton Color="Color.Error" 
                           Variant="Variant.Filled" 
                           StartIcon="@Icons.Material.Filled.Close" 
                           OnClick="CloseDialog">Close</MudButton>
-                          
+                      
                 <MudButton Color="Color.Primary" 
                           Variant="Variant.Filled" 
                           StartIcon="@Icons.Material.Filled.Save" 
@@ -199,27 +284,6 @@
             </div>
         </MudPaper>
     </MudOverlay>
-}
-
-@foreach (var roleEndpoints in _roleEndpoints)
-{
-    <MudPaper Elevation="2" Class="pa-4 mt-4">
-        <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
-            Selected Endpoints for Role: @roleEndpoints.Key
-        </MudText>
-        <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true">
-            <ColGroup>
-                <col style="width: 50px;" />
-                <col />
-            </ColGroup>
-            <RowTemplate>
-                <MudTd>
-                    <MudIcon Icon="@Icons.Material.Filled.Link" />
-                </MudTd>
-                <MudTd DataLabel="Endpoint">@context</MudTd>
-            </RowTemplate>
-        </MudTable>
-    </MudPaper>
 }
 
 @code {

@@ -48,7 +48,8 @@
         // Define routes where AppBar should be hidden
         var hiddenRoutes = new List<string>
         {
-            "/login"
+            "/login",
+            "/signup"
         };
 
         return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
