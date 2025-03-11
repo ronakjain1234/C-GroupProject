@@ -6,29 +6,48 @@
 @inject ISnackbar Snackbar
 
 <style>
-    .signup-container {
-        display: flex;
-        height: 100vh;
-    }
-    .left-section {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        background: white;
-    }
-    .right-section {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        background: linear-gradient(to bottom, #7F67F6, #6A5ACD);
-        color: white;
-        padding: 2rem;
-    }
+.signup-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.left-section {
+    width: 50%;    /* Make this exactly 50% of the width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: white;
+    box-sizing: border-box;
+    position: absolute;  /* Position it absolutely */
+    left: 0;            /* Align to the left edge */
+    top: 0;             /* Align to the top edge */
+    height: 100%;       /* Full height */
+}
+
+.right-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(to bottom, #392B77, #0E40F3);
+    color: white;
+    padding: 2rem;
+    height: 100vh;
+    width: 50%;
+    box-sizing: border-box;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
     .signup-card {
         width: 100%;
         max-width: 400px;
@@ -38,6 +57,11 @@
         background: white;
         color: black;
         width: 120px;
+    }
+    .login-button:hover {
+        background: white;  /* Keep the background white when hovered */
+        color: black;        /* Keep the text color black when hovered */
+        border-color: black; /* Ensure the border color stays */
     }
     .eye-icon {
         cursor: pointer;
@@ -105,8 +129,8 @@
 
     <!-- Right Side - Login Section -->
     <div class="right-section">
-        <MudText Typo="Typo.h5" Class="mb-2">Already Have an Account?</MudText>
-        <MudText Typo="Typo.body1" Class="mb-4">Login to access your account and continue your journey</MudText>
+        <MudText Typo="Typo.h3" Class="mb-2">Already Have an Account?</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4">Login to access your account and continue your journey</MudText>
         <MudButton Variant="Variant.Outlined"
                    Class="login-button"
                    OnClick="@(() => Navigation.NavigateTo("/login"))">
@@ -168,4 +192,4 @@
         Snackbar.Add("Registration successful! Please login.", Severity.Success);
         Navigation.NavigateTo("/login");
     }
-} 
+}
