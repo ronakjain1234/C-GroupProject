@@ -1,8 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
+@inject NavigationManager Navigation
 
 <MudThemeProvider />
-<MudPopoverProvider /> 
+<MudPopoverProvider />
 
 <div class="page">
     <main>
@@ -10,23 +11,47 @@
             body, html {
                 margin: 0;
                 padding: 0;
-                overflow-x: hidden; /* Prevents horizontal scrolling */
+                overflow-x: hidden;
             }
 
             .app-bar {
-                width: 100vw; /* Ensures full width */
+                width: 100vw;
                 top: 0;
                 left: 0;
             }
+
+            .content {
+                padding-top: 64px; /* Adjust based on the height of your app bar */
+            }
         </style>
 
-        <MudAppBar Class="app-bar" Color="Color.Primary" Fixed="true">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
-            <MudSpacer />
-            <MudAvatar Color="Color.Secondary" Size="Size.Medium">RJ</MudAvatar>
-        </MudAppBar>
+        @if (!ShouldHideAppBar())
+        {
+            <MudAppBar Class="app-bar" Color="Color.Primary" Fixed="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+                <MudSpacer />
+                <MudAvatar Color="Color.Secondary" Size="Size.Medium">RJ</MudAvatar>
+            </MudAppBar>
+        }
+
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    private bool ShouldHideAppBar()
+    {
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        
+        // Define routes where AppBar should be hidden
+        var hiddenRoutes = new List<string>
+        {
+            "/login",
+            "/signup"
+        };
+
+        return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
+    }
+}

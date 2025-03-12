@@ -1,0 +1,61 @@
+.login-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.login-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-form-fields {
+    margin-bottom: 1.5rem;
+}
+
+.login-actions {
+    margin-top: 1.5rem;
+}
+
+.brand-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgb(106, 17, 203), rgb(37, 117, 252));
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.brand-content {
+    max-width: 400px;
+}
+
+.brand-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.brand-title {
+    margin-bottom: 1rem;
+}
+
+.brand-description {
+    margin-bottom: 2rem;
+    opacity: 0.9;
+} 
