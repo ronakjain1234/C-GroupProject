@@ -1,0 +1,199 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Authorization.Infrastructure
+@using MudBlazor.Utilities
+@using MyMudBlazorApp.Objects
+
+<PageTitle>@_company.Name</PageTitle>
+
+<style>
+    .companySideBar {
+        width: 64px;
+        height: calc(100vh - 64px); /* Subtract app bar height */
+        position: fixed;
+        left: 0;
+        top: 64px; /* Start below app bar */
+        padding: 16px 8px;
+        background-color: #f0f0f0; /* Lighter gray background */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+        z-index: 1; /* Ensure sidebar appears above content */
+    }
+
+    .mainContent {
+        margin-left: 80px; /* Adjusted for narrower sidebar */
+        padding: 20px;
+        padding-top: 84px; /* Adjusted to account for app bar */
+    }
+
+    .entirePage {
+        background-color: white;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .companyTable {
+        background-color: white;
+        border-radius: 8px;
+    }
+
+    .mud-table-row {
+        width: fit-content;
+        background-color: white;
+    }
+    
+    .mud-checkbox-true {
+        color: green;    
+    }
+    
+    .mud-checkbox-false, .mud-checkbox-null {
+        color: black;
+    }
+
+    .sideBarButtons {
+        margin-top: 16px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .mud-table th, .mud-table td {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .headerRow {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .deleteCompanyButton {
+        margin-top: auto;
+        margin-bottom: 16px;
+    }
+
+    .companyTitle {
+        display: flex;
+        align-items: center;
+    }
+
+    .companyTitle h1 {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<div class="companySideBar">
+    <div class="sideBarButtons">
+        <MudTooltip Text="Back" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Create User" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Create" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Delete" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Make Admin" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Upgrade" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Add Roles" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Manage Roles" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" />
+        </MudTooltip>
+        
+        <MudTooltip Text="Remove Roles" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Primary" />
+        </MudTooltip>
+    </div>
+    
+    <div class="deleteCompanyButton">
+        <MudTooltip Text="Delete Company">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
+        </MudTooltip>
+    </div>
+</div>
+
+<div class="entirePage">
+    <div class="mainContent">
+        <div class="companyTitle mb-10" >
+            <h1 style="color: black;">@_company.Name</h1>
+            <MudTooltip Text="Edit Company">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" />
+            </MudTooltip>
+        </div>
+        
+        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+                  @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
+            <ToolBarContent>
+                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Roles</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit" Size="Size.Medium"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium"/>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+        </MudTable>
+    </div>
+</div>
+
+@code {
+    private HashSet<User> _selectedItems = new HashSet<User>();
+    private Objects.Company _company = new Objects.Company("");
+    private string searchString1 = "";
+    protected override Task OnInitializedAsync()
+    {
+        _company = new Objects.Company("JP Morgan");
+        _company.AddUser(new User("Elias", "EAL@DTU.dk"));
+        _company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
+        _company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
+        _company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
+        _company.GetUsers().First().Roles.Add(new Role("DEAN"));
+        _company.GetUsers().First().Roles.Add(new Role("PHAR"));
+        _company.GetUsers().First().Roles.Add(new Role("BUILD"));
+        return Task.CompletedTask;
+    }
+    
+    private bool FilterFunc1(User element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+}

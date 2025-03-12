@@ -1,4 +1,7 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@using MudBlazor
+@namespace MyMudBlazorApp
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -10,3 +13,7 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudThemeProvider />

@@ -1,0 +1,195 @@
+@page "/signup"
+@using MudBlazor
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<style>
+.signup-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.left-section {
+    width: 50%;    /* Make this exactly 50% of the width */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: white;
+    box-sizing: border-box;
+    position: absolute;  /* Position it absolutely */
+    left: 0;            /* Align to the left edge */
+    top: 0;             /* Align to the top edge */
+    height: 100%;       /* Full height */
+}
+
+.right-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(to bottom, #392B77, #0E40F3);
+    color: white;
+    padding: 2rem;
+    height: 100vh;
+    width: 50%;
+    box-sizing: border-box;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+    .signup-card {
+        width: 100%;
+        max-width: 400px;
+        box-shadow: none;
+    }
+    .login-button {
+        background: white;
+        color: black;
+        width: 120px;
+    }
+    .login-button:hover {
+        background: white;  /* Keep the background white when hovered */
+        color: black;        /* Keep the text color black when hovered */
+        border-color: black; /* Ensure the border color stays */
+    }
+    .eye-icon {
+        cursor: pointer;
+    }
+</style>
+
+<div class="signup-container">
+    <!-- Left Side - Sign Up Form -->
+    <div class="left-section">
+        <MudCard Class="signup-card">
+            <MudCardContent>
+                <MudText Typo="Typo.h4" Class="mb-4 text-center">Create Account</MudText>
+
+                <MudTextField @bind-Value="fullName"
+                            Label="Full Name"
+                            Variant="Variant.Filled"
+                            Class="mb-3"
+                            Required="true"
+                            RequiredError="Full name is required!" />
+
+                <MudTextField @bind-Value="email"
+                            Label="Email"
+                            Variant="Variant.Filled"
+                            Class="mb-3"
+                            Required="true"
+                            RequiredError="Email is required!" />
+
+                <MudTextField @bind-Value="password"
+                            Label="Password"
+                            Variant="Variant.Filled"
+                            InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.Visibility"
+                            OnAdornmentClick="TogglePasswordVisibility"
+                            Class="mb-3"
+                            Required="true"
+                            RequiredError="Password is required!" />
+
+                <MudTextField @bind-Value="confirmPassword"
+                            Label="Confirm Password"
+                            Variant="Variant.Filled"
+                            InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.Visibility"
+                            OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                            Class="mb-4"
+                            Required="true"
+                            RequiredError="Please confirm your password!" />
+
+                <div class="d-flex align-center mb-4">
+                    <MudCheckBox T="bool" @bind-Checked="acceptTerms" />
+                    <MudText Typo="Typo.body2" Class="ml-2">I accept the terms and conditions</MudText>
+                </div>
+
+                <MudButton Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          FullWidth="true"
+                          OnClick="HandleSignUp"
+                          Disabled="@(!IsValidForm())">
+                    Sign Up
+                </MudButton>
+            </MudCardContent>
+        </MudCard>
+    </div>
+
+    <!-- Right Side - Login Section -->
+    <div class="right-section">
+        <MudText Typo="Typo.h3" Class="mb-2">Already Have an Account?</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4">Login to access your account and continue your journey</MudText>
+        <MudButton Variant="Variant.Outlined"
+                   Class="login-button"
+                   OnClick="@(() => Navigation.NavigateTo("/login"))">
+            Login
+        </MudButton>
+    </div>
+</div>
+
+@code {
+    private string fullName = "";
+    private string email = "";
+    private string password = "";
+    private string confirmPassword = "";
+    private bool showPassword;
+    private bool showConfirmPassword;
+    private bool acceptTerms;
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        showConfirmPassword = !showConfirmPassword;
+    }
+
+    private bool IsValidForm()
+    {
+        return !string.IsNullOrWhiteSpace(fullName) &&
+               !string.IsNullOrWhiteSpace(email) &&
+               !string.IsNullOrWhiteSpace(password) &&
+               !string.IsNullOrWhiteSpace(confirmPassword) &&
+               password == confirmPassword &&
+               acceptTerms;
+    }
+
+    private async Task HandleSignUp()
+    {
+        if (!IsValidForm())
+        {
+            if (!acceptTerms)
+            {
+                Snackbar.Add("Please accept the terms and conditions", Severity.Warning);
+                return;
+            }
+            if (password != confirmPassword)
+            {
+                Snackbar.Add("Passwords do not match", Severity.Warning);
+                return;
+            }
+            Snackbar.Add("Please fill in all required fields", Severity.Warning);
+            return;
+        }
+
+        // TODO: Implement actual registration logic here
+        // For now, just simulate a successful registration
+        await Task.Delay(1000);
+        Snackbar.Add("Registration successful! Please login.", Severity.Success);
+        Navigation.NavigateTo("/login");
+    }
+}
