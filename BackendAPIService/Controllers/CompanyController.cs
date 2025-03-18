@@ -19,7 +19,7 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<Web.Company>> GetComapnies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+    public ActionResult<List<Web.Company>> GetComapnies( int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
@@ -36,7 +36,7 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
+    public ActionResult<SimpleErrorResponse> CreateCompany( string companyName)
     {
         try 
         {
@@ -57,7 +57,7 @@ public class CompanyController : ControllerBase
     }
     [HttpGet]
     [Route("getRoles")]
-    public ActionResult<List<Web.Role>> GetRoles (int userID, int limit = 50, int offset = 0)
+    public ActionResult<List<Web.Role>> GetRoles (int limit = 50, int offset = 0)
     {
         try 
         {
@@ -74,7 +74,7 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("createRole")]
-    public ActionResult<SimpleErrorResponse> CreateRole(int userID, string roleName)
+    public ActionResult<SimpleErrorResponse> CreateRole( string roleName)
     {
         try {
             if (string.IsNullOrEmpty(roleName))
@@ -94,7 +94,7 @@ public class CompanyController : ControllerBase
     }
     [HttpGet]
     [Route("getAllUsers")]
-    public ActionResult<List<Web.Role>> GetAllUsers (int userID, int limit = 50, int offset = 0)
+    public ActionResult<List<Web.Role>> GetAllUsers ( int limit = 50, int offset = 0)
     {
         try 
         {
@@ -111,7 +111,7 @@ public class CompanyController : ControllerBase
    
     [HttpPost]
     [Route("createUser")]
-    public ActionResult<SimpleErrorResponse> CreateUser(int userID, string userName, string userEmail, string userRole)
+    public ActionResult<SimpleErrorResponse> CreateUser( string userName, string userEmail, string userRole)
     {
         try 
         {
@@ -134,7 +134,7 @@ public class CompanyController : ControllerBase
 
     [HttpPut]
     [Route("editCompany/{companyId}")]
-    public ActionResult<SimpleErrorResponse> EditCompany(int companyId, int userID, string companyName)
+    public ActionResult<SimpleErrorResponse> EditCompany(int companyId, string companyName)
     {
         try
         {
@@ -164,7 +164,7 @@ public class CompanyController : ControllerBase
 
     [HttpDelete]
     [Route("deleteRole/{roleId}")]
-    public ActionResult<SimpleErrorResponse> DeleteRole(int userID, int roleId)
+    public ActionResult<SimpleErrorResponse> DeleteRole( int roleId)
     {
         try
         {
@@ -194,7 +194,7 @@ public class CompanyController : ControllerBase
 
     [HttpDelete]
     [Route("deleteCompany/{companyId}")]
-    public ActionResult<SimpleErrorResponse> DeleteCompany(int companyId, int userID)
+    public ActionResult<SimpleErrorResponse> DeleteCompany(int companyId)
     {
         try
         {
@@ -291,5 +291,30 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the user." });
         }
     }
+    [HttpDelete]
+[Route("deleteUser/{userId}")]
+    public ActionResult<SimpleErrorResponse> DeleteUser(int userId)
+    {
+        try
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userId);
+
+            if (user == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found." });
+            }
+
+            _dbContext.Users.Remove(user);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the user." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the user." });
+        }
+    }
+
 
 }
