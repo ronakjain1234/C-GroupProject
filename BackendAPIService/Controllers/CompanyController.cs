@@ -44,7 +44,8 @@ public class CompanyController : ControllerBase
             {
                 return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
-            var newCopany = new Database.Company { CompanyName = companyName};
+            int newCompanyId = GenerateUniqueId(true, false);
+            var newCopany = new Database.Company { CompanyID = newCompanyId, CompanyName = companyName};
             _dbContext.Companies.Add(newCopany);
             _dbContext.SaveChanges();
             return StatusCode(200, new SimpleErrorResponse {Success = true, Message = "Succesfully created a new company."});
@@ -80,8 +81,8 @@ public class CompanyController : ControllerBase
             {
                 return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role name cannot be empty"});
             }
-
-            var newRole = new Database.Role {Name = roleName};
+            int newRoleId = GenerateUniqueId(false, true);
+            var newRole = new Database.Role {RoleID = newRoleId, Name = roleName};
             _dbContext.Roles.Add(newRole);
             _dbContext.SaveChanges();
             return StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully created a new role."});
@@ -118,7 +119,8 @@ public class CompanyController : ControllerBase
             {
                 return StatusCode(500, new SimpleErrorResponse{Message = "Name, Email and Role can not be empty."});
             }
-            var newUser = new Database.User{Name = userName,  Email = userEmail, Roles = userRole};
+            int newUserId = GenerateUniqueId(false, false);
+            var newUser = new Database.User{UserID = newUserId, Name = userName,  Email = userEmail, Roles = userRole};
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges();
             return StatusCode(200, new SimpleErrorResponse{Success = true, Message =" Successfully created a new user"});
@@ -128,5 +130,53 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse{Success = false, Message = "An error occured while creating an user."});
         }
 
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    private int GenerateUniqueId(Boolean isCompany, Boolean isRole)
+    {
+        Random random = new Random();
+        int Id;
+        bool isUnique = false;
+        if (isCompany)
+        {
+            do
+            {
+                Id = random.Next(1, int.MaxValue); 
+                isUnique = !_dbContext.Companies.Any(c => c.CompanyID == Id);
+            } while (!isUnique);
+
+            return Id;
+        }
+        else if(isRole)
+        {
+            do
+            {
+                Id = random.Next(1, int.MaxValue); 
+                isUnique = !_dbContext.Roles.Any(c => c.RoleID == Id);
+            } while (!isUnique);
+            return Id;
+        }
+
+        else
+        {
+            do
+            {
+                Id = random.Next(1, int.MaxValue); 
+                isUnique = !_dbContext.Users.Any(c => c.UserID == Id);
+            } while (!isUnique);
+            return Id; 
+        }
     }
 }
