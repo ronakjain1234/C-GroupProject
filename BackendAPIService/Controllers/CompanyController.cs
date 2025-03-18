@@ -3,6 +3,7 @@ using DatabaseHandler;
 using Database = DatabaseHandler.Data.Models.Database;
 using Web = MyMudBlazorApp.Objects;
 using Microsoft.AspNetCore.Mvc;
+using DatabaseHandler.Data.Models.Database.ReferencingTables;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
@@ -23,7 +24,7 @@ public class CompanyController : ControllerBase
         try
         {
             var allCompanies = _dbContext.Companies;
-            StatusCode(200);
+            StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all companies."});
             return Ok(allCompanies);
         } catch (Exception ex) 
         {   
@@ -41,16 +42,16 @@ public class CompanyController : ControllerBase
         {
             if (string.IsNullOrEmpty(companyName))
             {
-                return StatusCode(500, new SimpleErrorResponse { Message = "Company name cannot be empty."});
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
             var newCopany = new Database.Company { CompanyName = companyName};
             _dbContext.Companies.Add(newCopany);
             _dbContext.SaveChanges();
-            return StatusCode(200);
+            return StatusCode(200, new SimpleErrorResponse {Success = true, Message = "Succesfully created a new company."});
         } catch (Exception ex) 
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating the company"});
+            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
         }
     }
     [HttpGet]
@@ -60,12 +61,12 @@ public class CompanyController : ControllerBase
         try 
         {
             var allRoles = _dbContext.Roles;
-            StatusCode(200);
+            StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all roles."});
             return Ok(allRoles);
         } catch(Exception ex) 
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Message = "An eror occurred when fetching the roles"});
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An eror occurred when fetching the roles"});
         }
 
     }
@@ -77,17 +78,38 @@ public class CompanyController : ControllerBase
         try {
             if (string.IsNullOrEmpty(roleName))
             {
-                return StatusCode(500, new SimpleErrorResponse { Message = "Role name cannot be empty"});
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role name cannot be empty"});
             }
 
             var newRole = new Database.Role {Name = roleName};
             _dbContext.Roles.Add(newRole);
             _dbContext.SaveChanges();
-            return StatusCode(200);
+            return StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully created a new role."});
         } catch(Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating a role."});
+            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating a role."});
         }
+    }
+    [HttpPost]
+    [Route("createUser")]
+    public ActionResult<SimpleErrorResponse> CreateUser(int userID, string userName, string userEmail, string userRole)
+    {
+        try 
+        {
+            if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userRole))
+            {
+                return StatusCode(500, new SimpleErrorResponse{Message = "Name, Email and Role can not be empty."});
+            }
+            var newUser = new Database.User{Name = userName,  Email = userEmail, Roles = userRole};
+            _dbContext.Users.Add(newUser);
+            _dbContext.SaveChanges();
+            return StatusCode(200, new SimpleErrorResponse{Success = true, Message =" Successfully created a new user"});
+        } catch(Exception ex)
+        {
+            Console.WriteLine("An error occured: {0}",  ex.Message);
+            return StatusCode(500, new SimpleErrorResponse{Success = false, Message = "An error occured while creating an user."});
+        }
+
     }
 }
