@@ -34,7 +34,7 @@ public class CompanyController : ControllerBase
     }
 
     [HttpPost]
-    [Route("create")]
+    [Route("createCompany")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
         try 
@@ -47,10 +47,31 @@ public class CompanyController : ControllerBase
             _dbContext.Companies.Add(newCopany);
             _dbContext.SaveChanges();
             return StatusCode(200);
-        } catch (Exception ex) {
+        } catch (Exception ex) 
+        {
             Console.WriteLine("An error occured: {0}", ex.Message);
             return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating the company"});
         }
     }
 
+    [HttpPost]
+    [Route("createRole")]
+    public ActionResult<SimpleErrorResponse> CreateRole(int userID, string roleName)
+    {
+        try {
+            if (string.IsNullOrEmpty(roleName))
+            {
+                return StatusCode(500, new SimpleErrorResponse { Message = "Role name cannot be empty"});
+            }
+
+            var newRole = new Database.Role {Name = roleName};
+            _dbContext.Roles.Add(newRole);
+            _dbContext.SaveChanges();
+            return StatusCode(200);
+        } catch(Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating a role."});
+        }
+    }
 }
