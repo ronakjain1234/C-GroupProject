@@ -19,7 +19,7 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<Web.Company>> Get(int userID, int limit = 50, int offset = 0, string? searchString = null)
+    public ActionResult<List<Web.Company>> GetComapnies(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
@@ -56,7 +56,7 @@ public class CompanyController : ControllerBase
     }
     [HttpGet]
     [Route("getRoles")]
-    public ActionResult<List<Web.Role>> Get (int userID, int limit = 50, int offset = 0)
+    public ActionResult<List<Web.Role>> GetRoles (int userID, int limit = 50, int offset = 0)
     {
         try 
         {
@@ -91,7 +91,24 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating a role."});
         }
     }
-     [HttpPost]
+    [HttpGet]
+    [Route("getAllUsers")]
+    public ActionResult<List<Web.Role>> GetAllUsers (int userID, int limit = 50, int offset = 0)
+    {
+        try 
+        {
+            var allUsers = _dbContext.Users;
+            StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all users."});
+            return Ok(allUsers);
+        } catch(Exception ex) 
+        {
+            Console.WriteLine("An error occurred while fetching users: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An eror occurred while fetching users."});
+        }
+
+    }
+   
+    [HttpPost]
     [Route("createUser")]
     public ActionResult<SimpleErrorResponse> CreateUser(int userID, string userName, string userEmail, string userRole)
     {
