@@ -23,6 +23,7 @@ public class CompanyController : ControllerBase
         try
         {
             var allCompanies = _dbContext.Companies;
+            StatusCode(200);
             return Ok(allCompanies);
         } catch (Exception ex) 
         {   
@@ -32,14 +33,24 @@ public class CompanyController : ControllerBase
         
     }
 
-    [HttpGet]
+    [HttpPost]
     [Route("create")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
-        _dbContext.Companies.Add(new Database.Company());
-        _dbContext.SaveChanges();
-        return Ok();
-        throw new NotImplementedException();
+        try 
+        {
+            if (string.IsNullOrEmpty(companyName))
+            {
+                return StatusCode(500, new SimpleErrorResponse { Message = "Company name cannot be empty."});
+            }
+            var newCopany = new Database.Company { CompanyName = companyName};
+            _dbContext.Companies.Add(newCopany);
+            _dbContext.SaveChanges();
+            return StatusCode(200);
+        } catch (Exception ex) {
+            Console.WriteLine("An error occured: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating the company"});
+        }
     }
 
 }
