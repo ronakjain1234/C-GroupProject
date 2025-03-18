@@ -53,6 +53,22 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse {Message = "An error occurred while creating the company"});
         }
     }
+    [HttpGet]
+    [Route("getRoles")]
+    public ActionResult<List<Web.Role>> Get (int userID, int limit = 50, int offset = 0)
+    {
+        try 
+        {
+            var allRoles = _dbContext.Roles;
+            StatusCode(200);
+            return Ok(allRoles);
+        } catch(Exception ex) 
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Message = "An eror occurred when fetching the roles"});
+        }
+
+    }
 
     [HttpPost]
     [Route("createRole")]
