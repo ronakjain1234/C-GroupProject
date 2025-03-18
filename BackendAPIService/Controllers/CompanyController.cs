@@ -132,6 +132,37 @@ public class CompanyController : ControllerBase
 
     }
 
+[HttpPut]
+[Route("editCompany/{companyId}")]
+public ActionResult<SimpleErrorResponse> EditCompany(int companyId, int userID, string companyName)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(companyName))
+        {
+            return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
+        }
+
+        var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+        if (existingCompany == null)
+        {
+            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+        }
+
+        existingCompany.CompanyName = companyName;
+
+        _dbContext.SaveChanges();
+
+        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
+    }
+}
+
+
 
 
 
