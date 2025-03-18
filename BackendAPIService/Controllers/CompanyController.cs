@@ -252,4 +252,44 @@ public class CompanyController : ControllerBase
                 return Id; 
             }
         }
+
+    [HttpPut]
+    [Route("editUser/{userId}")]
+    public ActionResult<SimpleErrorResponse> EditUser(int userId, string? userName = null, string? userEmail = null, string? userRole = null)
+    {
+        try
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userId);
+            
+            if (user == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found." });
+            }
+
+            if (!string.IsNullOrEmpty(userName))
+            {
+                user.Name = userName;
+            }
+
+            if (!string.IsNullOrEmpty(userEmail))
+            {
+                user.Email = userEmail;
+            }
+
+            if (!string.IsNullOrEmpty(userRole))
+            {
+                user.Roles = userRole;
+            }
+
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the user." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the user." });
+        }
+    }
+
 }
