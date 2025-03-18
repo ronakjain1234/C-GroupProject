@@ -132,124 +132,124 @@ public class CompanyController : ControllerBase
 
     }
 
-[HttpPut]
-[Route("editCompany/{companyId}")]
-public ActionResult<SimpleErrorResponse> EditCompany(int companyId, int userID, string companyName)
-{
-    try
+    [HttpPut]
+    [Route("editCompany/{companyId}")]
+    public ActionResult<SimpleErrorResponse> EditCompany(int companyId, int userID, string companyName)
     {
-        if (string.IsNullOrEmpty(companyName))
+        try
         {
-            return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
-        }
+            if (string.IsNullOrEmpty(companyName))
+            {
+                return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
+            }
 
-        var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
-        if (existingCompany == null)
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            if (existingCompany == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            existingCompany.CompanyName = companyName;
+
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
+        }
+        catch (Exception ex)
         {
-            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
         }
-
-        existingCompany.CompanyName = companyName;
-
-        _dbContext.SaveChanges();
-
-        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine("An error occurred: {0}", ex.Message);
-        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
-    }
-}
 
-[HttpDelete]
-[Route("deleteRole/{roleId}")]
-public ActionResult<SimpleErrorResponse> DeleteRole(int userID, int roleId)
-{
-    try
+    [HttpDelete]
+    [Route("deleteRole/{roleId}")]
+    public ActionResult<SimpleErrorResponse> DeleteRole(int userID, int roleId)
     {
-        var role = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleId);
+        try
+        {
+            var role = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleId);
+
+            
+            if (role == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Role not found." });
+            }
 
         
-        if (role == null)
-        {
-            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Role not found." });
+            _dbContext.Roles.Remove(role);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the role." });
         }
-
-    
-        _dbContext.Roles.Remove(role);
-        _dbContext.SaveChanges();
-
-        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the role." });
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the role." });
+        }
     }
-    catch (Exception ex)
+
+
+
+
+    [HttpDelete]
+    [Route("deleteCompany/{companyId}")]
+    public ActionResult<SimpleErrorResponse> DeleteCompany(int companyId, int userID)
     {
-        Console.WriteLine("An error occurred: {0}", ex.Message);
-        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the role." });
+        try
+        {
+            var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+
+            if (company == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            _dbContext.Companies.Remove(company);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the company." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the company." });
+        }
     }
-}
-
-
 
     private int GenerateUniqueId(Boolean isCompany, Boolean isRole)
-    {
-        Random random = new Random();
-        int Id;
-        bool isUnique = false;
-        if (isCompany)
         {
-            do
+            Random random = new Random();
+            int Id;
+            bool isUnique = false;
+            if (isCompany)
             {
-                Id = random.Next(1, int.MaxValue); 
-                isUnique = !_dbContext.Companies.Any(c => c.CompanyID == Id);
-            } while (!isUnique);
+                do
+                {
+                    Id = random.Next(1, int.MaxValue); 
+                    isUnique = !_dbContext.Companies.Any(c => c.CompanyID == Id);
+                } while (!isUnique);
 
-            return Id;
-        }
-        else if(isRole)
-        {
-            do
+                return Id;
+            }
+            else if(isRole)
             {
-                Id = random.Next(1, int.MaxValue); 
-                isUnique = !_dbContext.Roles.Any(c => c.RoleID == Id);
-            } while (!isUnique);
-            return Id;
-        }
+                do
+                {
+                    Id = random.Next(1, int.MaxValue); 
+                    isUnique = !_dbContext.Roles.Any(c => c.RoleID == Id);
+                } while (!isUnique);
+                return Id;
+            }
 
-        else
-        {
-            do
+            else
             {
-                Id = random.Next(1, int.MaxValue); 
-                isUnique = !_dbContext.Users.Any(c => c.UserID == Id);
-            } while (!isUnique);
-            return Id; 
+                do
+                {
+                    Id = random.Next(1, int.MaxValue); 
+                    isUnique = !_dbContext.Users.Any(c => c.UserID == Id);
+                } while (!isUnique);
+                return Id; 
+            }
         }
-    }
-
-[HttpDelete]
-[Route("deleteCompany/{companyId}")]
-public ActionResult<SimpleErrorResponse> DeleteCompany(int companyId, int userID)
-{
-    try
-    {
-        var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
-
-        if (company == null)
-        {
-            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
-        }
-
-        _dbContext.Companies.Remove(company);
-        _dbContext.SaveChanges();
-
-        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the company." });
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("An error occurred: {0}", ex.Message);
-        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the company." });
-    }
-}
-
 }
