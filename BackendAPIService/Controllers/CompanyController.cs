@@ -91,4 +91,25 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating a role."});
         }
     }
+     [HttpPost]
+    [Route("createUser")]
+    public ActionResult<SimpleErrorResponse> CreateUser(int userID, string userName, string userEmail, string userRole)
+    {
+        try 
+        {
+            if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userRole))
+            {
+                return StatusCode(500, new SimpleErrorResponse{Message = "Name, Email and Role can not be empty."});
+            }
+            var newUser = new Database.User{Name = userName,  Email = userEmail, Roles = userRole};
+            _dbContext.Users.Add(newUser);
+            _dbContext.SaveChanges();
+            return StatusCode(200, new SimpleErrorResponse{Success = true, Message =" Successfully created a new user"});
+        } catch(Exception ex)
+        {
+            Console.WriteLine("An error occured: {0}",  ex.Message);
+            return StatusCode(500, new SimpleErrorResponse{Success = false, Message = "An error occured while creating an user."});
+        }
+
+    }
 }
