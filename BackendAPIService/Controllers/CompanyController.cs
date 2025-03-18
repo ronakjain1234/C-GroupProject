@@ -162,16 +162,32 @@ public ActionResult<SimpleErrorResponse> EditCompany(int companyId, int userID, 
     }
 }
 
+[HttpDelete]
+[Route("deleteRole/{roleId}")]
+public ActionResult<SimpleErrorResponse> DeleteRole(int userID, int roleId)
+{
+    try
+    {
+        var role = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleId);
 
+        
+        if (role == null)
+        {
+            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Role not found." });
+        }
 
+    
+        _dbContext.Roles.Remove(role);
+        _dbContext.SaveChanges();
 
-
-
-
-
-
-
-
+        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully deleted the role." });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the role." });
+    }
+}
 
 
 
