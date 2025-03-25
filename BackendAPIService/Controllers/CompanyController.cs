@@ -3,7 +3,7 @@ using DatabaseHandler;
 using Database = DatabaseHandler.Data.Models.Database;
 using Web = MyMudBlazorApp.Objects;
 using Microsoft.AspNetCore.Mvc;
-using DatabaseHandler.Data.Models.Database.ReferencingTables;
+using DatabaseHandler.Data.Models.Database.MixedTables;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
@@ -19,7 +19,7 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<Web.Company>> GetComapnies( int limit = 50, int offset = 0, string? searchString = null)
+    public ActionResult<List<Web.Company>> GetComapnies( int UserID, int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
@@ -36,32 +36,59 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<SimpleErrorResponse> CreateCompany( string companyName)
+    public ActionResult<SimpleErrorResponse> CreateCompany(string userID, string companyName)
     {
         try 
         {
             if (string.IsNullOrEmpty(companyName))
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
+                return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
-            int newCompanyId = GenerateUniqueId(true, false);
-            var newCopany = new Database.Company { CompanyID = newCompanyId, CompanyName = companyName};
-            _dbContext.Companies.Add(newCopany);
+
+            // Check if the user exists
+            var user = _dbContext.Users.FirstOrDefault(u => u.UserID.ToString() == userID);
+            if (user == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found." });
+            }
+
+            // Create a new company
+            var newCompany = new Database.Company { CompanyName = companyName };
+            _dbContext.Companies.Add(newCompany);
             _dbContext.SaveChanges();
-            return StatusCode(200, new SimpleErrorResponse {Success = true, Message = "Succesfully created a new company."});
-        } catch (Exception ex) 
+
+            // Associate the user with the company
+            var userCompany = new UserCompany
+            {
+                UserID = user.UserID,
+                CompanyID = newCompany.CompanyID,
+                ValidUntil = DateTime.MaxValue,
+                LastChange = DateTime.UtcNow
+            };
+            _dbContext.UserCompanies.Add(userCompany);
+            
+            // Set user role to Admin
+            user.Roles = "Admin";
+            
+            _dbContext.SaveChanges();
+
+            return StatusCode(201, new SimpleErrorResponse { Success = true, Message = "Successfully created a new company and assigned the user as Admin." });
+        } 
+        catch (Exception ex) 
         {
-            Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while creating the company." });
         }
     }
+
     [HttpGet]
     [Route("getRoles")]
-    public ActionResult<List<Web.Role>> GetRoles (int limit = 50, int offset = 0)
+    public ActionResult<List<Web.Role>> GetRoles (int companyId, int limit = 50, int offset = 0)
     {
         try 
         {
-            var allRoles = _dbContext.Roles;
+
+            var allRoles = _dbContext.Roles.Find(companyId);
             StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all roles."});
             return Ok(allRoles);
         } catch(Exception ex) 
@@ -94,43 +121,83 @@ public class CompanyController : ControllerBase
     }
     [HttpGet]
     [Route("getAllUsers")]
-    public ActionResult<List<Web.Role>> GetAllUsers ( int limit = 50, int offset = 0)
+   public ActionResult<List<Web.Role>> GetAllUsers(int companyId, int limit = 50, int offset = 0)
     {
-        try 
+        try
         {
-            var allUsers = _dbContext.Users;
-            StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all users."});
-            return Ok(allUsers);
-        } catch(Exception ex) 
+            var usersInCompany = _dbContext.Users
+                .Join(_dbContext.UserCompanies, // Join Users with UserCompany table
+                    user => user.UserID,
+                    userCompany => userCompany.UserID,
+                    (user, userCompany) => new { user, userCompany })
+                .Where(joined => joined.userCompany.CompanyID == companyId) // Filter by CompanyID
+                .Select(joined => joined.user) // Select only user data
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+
+            return Ok(usersInCompany);
+        }
+        catch (Exception ex)
         {
             Console.WriteLine("An error occurred while fetching users: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An eror occurred while fetching users."});
+            return StatusCode(500, new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "An error occurred while fetching users."
+            });
         }
-
     }
+
    
     [HttpPost]
     [Route("createUser")]
-    public ActionResult<SimpleErrorResponse> CreateUser( string userName, string userEmail, string userRole)
+    public ActionResult<SimpleErrorResponse> CreateUser(string userName, string userEmail, string userRole, int companyID)
     {
         try 
         {
-            if(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userRole))
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userRole))
             {
-                return StatusCode(500, new SimpleErrorResponse{Message = "Name, Email and Role can not be empty."});
+                return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Name, Email, and Role cannot be empty." });
             }
-            int newUserId = GenerateUniqueId(false, false);
-            var newUser = new Database.User{UserID = newUserId, Name = userName,  Email = userEmail, Roles = userRole};
+
+            var companyExists = _dbContext.Companies.Any(c => c.CompanyID == companyID);
+            if (!companyExists)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found" });
+            }
+
+            var newUser = new Database.User { Name = userName, Email = userEmail, Roles = userRole };
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges();
-            return StatusCode(200, new SimpleErrorResponse{Success = true, Message =" Successfully created a new user"});
-        } catch(Exception ex)
-        {
-            Console.WriteLine("An error occured: {0}",  ex.Message);
-            return StatusCode(500, new SimpleErrorResponse{Success = false, Message = "An error occured while creating an user."});
-        }
 
+            var userID = newUser.UserID;
+
+            var existingAssociation = _dbContext.UserCompanies.Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
+            if (existingAssociation)
+            {
+                return StatusCode(409, new SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
+            }
+            var userCompany = new UserCompany
+            {
+                UserID = userID,
+                CompanyID = companyID,
+                ValidUntil = DateTime.MaxValue,
+                LastChange = DateTime.UtcNow
+            };
+
+            _dbContext.UserCompanies.Add(userCompany);
+            _dbContext.SaveChanges();
+
+            return StatusCode(201, new SimpleErrorResponse { Success = true, Message = "Successfully created a new user and associated with the company." });
+        } 
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while creating the user." });
+        }
     }
+
 
     [HttpPut]
     [Route("editCompany/{companyId}")]
@@ -292,7 +359,7 @@ public class CompanyController : ControllerBase
         }
     }
     [HttpDelete]
-[Route("deleteUser/{userId}")]
+    [Route("deleteUser/{userId}")]
     public ActionResult<SimpleErrorResponse> DeleteUser(int userId)
     {
         try
@@ -315,6 +382,5 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the user." });
         }
     }
-
 
 }
