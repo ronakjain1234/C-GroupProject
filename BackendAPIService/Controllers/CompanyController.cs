@@ -44,8 +44,8 @@ public class CompanyController : ControllerBase
             {
                 return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
-            int newCompanyId = GenerateUniqueId(true, false);
             var newCopany = new Database.Company {CompanyName = companyName};
+            var companyId = newCopany.CompanyID;
             _dbContext.Companies.Add(newCopany);
             _dbContext.SaveChanges();
             return StatusCode(200, new SimpleErrorResponse {Success = true, Message = "Succesfully created a new company."});
@@ -264,7 +264,7 @@ public class CompanyController : ControllerBase
 
     [HttpDelete]
     [Route("deleteRole/{roleId}")]
-    public ActionResult<SimpleErrorResponse> DeleteRole( int roleId)
+    public ActionResult<SimpleErrorResponse> DeleteRole(int roleId)
     {
         try
         {
@@ -317,41 +317,7 @@ public class CompanyController : ControllerBase
         }
     }
 
-    private int GenerateUniqueId(Boolean isCompany, Boolean isRole)
-        {
-            Random random = new Random();
-            int Id;
-            bool isUnique = false;
-            if (isCompany)
-            {
-                do
-                {
-                    Id = random.Next(1, int.MaxValue); 
-                    isUnique = !_dbContext.Companies.Any(c => c.CompanyID == Id);
-                } while (!isUnique);
-
-                return Id;
-            }
-            else if(isRole)
-            {
-                do
-                {
-                    Id = random.Next(1, int.MaxValue); 
-                    isUnique = !_dbContext.Roles.Any(c => c.RoleID == Id);
-                } while (!isUnique);
-                return Id;
-            }
-
-            else
-            {
-                do
-                {
-                    Id = random.Next(1, int.MaxValue); 
-                    isUnique = !_dbContext.Users.Any(c => c.UserID == Id);
-                } while (!isUnique);
-                return Id; 
-            }
-        }
+    
 
     [HttpPut]
     [Route("editUser/{userId}")]
@@ -413,6 +379,35 @@ public class CompanyController : ControllerBase
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
             return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while deleting the user." });
+        }
+    }
+
+
+    [HttpPut]
+    [Route("makeAdmin/{userId}")]
+    public ActionResult<SimpleErrorResponse> makeAdmin(int userId)
+    {
+        try
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userId);
+            
+            if (user == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found." });
+            }
+
+           
+            user.Roles = "Admin";
+            
+
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the user." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the user." });
         }
     }
 
