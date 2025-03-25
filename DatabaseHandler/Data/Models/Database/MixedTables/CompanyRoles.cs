@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-
-namespace DatabaseHandler.Data.Models.Database.MixedTables;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+namespace DatabaseHandler.Data.Models.Database.MixedTables;
+
 
 [PrimaryKey("CompanyID", "RoleID")]
 public class CompanyRole
