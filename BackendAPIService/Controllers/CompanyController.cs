@@ -56,20 +56,38 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<SimpleErrorResponse> CreateCompany(string companyName)
+    public ActionResult<SimpleErrorResponse> CreateCompany(int userID ,string companyName)
     {
-        try 
+        try
         {
             if (string.IsNullOrEmpty(companyName))
             {
                 return StatusCode(400, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
-            var newCopany = new Database.Company {CompanyName = companyName};
-            var companyId = newCopany.CompanyID;
-            _dbContext.Companies.Add(newCopany);
+            var newCompany = new Database.Company {CompanyName = companyName};
+            newCompany.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.Companies.Add(newCompany);
+            
+            var userCompany = new UserCompany() {CompanyID = newCompany.CompanyID, UserID = userID};
+            userCompany.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.UserCompanies.Add(userCompany);
+            
+            var localAdminRole = new Database.Role() {Name = "CustomerAdmin"};
+            localAdminRole.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.Roles.Add(localAdminRole);
+            
+            var companyRole = new CompanyRole() {CompanyID = newCompany.CompanyID, RoleID = localAdminRole.RoleID};
+            companyRole.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.CompanyRoles.Add(companyRole);
+            
+            var userRole = new UserRole() {UserID = userID, RoleID = companyRole.RoleID};
+            userRole.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.UserRoles.Add(userRole);
+            
             _dbContext.SaveChanges();
             return Ok();
-        } catch (Exception ex) 
+        } 
+        catch (Exception ex) 
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
             return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
@@ -413,7 +431,7 @@ public class CompanyController : ControllerBase
             
             if (user == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found." });
+                return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "User not found." });
             }
 
            
