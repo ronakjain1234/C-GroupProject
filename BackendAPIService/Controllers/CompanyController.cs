@@ -19,16 +19,36 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<Web.Company>> GetComapnies( int limit = 50, int offset = 0, string? searchString = null)
+    public ActionResult<List<string>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
-            var allCompanies = _dbContext.Companies;
-            StatusCode(200, new SimpleErrorResponse{Success = true, Message = "Successfully fetched all companies."});
-            return Ok(allCompanies);
-        } catch (Exception ex) 
-        {   
-            Console.WriteLine("An error occured: {0}", ex.Message);
+            var companies = from company in _dbContext.UserCompanies where company.UserID == userID select company;
+            List<string> companyNameList = new List<string>();
+            foreach (var company in companies)
+            {
+                companyNameList.Add(_dbContext.Companies.Find(company.CompanyID)!.CompanyName);
+            }
+            
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                List<string> returnList = new List<string>();
+                foreach (var name in companyNameList)
+                {
+                    if (!name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                    {
+                        returnList.Add(name);
+                    }
+
+                    return returnList;
+                }
+            }
+            
+            return Ok(companyNameList);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("An error occured: {0}", e.Message);
             return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching companies."});
         }
         
@@ -42,13 +62,13 @@ public class CompanyController : ControllerBase
         {
             if (string.IsNullOrEmpty(companyName))
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
+                return StatusCode(400, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
             var newCopany = new Database.Company {CompanyName = companyName};
             var companyId = newCopany.CompanyID;
             _dbContext.Companies.Add(newCopany);
             _dbContext.SaveChanges();
-            return StatusCode(200, new SimpleErrorResponse {Success = true, Message = "Succesfully created a new company."});
+            return Ok();
         } catch (Exception ex) 
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
