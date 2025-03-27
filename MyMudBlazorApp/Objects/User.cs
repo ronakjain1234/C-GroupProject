@@ -6,21 +6,21 @@ public class User
 {
     public string Name { get; set; }
     public string Email { get; set; }
-    public List<Role> Roles { get; set; }
+    public List<string> Roles { get; set; }
 
-    public User(string name, string email)
+    public User()
     {
-        Name = name;
-        Email = email;
+        Name = "NOT INITIALIZED";
+        Email = "NOT INITIALIZED";
         Roles = new();
     }
 
     public string RolesToString()
     {
         StringBuilder sb = new();
-        foreach (Role role in Roles)
+        foreach (var role in Roles)
         {
-            sb.Append(role.Name);
+            sb.Append(role);
             if (role != Roles.Last())
             {
                 sb.Append(", ");

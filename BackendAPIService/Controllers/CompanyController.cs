@@ -94,6 +94,49 @@ public class CompanyController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("getUsersInCompany")]
+    public ActionResult<List<Web.User>> GetUsersInCompany(int companyID, int limit = 50, int offset = 0, string? searchString = null)
+    {
+        try
+        {
+            List<Web.User> usersInCompany = new List<Web.User>();
+            var userCompanies = _dbContext.UserCompanies.Where(userCompany => userCompany.CompanyID == companyID);
+            foreach (var userCompany in userCompanies)
+            {
+                var webUser = new Web.User();
+                var user = _dbContext.Users.Find(userCompany.UserID);
+                if (string.IsNullOrEmpty(searchString))
+                {
+                    if (!user!.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                }
+
+                webUser.Name = user!.Name;
+                webUser.Email = _dbContext.UserEmail.Find(user.UserID)!.Email;
+                var roles = _dbContext.UserRoles.Where(userRole => userRole.UserID == userCompany.UserID);
+                foreach (var role in roles)
+                {
+                    var isCurrentCompanyRole = _dbContext.CompanyRoles.Find(role.RoleID);
+                    if (isCurrentCompanyRole != null && isCurrentCompanyRole.CompanyID == companyID)
+                    {
+                        webUser.Roles.Add(_dbContext.Roles.Find(role.RoleID)!.Name);
+                    }
+                }
+                usersInCompany.Add(webUser);
+            }
+
+            return usersInCompany;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("An error occured: {0}", e.Message);
+            return StatusCode(500, new SimpleErrorResponse() {Success = false, Message = "An error occurred while fetching companies"});
+        }
+    }
+
 
     [HttpGet]
     [Route("getRoles")]
