@@ -1,5 +1,5 @@
-using DatabaseHandler.Data.Models.Database;
 
+using MyMudBlazorApp.Objects;
 namespace BackendAPIService.ResponseObjects;
 
 public class GetAllCompaniesResponse
@@ -15,10 +15,10 @@ public class CreateCompanyResponse
     public int companyId { get; set; }
 }
 
+
+
 public class GetDetailedCompanyInfo
 {
     public required string companyName { get; set; }
-    public required string[] userNames { get; set; }
-    public required string[] emailAddresses { get; set; }
-    public required List<Role> roles { get; set; }
+    public required List<User>  userInformation { get; set; }
 }
