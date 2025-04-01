@@ -58,6 +58,7 @@ public class CompanyController : ControllerBase
     [Route("createCompany")]
     public ActionResult<SimpleErrorResponse> CreateCompany(int userID ,string companyName)
     {
+        using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
             if (string.IsNullOrEmpty(companyName))
@@ -67,31 +68,69 @@ public class CompanyController : ControllerBase
             var newCompany = new Database.Company {CompanyName = companyName};
             newCompany.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.Companies.Add(newCompany);
-            
+            _dbContext.SaveChanges(); 
+
             var userCompany = new UserCompany() {CompanyID = newCompany.CompanyID, UserID = userID};
             userCompany.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.UserCompanies.Add(userCompany);
-            
+            _dbContext.SaveChanges(); 
+
             var localAdminRole = new Database.Role() {Name = "CustomerAdmin"};
             localAdminRole.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.Roles.Add(localAdminRole);
-            
+            _dbContext.SaveChanges(); 
+
             var companyRole = new CompanyRole() {CompanyID = newCompany.CompanyID, RoleID = localAdminRole.RoleID};
             companyRole.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.CompanyRoles.Add(companyRole);
-            
+            _dbContext.SaveChanges(); 
+
             var userRole = new UserRole() {UserID = userID, RoleID = companyRole.RoleID};
             userRole.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.UserRoles.Add(userRole);
             
             _dbContext.SaveChanges();
+            transaction.Commit();
             return Ok();
         } 
         catch (Exception ex) 
         {
+            transaction.Rollback();
             Console.WriteLine("An error occured: {0}", ex.Message);
             return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
         }
     }
 
+    [HttpPost]
+    [Route("createUser")]
+    public ActionResult<SimpleErrorResponse> CreateUser(string userName, string userEmail)
+    {
+        using  (var transaction = _dbContext.Database.BeginTransaction())
+        try
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail))
+            {
+                return StatusCode(400, new SimpleErrorResponse {Success = false, Message = "Parameters undefined."});
+            }
+            var newUser = new Database.User {Name = userName};
+            newUser.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.Users.Add(newUser);
+            _dbContext.SaveChanges(); 
+            var userId = newUser.UserID;
+            var newUserEmail = new Database.ReferencingTables.UserEmail {UserID = userId, Email = userEmail};
+            newUserEmail.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.UserEmail.Add(newUserEmail);
+            _dbContext.SaveChanges();
+            transaction.Commit();
+            return Ok();
+        } 
+        catch (Exception ex) 
+        {   
+            transaction.Rollback();
+            Console.WriteLine("An error occured: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the user"});
+        }
+    }
 }
+
+    
