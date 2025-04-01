@@ -171,6 +171,31 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
         }
     }
+
+    [HttpPut]
+    [Route("addUser")]
+    public ActionResult<SimpleErrorResponse> AddUser (int userId, int companyId)
+    {
+        try 
+        {
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            if (existingCompany == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            var newUser = new Database.MixedTables.UserCompany {UserID = userId, CompanyID = companyId };
+            newUser.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.UserCompanies.Add(newUser);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully added user"});
+        } catch (Exception ex)
+        {
+            Console.WriteLine("An error occured: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while adding user"});
+        }   
+    }
 }
 
     
