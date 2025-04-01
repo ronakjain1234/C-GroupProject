@@ -299,6 +299,53 @@ public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, i
         }   
     }
 
+    [HttpDelete]
+    [Route("removeRoleFromUser")]
+    public ActionResult<SimpleErrorResponse> RemoveRoleFromUser(int mainUserId, int userId, int companyId, int roleId)
+    {
+        try
+        {
+            
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            if (!hasAccess)
+            {
+                return StatusCode(403, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+            }
+
+        
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            if (existingCompany == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            
+            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
+            if (!existingRole)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
+            }
+
+           
+            var userRole = _dbContext.UserRoles.FirstOrDefault(ur => ur.UserID == userId && ur.RoleID == roleId);
+            if (userRole == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User does not have this role." });
+            }
+
+          
+            _dbContext.UserRoles.Remove(userRole);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Role removed from user successfully." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while removing role from user." });
+        }
+    }
+
 }
 
     
