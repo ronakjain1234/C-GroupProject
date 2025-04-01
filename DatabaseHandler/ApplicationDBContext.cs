@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Role> Roles { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Module> Modules { get; set; }
+    public DbSet<Parameter> Parameters { get; set; }
     
     // Referencing Tables
     public DbSet<UserEmail> UserEmail { get; set; }
@@ -34,6 +35,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<ModuleEndPoint> ModuleEndPoints { get; set; }
     public DbSet<RoleEndPoint> RoleEndPoints { get; set; }
+    public DbSet<EndPointParameter> EndPointParameters { get; set; }
     
 
 
