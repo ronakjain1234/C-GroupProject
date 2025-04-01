@@ -8,7 +8,7 @@ public class UserEmail
     [ForeignKey("Users")]
     public int UserID { get; set; }
     [Key]
-    public string Email { get; set; }
+    public required string Email { get; set; }
     
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}
