@@ -174,10 +174,16 @@ public class CompanyController : ControllerBase
 
     [HttpPut]
     [Route("addUser")]
-    public ActionResult<SimpleErrorResponse> AddUser (int userId, int companyId)
+    public ActionResult<SimpleErrorResponse> AddUser (int mainUserId, int userId, int companyId)
     {
         try 
         {
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            if (!hasAccess)
+            {
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+            }
+
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
             if (existingCompany == null)
             {
@@ -195,6 +201,38 @@ public class CompanyController : ControllerBase
             Console.WriteLine("An error occured: {0}", ex.Message);
             return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while adding user"});
         }   
+    }
+
+    [HttpDelete]
+    [Route("removeUser")]
+    public ActionResult<SimpleErrorResponse> RemoveUser(int mainUserId, int userId, int companyId)
+    {
+        try
+        {
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            if (!hasAccess)
+            {
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+            }
+                
+            var userCompany = _dbContext.UserCompanies
+                .FirstOrDefault(uc => uc.UserID == userId && uc.CompanyID == companyId);
+
+            if (userCompany == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found in company." });
+            }
+
+            _dbContext.UserCompanies.Remove(userCompany);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "User removed successfully." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while removing the user." });
+        }
     }
 }
 
