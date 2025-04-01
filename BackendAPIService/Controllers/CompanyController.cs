@@ -172,36 +172,62 @@ public class CompanyController : ControllerBase
         }
     }
 
-    [HttpPut]
-    [Route("addUser")]
-    public ActionResult<SimpleErrorResponse> AddUser (int mainUserId, int userId, int companyId)
+    [HttpPost]
+[Route("addUser")]
+public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, int companyId)
+{
+    try
     {
-        try 
+        // Check if the main user has access to the company
+        var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+        if (!hasAccess)
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
-            if (!hasAccess)
-            {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
-            }
+            return StatusCode(403, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+        }
 
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
-            if (existingCompany == null)
-            {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
-            }
-
-            var newUser = new Database.MixedTables.UserCompany {UserID = userId, CompanyID = companyId };
-            newUser.LastChange = DateTime.Now.ToUniversalTime();
-            _dbContext.UserCompanies.Add(newUser);
-            _dbContext.SaveChanges();
-
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully added user"});
-        } catch (Exception ex)
+        // Find the userId based on the provided email
+        var userEmailEntry = _dbContext.UserEmail.FirstOrDefault(ue => ue.Email == email);
+        if (userEmailEntry == null)
         {
-            Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while adding user"});
-        }   
+            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User with this email not found." });
+        }
+
+        int userId = userEmailEntry.UserID;
+
+        // Check if the company exists
+        var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+        if (existingCompany == null)
+        {
+            return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+        }
+
+        // Check if the user is already added
+        bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyId);
+        if (userExists)
+        {
+            return StatusCode(409, new SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
+        }
+
+        // Add the user to the company
+        var newUser = new Database.MixedTables.UserCompany
+        {
+            UserID = userId,
+            CompanyID = companyId,
+            LastChange = DateTime.UtcNow
+        };
+
+        _dbContext.UserCompanies.Add(newUser);
+        _dbContext.SaveChanges();
+
+        return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "User successfully added to company" });
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while adding the user." });
+    }
+}
+
 
     [HttpDelete]
     [Route("removeUser")]
@@ -234,6 +260,45 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while removing the user." });
         }
     }
+
+
+    [HttpPut]
+    [Route("addRoletoUser")]
+    public ActionResult<SimpleErrorResponse> AddRoleToUser (int mainUserId, int userId, int companyId, int roleId)
+    {
+        try 
+        {
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            if (!hasAccess)
+            {
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+            }
+
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            if (existingCompany == null)
+            {
+                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
+            if (!existingRole)
+            {
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role does not exist in compnay"});
+            }
+
+            var newUserRole = new Database.MixedTables.UserRole {UserID = userId, RoleID = roleId};
+            newUserRole.LastChange = DateTime.Now.ToUniversalTime();
+            _dbContext.UserRoles.Add(newUserRole);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully added user"});
+        } catch (Exception ex)
+        {
+            Console.WriteLine("An error occured: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while adding role to user"});
+        }   
+    }
+
 }
 
     
