@@ -371,11 +371,63 @@ public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, i
         catch (Exception ex)
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching companies."});
+            return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching roles."});
         }
     }
 
-    
+   [HttpDelete]
+   [Route("deleteRole")]
+   public ActionResult DeleteRole(int userID, int companyID, int roleID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+                if (!hasAccess)
+                {
+                    return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                }
+                var companyRole = _dbContext.CompanyRoles
+                    .FirstOrDefault(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
+
+                if (companyRole == null)
+                {
+                    return NotFound("Role not assigned to the given company.");
+                }
+
+                
+                _dbContext.CompanyRoles.Remove(companyRole);
+                _dbContext.SaveChanges();
+
+               
+                bool roleExistsInOtherCompanies = _dbContext.CompanyRoles
+                    .Any(cr => cr.RoleID == roleID);
+
+                if (!roleExistsInOtherCompanies)
+                {
+                    
+                    var role = _dbContext.Roles.Find(roleID);
+                    if (role != null)
+                    {
+                        _dbContext.Roles.Remove(role);
+                        _dbContext.SaveChanges();
+                    }
+                }
+
+                
+                transaction.Commit();
+                return Ok("Role successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occured: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching roles."});
+            }
+        }
+    }
+ 
 }
 
     
