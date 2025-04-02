@@ -8,7 +8,7 @@ public class UserPassword
 {
     [ForeignKey("Users")]
     public int UserID { get; set; }
-    public string Password { get; set; }
+    public required string Password { get; set; }
     
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}

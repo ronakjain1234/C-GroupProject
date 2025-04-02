@@ -1,6 +1,6 @@
 using DatabaseHandler;
 using Microsoft.AspNetCore.Mvc;
-using MyMudBlazorApp.Objects;
+using DatabaseHandler.Data.Models.Web.ResponseObjects;
 
 namespace BackendAPIService.Controllers;
 

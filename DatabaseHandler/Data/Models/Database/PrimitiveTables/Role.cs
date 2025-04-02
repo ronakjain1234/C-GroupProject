@@ -7,7 +7,7 @@ public class Role
     [Key]
     public int RoleID { get; set; }
     
-    public string Name { get; set; }
+    public required string Name { get; set; }
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}
 }

@@ -1,7 +1,5 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Authorization.Infrastructure
-@using MudBlazor.Utilities
-@using MyMudBlazorApp.Objects
+@using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 
 <PageTitle>@_company.Name</PageTitle>
 
@@ -138,7 +136,7 @@
             </MudTooltip>
         </div>
         
-        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<Web.User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
                   @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -166,25 +164,18 @@
 </div>
 
 @code {
-    private HashSet<User> _selectedItems = new HashSet<User>();
-    private Objects.Company _company = new Objects.Company("");
+    private HashSet<Web.User> _selectedItems = new HashSet<Web.User>();
+    private Web.Company _company = new Web.Company("HERRO");
     private string searchString1 = "";
     protected override Task OnInitializedAsync()
     {
-        _company = new Objects.Company("JP Morgan");
-        _company.AddUser(new User("Elias", "EAL@DTU.dk"));
-        _company.AddUser(new User("Meg", "SHUTUPMEG@FAMILY.com"));
-        _company.AddUser(new User("Noobos Imaginos", "MrNoob@LOOL.dk"));
-        _company.AddUser(new User("Fixos Logos", "DEANPHAR@lulw.tv"));
-        _company.GetUsers().First().Roles.Add(new Role("DEAN"));
-        _company.GetUsers().First().Roles.Add(new Role("PHAR"));
-        _company.GetUsers().First().Roles.Add(new Role("BUILD"));
+        _company = new Web.Company("JP Morgan");
         return Task.CompletedTask;
     }
     
-    private bool FilterFunc1(User element) => FilterFunc(element, searchString1);
+    private bool FilterFunc1(Web.User element) => FilterFunc(element, searchString1);
 
-    private bool FilterFunc(User element, string searchString)
+    private bool FilterFunc(Web.User element, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;

@@ -6,7 +6,7 @@ public class EndPoint
 {
     [Key]
     public int EndPointID { get; set; }
-    public string Path { get; set; }
+    public required string Path { get; set; }
     [ConcurrencyCheck]
     public DateTime LastChange {get; set;}
 }
