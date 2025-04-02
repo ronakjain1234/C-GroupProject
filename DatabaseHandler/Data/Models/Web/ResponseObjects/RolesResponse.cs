@@ -1,7 +1,6 @@
 using DatabaseHandler.Data.Models.Database;
 
-namespace BackendAPIService.ResponseObjects;
-
+namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class GetRolesInCompanyResponse 
 {
     public required List<Role> roles { get; set; }

@@ -1,8 +1,6 @@
-using BackendAPIService.RequestObjects;
-using BackendAPIService.ResponseObjects;
+using DatabaseHandler.Data.Models.Web.ResponseObjects;
 using DatabaseHandler;
 using Database = DatabaseHandler.Data.Models.Database;
-using Web = MyMudBlazorApp.Objects;
 using Microsoft.AspNetCore.Mvc;
 namespace BackendAPIService.Controllers;
 
@@ -15,13 +13,6 @@ public class EndPointController : ControllerBase
     public EndPointController(ApplicationDbContext context)
     {
         _dbContext = context;
-    }
-    
-    [HttpPost]
-    [Route("add")]
-    public ActionResult Add(EndPointAddRequest endPointAddRequest)
-    {
-        throw new NotImplementedException();
     }
     
     [HttpGet]

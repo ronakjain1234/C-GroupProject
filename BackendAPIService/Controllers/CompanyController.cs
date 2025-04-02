@@ -1,10 +1,8 @@
-using BackendAPIService.ResponseObjects;
 using DatabaseHandler;
 using Database = DatabaseHandler.Data.Models.Database;
-using Web = MyMudBlazorApp.Objects;
+using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 using Microsoft.AspNetCore.Mvc;
 using DatabaseHandler.Data.Models.Database.MixedTables;
-using MyMudBlazorApp.Pages;
 using DatabaseHandler.Data.Models.Database;
 namespace BackendAPIService.Controllers;
 
@@ -51,21 +49,21 @@ public class CompanyController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine("An error occured: {0}", e.Message);
-            return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching companies."});
+            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching companies."});
         }
         
     }
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<SimpleErrorResponse> CreateCompany(int userID ,string companyName)
+    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID ,string companyName)
     {
         using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
             if (string.IsNullOrEmpty(companyName))
             {
-                return StatusCode(400, new SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
+                return StatusCode(400, new Web.SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
             var newCompany = new Database.Company {CompanyName = companyName};
             newCompany.LastChange = DateTime.Now.ToUniversalTime();
@@ -99,20 +97,20 @@ public class CompanyController : ControllerBase
         {
             transaction.Rollback();
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
+            return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "An error occurred while creating the company"});
         }
     }
 
     [HttpPost]
     [Route("createUser")]
-    public ActionResult<SimpleErrorResponse> CreateUser(string userName, string userEmail)
+    public ActionResult<Web.SimpleErrorResponse> CreateUser(string userName, string userEmail)
     {
         using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
             if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail))
             {
-                return StatusCode(400, new SimpleErrorResponse {Success = false, Message = "Parameters undefined."});
+                return StatusCode(400, new Web.SimpleErrorResponse {Success = false, Message = "Parameters undefined."});
             }
             var newUser = new Database.User {Name = userName};
             newUser.LastChange = DateTime.Now.ToUniversalTime();
@@ -130,51 +128,51 @@ public class CompanyController : ControllerBase
         {   
             transaction.Rollback();
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while creating the user"});
+            return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "An error occurred while creating the user"});
         }
     }
 
     [HttpPut]
     [Route("changeCompanyName")]
 
-    public ActionResult<SimpleErrorResponse> ChangeCompanyName (int userId, int companyId, string companyName)
+    public ActionResult<Web.SimpleErrorResponse> ChangeCompanyName (int userId, int companyId, string companyName)
     {
         try
         { 
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == userId);
             if (!hasAccess)
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
 
             if (string.IsNullOrEmpty(companyName))
             {
-                return StatusCode(400, new SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
+                return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
 
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
             if (existingCompany == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             existingCompany.CompanyName = companyName;
 
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
 
 
         } catch(Exception ex)  
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
         }
     }
 
     [HttpPost]
     [Route("addUser")]
-    public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, int companyId)
+    public ActionResult<Web.SimpleErrorResponse> AddUser(int mainUserId, string email, int companyId)
     {
         try
         {
@@ -182,14 +180,14 @@ public class CompanyController : ControllerBase
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
             if (!hasAccess)
             {
-                return StatusCode(403, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
             }
 
             // Find the userId based on the provided email
             var userEmailEntry = _dbContext.UserEmail.FirstOrDefault(ue => ue.Email == email);
             if (userEmailEntry == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User with this email not found." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User with this email not found." });
             }
 
             int userId = userEmailEntry.UserID;
@@ -198,14 +196,14 @@ public class CompanyController : ControllerBase
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
             if (existingCompany == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             // Check if the user is already added
             bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyId);
             if (userExists)
             {
-                return StatusCode(409, new SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
+                return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
             }
 
             // Add the user to the company
@@ -219,26 +217,26 @@ public class CompanyController : ControllerBase
             _dbContext.UserCompanies.Add(newUser);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "User successfully added to company" });
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "User successfully added to company" });
         }
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while adding the user." });
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding the user." });
         }
     }
 
 
     [HttpDelete]
     [Route("removeUser")]
-    public ActionResult<SimpleErrorResponse> RemoveUser(int mainUserId, int userId, int companyId)
+    public ActionResult<Web.SimpleErrorResponse> RemoveUser(int mainUserId, int userId, int companyId)
     {
         try
         {
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
             if (!hasAccess)
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
                 
             var userCompany = _dbContext.UserCompanies
@@ -246,44 +244,44 @@ public class CompanyController : ControllerBase
 
             if (userCompany == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User not found in company." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User not found in company." });
             }
 
             _dbContext.UserCompanies.Remove(userCompany);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "User removed successfully." });
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "User removed successfully." });
         }
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while removing the user." });
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while removing the user." });
         }
     }
 
 
     [HttpPut]
     [Route("addRoletoUser")]
-    public ActionResult<SimpleErrorResponse> AddRoleToUser (int mainUserId, int userId, int companyId, int roleId)
+    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser (int mainUserId, int userId, int companyId, int roleId)
     {
         try 
         {
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
             if (!hasAccess)
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
 
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
             if (existingCompany == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
             if (!existingRole)
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role does not exist in compnay"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist in compnay"});
             }
 
             var newUserRole = new Database.MixedTables.UserRole {UserID = userId, RoleID = roleId};
@@ -291,17 +289,17 @@ public class CompanyController : ControllerBase
             _dbContext.UserRoles.Add(newUserRole);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Successfully added user"});
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully added user"});
         } catch (Exception ex)
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "An error occurred while adding role to user"});
+            return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "An error occurred while adding role to user"});
         }   
     }
 
     [HttpDelete]
     [Route("removeRoleFromUser")]
-    public ActionResult<SimpleErrorResponse> RemoveRoleFromUser(int mainUserId, int userId, int companyId, int roleId)
+    public ActionResult<Web.SimpleErrorResponse> RemoveRoleFromUser(int mainUserId, int userId, int companyId, int roleId)
     {
         try
         {
@@ -309,40 +307,40 @@ public class CompanyController : ControllerBase
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
             if (!hasAccess)
             {
-                return StatusCode(403, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
             }
 
         
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
             if (existingCompany == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Company not found." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             
             var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
             if (!existingRole)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
             }
 
            
             var userRole = _dbContext.UserRoles.FirstOrDefault(ur => ur.UserID == userId && ur.RoleID == roleId);
             if (userRole == null)
             {
-                return StatusCode(404, new SimpleErrorResponse { Success = false, Message = "User does not have this role." });
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User does not have this role." });
             }
 
           
             _dbContext.UserRoles.Remove(userRole);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new SimpleErrorResponse { Success = true, Message = "Role removed from user successfully." });
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Role removed from user successfully." });
         }
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while removing role from user." });
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while removing role from user." });
         }
     }
 
@@ -355,7 +353,7 @@ public class CompanyController : ControllerBase
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == userId);
             if (!hasAccess)
             {
-                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
             var roleNames = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyId)
@@ -371,7 +369,7 @@ public class CompanyController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching roles."});
+            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles."});
         }
     }
 
@@ -387,7 +385,7 @@ public class CompanyController : ControllerBase
                 var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
                 if (!hasAccess)
                 {
-                    return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
                 }
 
                 
@@ -396,7 +394,7 @@ public class CompanyController : ControllerBase
 
                 if (companyRole == null)
                 {
-                    return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "Role not assigned to the given company." });
+                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role not assigned to the given company." });
                 }
 
                 
@@ -405,7 +403,7 @@ public class CompanyController : ControllerBase
 
                 if (isRoleAssignedToUser)
                 {
-                    return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "Role is currently assigned to one or more users and cannot be deleted." });
+                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role is currently assigned to one or more users and cannot be deleted." });
                 }
 
                 
@@ -436,7 +434,7 @@ public class CompanyController : ControllerBase
                 
                 transaction.Rollback();
                 Console.WriteLine("An error occurred: {0}", ex.Message);
-                return StatusCode(500, new SimpleErrorResponse { Success = false, Message = "An error occurred while fetching roles." });
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while fetching roles." });
             }
         }
     }
@@ -454,7 +452,7 @@ public class CompanyController : ControllerBase
                 var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
                 if (!hasAccess)
                 {
-                    return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                    return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
                 }
                 var role = _dbContext.Roles.FirstOrDefault(r => r.Name == name);
 
@@ -476,7 +474,7 @@ public class CompanyController : ControllerBase
 
                 if (roleExistsInCompany)
                 {
-                    return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role exists in company"});
+                    return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role exists in company"});
                 }
 
                 
@@ -497,7 +495,7 @@ public class CompanyController : ControllerBase
             {
                 transaction.Rollback();
                 Console.WriteLine("An error occured: {0}", ex.Message);
-                return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while creating roles."});
+                return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while creating roles."});
             }
         }
     }
@@ -515,7 +513,7 @@ public class CompanyController : ControllerBase
 
                 if (role == null)
                 {
-                    return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "Role does not exist."});
+                    return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist."});
                 }
 
                 
@@ -531,7 +529,7 @@ public class CompanyController : ControllerBase
             {
                 transaction.Rollback();
                 Console.WriteLine("An error occured: {0}", ex.Message);
-                return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while updating roles."});
+                return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while updating roles."});
             }
         }
     }

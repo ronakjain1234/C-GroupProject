@@ -16,4 +16,9 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\Models\Web\" />
+      <Folder Include="Data\Models\Web\RequestObjects\" />
+    </ItemGroup>
+
 </Project>

@@ -1,5 +1,4 @@
-namespace MyMudBlazorApp.Objects;
-
+namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class Company
 {
     public string Name { get; set; }

@@ -1,7 +1,6 @@
 using System.Text;
 
-namespace MyMudBlazorApp.Objects;
-
+namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class User
 {
     public string Name { get; set; }

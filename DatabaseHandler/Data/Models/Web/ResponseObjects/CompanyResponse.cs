@@ -1,7 +1,4 @@
-
-using MyMudBlazorApp.Objects;
-namespace BackendAPIService.ResponseObjects;
-
+namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class GetAllCompaniesResponse
 {
     public int companyId { get; set; }
