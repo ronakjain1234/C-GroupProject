@@ -427,6 +427,65 @@ public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, i
             }
         }
     }
+    
+
+   [HttpPost]
+   [Route("createRole")]
+   public ActionResult CreateRole(int userID, int companyID, string name)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+                if (!hasAccess)
+                {
+                    return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                }
+                var role = _dbContext.Roles.FirstOrDefault(r => r.Name == name);
+
+                
+                if (role == null)
+                {
+                    role = new Role
+                    {
+                        Name = name,
+                        LastChange = DateTime.UtcNow
+                    };
+                    _dbContext.Roles.Add(role);
+                    _dbContext.SaveChanges(); 
+                }
+
+                
+                bool roleExistsInCompany = _dbContext.CompanyRoles
+                    .Any(cr => cr.CompanyID == companyID && cr.RoleID == role.RoleID);
+
+                if (roleExistsInCompany)
+                {
+                    return BadRequest("Role already exists for this company.");
+                }
+
+                
+                var companyRole = new CompanyRole
+                {
+                    CompanyID = companyID,
+                    RoleID = role.RoleID,
+                    LastChange = DateTime.UtcNow
+                };
+                _dbContext.CompanyRoles.Add(companyRole);
+                _dbContext.SaveChanges();
+
+                
+                transaction.Commit();
+                return Ok("Role successfully created and assigned to company.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return BadRequest($"Error creating role: {ex.Message}");
+            }
+        }
+    }
  
 }
 
