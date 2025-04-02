@@ -346,6 +346,36 @@ public ActionResult<SimpleErrorResponse> AddUser(int mainUserId, string email, i
         }
     }
 
+    [HttpGet]
+    [Route("getRolesInCompany")]
+    public ActionResult<List<string>> GetCompanyRoles(int companyId, int userId )
+    {
+        try
+        {
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == userId);
+            if (!hasAccess)
+            {
+                return StatusCode(500, new SimpleErrorResponse {Success = false, Message = "User does not have access"});
+            }
+            var roleNames = _dbContext.CompanyRoles
+                .Where(cr => cr.CompanyID == companyId)
+                .Join(_dbContext.Roles, 
+                    cr => cr.RoleID, 
+                    r => r.RoleID, 
+                    (cr, r) => r.Name)
+                .Distinct()
+                .ToList();
+
+            return Ok(roleNames);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occured: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse { Message = "An error occurred while fetching companies."});
+        }
+    }
+
+    
 }
 
     
