@@ -1,5 +1,9 @@
 ﻿@page "/LALA"
 @using MudBlazor
+@using DatabaseHandler.Data.Models.Web.ResponseObjects
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <MudMainContent>
     <div class="mx-auto px-8">
@@ -8,7 +12,7 @@
                 <div class="w-full">
                     <div class="d-flex justify-space-between align-center mb-10">
                         <MudText Typo="Typo.h3">Companies</MudText>
-                        <MudAutocomplete T="string" Style="width: 15rem; margin-left: auto;" Placeholder="Search Companies" Variant="Variant.Outlined" />
+                        <MudTextField @bind-Value="searchString" Style="width: 15rem; margin-left: auto;" Placeholder="Search Companies" Variant="Variant.Outlined" />
                     </div>
 
                     <MudGrid Spacing="8">
@@ -16,11 +20,11 @@
                         {
                             <MudItem xs="12" sm="6" lg="4" Class="mb-10">
                                 <MudCard Elevation="2" Style="height: 100%;">
-                                    <MudCardMedia Image="@company.ImageUrl" Height="180" Style="background-color: #C9C9C9;" />
+                                    <MudCardMedia Image="@company.imageURL" Height="180" Style="background-color: #C9C9C9;" />
                                     <MudCardContent Class="pa-7">
                                         <div class="d-flex justify-space-between align-center">
-                                            <MudText Typo="Typo.h6">@company.Name</MudText>
-                                            <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton>
+                                            <MudText Typo="Typo.h6">@company.companyName</MudText>
+                                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => NavigateToCompany(company.companyId))">View Details</MudButton>
                                         </div>
                                     </MudCardContent>
                                 </MudCard>
@@ -30,7 +34,7 @@
                 </div>
 
                 <div class="pt-12 d-flex justify-center w-100 mb-10">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog">
                         Create Company
                     </MudButton>
                 </div>
@@ -39,22 +43,92 @@
     </div>
 </MudMainContent>
 
-@code {
-    private List<CompanyModel> Companies { get; set; } = new List<CompanyModel>
-    {
-        new CompanyModel { Id = 1, Name = "Company One", ImageUrl = "" },
-        new CompanyModel { Id = 2, Name = "Company Two", ImageUrl = "" },
-        new CompanyModel { Id = 3, Name = "Company Three", ImageUrl = "" },
-        new CompanyModel { Id = 4, Name = "Company Four", ImageUrl = "" },
-        new CompanyModel { Id = 5, Name = "Company Five", ImageUrl = "" },
-        new CompanyModel { Id = 6, Name = "Company Six", ImageUrl = "" },
-        new CompanyModel { Id = 7, Name = "Company Seven", ImageUrl = "" },
-    };
+<MudDialog @bind-IsVisible="createCompanyDialog">
+    <DialogContent>
+        <MudTextField @bind-Value="newCompanyName" Label="Company Name" Required="true" RequiredError="Company name is required!" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="CreateCompany">Create</MudButton>
+    </DialogActions>
+</MudDialog>
 
-    public class CompanyModel
+@code {
+    private List<GetAllCompaniesResponse> Companies { get; set; } = new();
+    private string searchString = "";
+    private bool createCompanyDialog;
+    private string newCompanyName = "";
+
+    protected override async Task OnInitializedAsync()
     {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? ImageUrl { get; set; }
+        await LoadCompanies();
+    }
+
+    private async Task LoadCompanies()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>($"api/company/get?userID=1&searchString={searchString}");
+            if (result != null)
+            {
+                Companies = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to load companies", Severity.Error);
+        }
+    }
+
+    private void OpenCreateCompanyDialog()
+    {
+        createCompanyDialog = true;
+    }
+
+    private void Cancel()
+    {
+        createCompanyDialog = false;
+        newCompanyName = "";
+    }
+
+    private async Task CreateCompany()
+    {
+        if (string.IsNullOrWhiteSpace(newCompanyName))
+        {
+            Snackbar.Add("Please enter a company name", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/company/createCompany", new { userID = 1, companyName = newCompanyName });
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<CreateCompanyResponse>();
+                if (result != null)
+                {
+                    Snackbar.Add("Company created successfully!", Severity.Success);
+                    createCompanyDialog = false;
+                    newCompanyName = "";
+                    await LoadCompanies();
+                }
+            }
+            else
+            {
+                Snackbar.Add("Failed to create company", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to create company", Severity.Error);
+        }
+    }
+
+    private void NavigateToCompany(int companyId)
+    {
+        Navigation.NavigateTo($"/company/{companyId}");
     }
 }
+

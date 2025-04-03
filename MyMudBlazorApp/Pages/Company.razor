@@ -1,7 +1,11 @@
 ﻿@page "/"
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
+@using DatabaseHandler.Data.Models.Web.ResponseObjects;
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
-<PageTitle>@_company.Name</PageTitle>
+<PageTitle>@_company.companyName</PageTitle>
 
 <style>
     .companySideBar {
@@ -40,11 +44,11 @@
         width: fit-content;
         background-color: white;
     }
-    
+
     .mud-checkbox-true {
-        color: green;    
+        color: green;
     }
-    
+
     .mud-checkbox-false, .mud-checkbox-null {
         color: black;
     }
@@ -57,7 +61,7 @@
         align-items: center;
         gap: 16px;
     }
-    
+
     .mud-table th, .mud-table td {
         width: 200px;
         min-width: 200px;
@@ -66,13 +70,13 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    
+
     .headerRow {
         display: flex;
         align-items: center;
         margin-bottom: 20px;
     }
-    
+
     .deleteCompanyButton {
         margin-top: auto;
         margin-bottom: 16px;
@@ -83,43 +87,43 @@
         align-items: center;
     }
 
-    .companyTitle h1 {
-        margin: 0;
-        padding: 0;
-    }
+        .companyTitle h1 {
+            margin: 0;
+            padding: 0;
+        }
 </style>
 
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Create User" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Create" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Create" Color="Color.Primary" OnClick="@(() => AddUserToCompany(new Web.User("New User", "newuser@example.com")))" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Delete" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" OnClick="@(() => RemoveUserFromCompany(_selectedItems.First()))" Disabled="@(_selectedItems.Count != 1)" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Make Admin" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Upgrade" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Upgrade" Color="Color.Primary" OnClick="@(() => AddRoleToUser(_selectedItems.First(), "Admin"))" Disabled="@(_selectedItems.Count != 1)" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Add Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(() => CreateRole("New Role"))" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" OnClick="@(() => UpdateRole(_selectedItems.First().RolesToString(), "Updated Role"))" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Remove Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Primary" />
+            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="@(() => RemoveRoleFromUser(_selectedItems.First(), "Admin"))" Disabled="@(_selectedItems.Count != 1)" />
         </MudTooltip>
     </div>
-    
+
     <div class="deleteCompanyButton">
         <MudTooltip Text="Delete Company">
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
@@ -129,14 +133,14 @@
 
 <div class="entirePage">
     <div class="mainContent">
-        <div class="companyTitle mb-10" >
-            <h1 style="color: black;">@_company.Name</h1>
+        <div class="companyTitle mb-10">
+            <h1 style="color: black;">@_company.companyName</h1>
             <MudTooltip Text="Edit Company">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" OnClick="@(() => UpdateCompanyName("New Company Name"))" />
             </MudTooltip>
         </div>
-        
-        <MudTable class="companyTable" Items="@_company.GetUsers()" Filter="new Func<Web.User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+
+        <MudTable class="companyTable" Items="@_company.userInformation" Filter="new Func<Web.User, bool>(FilterFunc1)" MultiSelection="true" SelectionChangeable="true" Hover="true"
                   @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -152,12 +156,12 @@
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit" Size="Size.Medium"/>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit" Size="Size.Medium" OnClick="@(() => UpdateCompanyName(context.Name))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium" OnClick="@(() => RemoveUserFromCompany(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
-                <MudTablePager/>
+                <MudTablePager />
             </PagerContent>
         </MudTable>
     </div>
@@ -165,21 +169,57 @@
 
 @code {
     private HashSet<Web.User> _selectedItems = new HashSet<Web.User>();
-    private Web.Company _company = new Web.Company("HERRO");
+    private Web.GetDetailedCompanyInfo _company = new() { companyName = "", userInformation = new List<Web.User>() };
+    private Web.GetRolesInCompanyResponse _roles = new() { roles = new List<Web.Role>() };
+    private Web.GetEndpointsForRolesResponse _endpointsForRoles = new();
+    private Web.GetEndPointsForCompaniesResponse _endpointsForCompanies = new();
+    private Web.GetEndpoints _allEndpoints = new();
     private string searchString1 = "";
-    protected override Task OnInitializedAsync()
+
+    [Parameter]
+    public int CompanyId { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        _company = new Web.Company("JP Morgan");
-        _company.AddUser(new Web.User("Elias", "EAL@DTU.dk"));
-        _company.AddUser(new Web.User("Meg", "SHUTUPMEG@FAMILY.com"));
-        _company.AddUser(new Web.User("Noobos Imaginos", "MrNoob@LOOL.dk"));
-        _company.AddUser(new Web.User("Fixos Logos", "DEANPHAR@lulw.tv"));
-        _company.GetUsers().First().Roles.Add(new Web.Role("DEAN"));
-        _company.GetUsers().First().Roles.Add(new Web.Role("PHAR"));
-        _company.GetUsers().First().Roles.Add(new Web.Role("BUILD"));
-        return Task.CompletedTask;
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Web.GetDetailedCompanyInfo>($"api/company/getDetailedCompanyInfo?companyID={CompanyId}");
+            if (result != null)
+            {
+                _company = result;
+            }
+
+            var rolesResult = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}");
+            if (rolesResult != null)
+            {
+                _roles = rolesResult;
+            }
+
+            var endpointsForRolesResult = await Http.GetFromJsonAsync<Web.GetEndpointsForRolesResponse>($"api/endpoint/getEndpointsForRoles?companyID={CompanyId}");
+            if (endpointsForRolesResult != null)
+            {
+                _endpointsForRoles = endpointsForRolesResult;
+            }
+
+            var endpointsForCompaniesResult = await Http.GetFromJsonAsync<Web.GetEndPointsForCompaniesResponse>($"api/endpoint/getEndpointsForCompanies?companyID={CompanyId}");
+            if (endpointsForCompaniesResult != null)
+            {
+                _endpointsForCompanies = endpointsForCompaniesResult;
+            }
+
+            var allEndpointsResult = await Http.GetFromJsonAsync<Web.GetEndpoints>("api/endpoint/getAllEndpoints");
+            if (allEndpointsResult != null)
+            {
+                _allEndpoints = allEndpointsResult;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to load company data", Severity.Error);
+        }
     }
-    
+
     private bool FilterFunc1(Web.User element) => FilterFunc(element, searchString1);
 
     private bool FilterFunc(Web.User element, string searchString)
@@ -193,5 +233,174 @@
             return true;
         }
         return false;
+    }
+
+    private async Task AddUserToCompany(Web.User user)
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/company/createUser", new { userName = user.Name, userEmail = user.Email });
+            if (response.IsSuccessStatusCode)
+            {
+                var addUserResponse = await Http.PostAsJsonAsync("api/company/addUser", new { email = user.Email, companyId = CompanyId });
+                if (addUserResponse.IsSuccessStatusCode)
+                {
+                    Snackbar.Add("User added successfully!", Severity.Success);
+                    await OnInitializedAsync();
+                }
+                else
+                {
+                    Snackbar.Add("Failed to add user to company", Severity.Error);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Failed to create user", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to add user", Severity.Error);
+        }
+    }
+
+    private async Task RemoveUserFromCompany(Web.User user)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/company/removeUser?email={user.Email}&companyId={CompanyId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("User removed successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove user", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to remove user", Severity.Error);
+        }
+    }
+
+    private async Task AddRoleToUser(Web.User user, string roleName)
+    {
+        try
+        {
+            var role = new Web.Role(roleName);
+            var response = await Http.PutAsJsonAsync("api/company/addRoletoUser", new { email = user.Email, companyId = CompanyId, roleName = roleName });
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role added successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to add role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to add role", Severity.Error);
+        }
+    }
+
+    private async Task RemoveRoleFromUser(Web.User user, string roleName)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/company/removeRoleFromUser?email={user.Email}&companyId={CompanyId}&roleName={roleName}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role removed successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to remove role", Severity.Error);
+        }
+    }
+
+    private async Task CreateRole(string roleName)
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/company/createRole", new { companyId = CompanyId, name = roleName });
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role created successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to create role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to create role", Severity.Error);
+        }
+    }
+
+    private async Task UpdateCompanyName(string newName)
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync("api/company/changeCompanyName", new { companyId = CompanyId, companyName = newName });
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Company name updated successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update company name", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to update company name", Severity.Error);
+        }
+    }
+
+    private async Task UpdateRole(string roleName, string newName)
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync("api/company/updateRoles", new { companyId = CompanyId, roleName = roleName, newName = newName });
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role updated successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to update role", Severity.Error);
+        }
+    }
+
+    private List<Web.User> GetCompanyUsers()
+    {
+        var company = new Web.Company(_company.companyName);
+        return company.GetUsers();
     }
 }
