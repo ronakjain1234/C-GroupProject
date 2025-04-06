@@ -61,6 +61,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Http.BaseAddress = new Uri("http://localhost:5000");
         await LoadCompanies();
     }
 
@@ -68,7 +69,7 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>($"api/company/get?userID=1&searchString={searchString}");
+            var result = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>("/api/company/get?userID=1");
             if (result != null)
             {
                 Companies = result;

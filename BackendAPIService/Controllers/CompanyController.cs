@@ -19,7 +19,7 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<string>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+    public List<Web.GetAllCompaniesResponse> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
@@ -29,27 +29,30 @@ public class CompanyController : ControllerBase
             {
                 companyNameList.Add(_dbContext.Companies.Find(company.CompanyID)!.CompanyName);
             }
-            
+            List<Web.GetAllCompaniesResponse> returnList = new();
             if (!string.IsNullOrEmpty(searchString))
             {
-                List<string> returnList = new List<string>();
+                
                 foreach (var name in companyNameList)
                 {
                     if (!name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
                     {
-                        returnList.Add(name);
+                        returnList.Add(new Web.GetAllCompaniesResponse() {companyName = name, imageURL = ""});
                     }
 
                     return returnList;
                 }
             }
-            
-            return Ok(companyNameList);
+            foreach (var name in companyNameList)
+            {
+                returnList.Add(new Web.GetAllCompaniesResponse() {companyName = name, imageURL = ""});
+            }
+            return returnList;
         }
         catch (Exception e)
         {
             Console.WriteLine("An error occured: {0}", e.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching companies."});
+            return new();
         }
         
     }

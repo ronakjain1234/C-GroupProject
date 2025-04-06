@@ -175,15 +175,15 @@
     private Web.GetEndPointsForCompaniesResponse _endpointsForCompanies = new();
     private Web.GetEndpoints _allEndpoints = new();
     private string searchString1 = "";
-
-    [Parameter]
-    public int CompanyId { get; set; }
+    private string? thing = null;
+    [Parameter] public int CompanyId { get; set; } = 1;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var result = await Http.GetFromJsonAsync<Web.GetDetailedCompanyInfo>($"api/company/getDetailedCompanyInfo?companyID={CompanyId}");
+            
             if (result != null)
             {
                 _company = result;
@@ -217,6 +217,7 @@
         {
             Console.WriteLine($"Error: {ex.Message}");
             Snackbar.Add("Failed to load company data", Severity.Error);
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
     }
 
