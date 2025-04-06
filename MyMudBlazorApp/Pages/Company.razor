@@ -1,7 +1,8 @@
 ﻿@page "/company"
+@using System.Net
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @using DatabaseHandler.Data.Models.Web.ResponseObjects;
-@inject HttpClient Http
+@using MyMudBlazorApp.Services
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
@@ -174,6 +175,7 @@
     private Web.GetEndpointsForRolesResponse _endpointsForRoles = new();
     private Web.GetEndPointsForCompaniesResponse _endpointsForCompanies = new();
     private Web.GetEndpoints _allEndpoints = new();
+    private HttpClient Http = new OurHttpClient();
     private string searchString1 = "";
     private string? thing = null;
     [Parameter] public int CompanyId { get; set; } = 1;
@@ -182,13 +184,12 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.GetDetailedCompanyInfo>($"api/company/getDetailedCompanyInfo?companyID={CompanyId}");
+            var result = await Http.GetFromJsonAsync<Web.GetDetailedCompanyInfo>($"api/company/get?companyID={CompanyId}");
             
             if (result != null)
             {
                 _company = result;
             }
-
             var rolesResult = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}");
             if (rolesResult != null)
             {
