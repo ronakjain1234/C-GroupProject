@@ -57,6 +57,16 @@ public class CompanyController : ControllerBase
         
     }
 
+    [HttpGet]
+    [Route("getInfo")]
+    public Web.GetDetailedCompanyInfo GetDetailedCompanyInfo(int userID, int companyID)
+    {
+        var result = new Web.GetDetailedCompanyInfo() { companyName = "", userInformation = new()};
+        result.companyName = _dbContext.Companies.Find(companyID).CompanyName;
+
+        return result;
+    }
+
     [HttpPost]
     [Route("createCompany")]
     public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID ,string companyName)
