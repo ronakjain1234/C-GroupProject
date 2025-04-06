@@ -1,7 +1,7 @@
 ﻿@page "/LALA"
 @using MudBlazor
 @using DatabaseHandler.Data.Models.Web.ResponseObjects
-@inject HttpClient Http
+@using MyMudBlazorApp.Services
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
@@ -58,10 +58,10 @@
     private string searchString = "";
     private bool createCompanyDialog;
     private string newCompanyName = "";
+    private HttpClient Http = new OurHttpClient();
 
     protected override async Task OnInitializedAsync()
     {
-        Http.BaseAddress = new Uri("http://localhost:5000");
         await LoadCompanies();
     }
 
