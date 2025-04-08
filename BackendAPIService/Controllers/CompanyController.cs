@@ -705,6 +705,85 @@ public class CompanyController : ControllerBase
         }
     }
 
+    [HttpPost]
+    [Route("createRoleEndPoint")]
+    public ActionResult CreateRoleEndPoint(int userID, int companyID, int roleID, int endPointID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                
+                var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+                if (!hasAccess)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User does not have access"
+                    });
+                }
+
+                
+                var roleExists = _dbContext.Roles.Any(r => r.RoleID == roleID);
+                if (!roleExists)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Role does not exist"
+                    });
+                }
+
+                
+                var endpointExists = _dbContext.EndPoints.Any(ep => ep.EndPointID == endPointID);
+                if (!endpointExists)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Endpoint does not exist"
+                    });
+                }
+
+                
+                var alreadyExists = _dbContext.Set<RoleEndPoint>()
+                    .Any(rep => rep.RoleID == roleID && rep.EndPointID == endPointID);
+
+                if (alreadyExists)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "This Role-Endpoint combination already exists"
+                    });
+                }
+
+                
+                var roleEndPoint = new RoleEndPoint
+                {
+                    RoleID = roleID,
+                    EndPointID = endPointID,
+                    LastChange = DateTime.UtcNow
+                };
+                _dbContext.Set<RoleEndPoint>().Add(roleEndPoint);
+                _dbContext.SaveChanges();
+
+                transaction.Commit();
+                return Ok("Role-Endpoint successfully created.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new Web.SimpleErrorResponse
+                {
+                    Message = "An error occurred while creating the Role-Endpoint mapping."
+                });
+            }
+        }
+    }
+
 }
 
     
