@@ -296,4 +296,41 @@ public class EndPointController : ControllerBase
         }
     }
 
+    [HttpPost]
+[   Route("createModule")]
+    public ActionResult CreateModule(string moduleName)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                
+                var newModule = new Module
+                {
+                    Name = moduleName,
+                    LastChange = DateTime.UtcNow
+                };
+
+                
+                _dbContext.Modules.Add(newModule);
+                _dbContext.SaveChanges();
+
+                
+                transaction.Commit();
+
+                return Ok("Module successfully created.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse
+                {
+                    Message = "An error occurred while creating the module."
+                });
+            }
+        }
+    }
+
+
 }
