@@ -404,6 +404,68 @@ public class EndPointController : ControllerBase
         }
     }
 
+    [HttpDelete]
+    [Route("deleteEndpoint")]
+    public ActionResult DeleteEndpoint(int endpointID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                
+                var endpoint = _dbContext.EndPoints.FirstOrDefault(e => e.EndPointID == endpointID);
+                if (endpoint == null)
+                {
+                    return NotFound(new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Endpoint not found."
+                    });
+                }
+
+                
+                var companyEndPoints = _dbContext.CompanyEndPoints
+                    .Where(ce => ce.EndPointID == endpointID)
+                    .ToList();
+                _dbContext.CompanyEndPoints.RemoveRange(companyEndPoints);
+
+                
+                var moduleEndPoints = _dbContext.ModuleEndPoints
+                    .Where(me => me.EndPointID == endpointID)
+                    .ToList();
+                _dbContext.ModuleEndPoints.RemoveRange(moduleEndPoints);
+
+                
+                var roleEndPoints = _dbContext.RoleEndPoints
+                    .Where(re => re.EndPointID == endpointID)
+                    .ToList();
+                _dbContext.RoleEndPoints.RemoveRange(roleEndPoints);
+
+                
+                _dbContext.EndPoints.Remove(endpoint);
+
+                
+                _dbContext.SaveChanges();
+
+               
+                transaction.Commit();
+
+                return Ok("Endpoint and all associated references successfully deleted.");
+            }
+            catch (Exception ex)
+            {
+                // Rollback the transaction if any error occurs
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse
+                {
+                    Message = "An error occurred while deleting the endpoint and its references."
+                });
+            }
+        }
+    }
 
 
-}
+
+
+}   
