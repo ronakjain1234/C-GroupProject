@@ -206,30 +206,38 @@
         }
     }
 
-    private async Task AddUser(string company, string user)
+    private async Task AddUser(string company, string userName)
     {
         var companyInfo = _companies.FirstOrDefault(c => c.companyName == company);
         if (companyInfo != null)
         {
             try
             {
-                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyId={companyInfo.companyId}", null);
-                if (response.IsSuccessStatusCode)
+                var userEmail = _allUsers.FirstOrDefault(u => u.Name == userName)?.Email;
+                if (userEmail != null)
                 {
-                    // Update local state
-                    if (!_selectedUsersByCompany.ContainsKey(company))
+                    var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={userEmail}&companyID={companyInfo.companyId}", null);
+                    if (response.IsSuccessStatusCode)
                     {
-                        _selectedUsersByCompany[company] = new HashSet<string>();
-                    }
-                    _selectedUsersByCompany[company].Add(user);
-                    Snackbar.Add($"Added {user} to {company}", Severity.Success);
+                        // Update local state
+                        if (!_selectedUsersByCompany.ContainsKey(company))
+                        {
+                            _selectedUsersByCompany[company] = new HashSet<string>();
+                        }
+                        _selectedUsersByCompany[company].Add(userName);
+                        Snackbar.Add($"Added {userName} to {company}", Severity.Success);
 
-                    // Refresh data from database
-                    await LoadUsers();
+                        // Refresh data from database
+                        await LoadUsers();
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to add user: {response.StatusCode}", Severity.Error);
+                    }
                 }
                 else
                 {
-                    Snackbar.Add($"Failed to add user: {response.StatusCode}", Severity.Error);
+                    Snackbar.Add($"Could not find email for user {userName}", Severity.Error);
                 }
             }
             catch (Exception ex)
@@ -246,10 +254,10 @@
         {
             try
             {
-                var user = _allUsers.FirstOrDefault(u => u.Name == userName);
-                if (user != null)
+                var userEmail = _allUsers.FirstOrDefault(u => u.Name == userName)?.Email;
+                if (userEmail != null)
                 {
-                    var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID={user.UserID}&companyID={companyInfo.companyId}");
+                    var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&email={userEmail}&companyID={companyInfo.companyId}");
                     if (response.IsSuccessStatusCode)
                     {
                         if (_selectedUsersByCompany.ContainsKey(company))
@@ -265,7 +273,7 @@
                 }
                 else
                 {
-                    Snackbar.Add($"Could not find user {userName}", Severity.Error);
+                    Snackbar.Add($"Could not find email for user {userName}", Severity.Error);
                 }
             }
             catch (Exception ex)

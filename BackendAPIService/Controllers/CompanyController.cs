@@ -187,13 +187,91 @@ public class CompanyController : ControllerBase
     [Route("addUser")]
     public ActionResult<Web.SimpleErrorResponse> AddUser(int mainUserId, string email, int companyId)
     {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                // Check if the main user has access to the company
+                var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+                if (!hasAccess)
+                {
+                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                }
+
+                // Check if the main user has admin role
+                var adminRoleId = _dbContext.Roles
+                    .Where(r => r.Name == "CustomerAdmin")
+                    .Join(_dbContext.CompanyRoles,
+                        r => r.RoleID,
+                        cr => cr.RoleID,
+                        (r, cr) => new { r.RoleID, cr.CompanyID })
+                    .FirstOrDefault(x => x.CompanyID == companyId)?.RoleID;
+
+                if (adminRoleId == null)
+                {
+                    return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Admin role not found for company" });
+                }
+
+                var isAdmin = _dbContext.UserRoles.Any(ur => ur.UserID == mainUserId && ur.RoleID == adminRoleId);
+                if (!isAdmin)
+                {
+                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have admin permissions" });
+                }
+
+                // Find the userId based on the provided email
+                var userEmailEntry = _dbContext.UserEmail.FirstOrDefault(ue => ue.Email == email);
+                if (userEmailEntry == null)
+                {
+                    return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User with this email not found." });
+                }
+
+                int userId = userEmailEntry.UserID;
+
+                // Check if the company exists
+                var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+                if (existingCompany == null)
+                {
+                    return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
+                }
+
+                // Check if the user is already added to the company
+                var existingUserCompany = _dbContext.UserCompanies
+                    .FirstOrDefault(uc => uc.UserID == userId && uc.CompanyID == companyId);
+
+                if (existingUserCompany != null)
+                {
+                    return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already added to the company." });
+                }
+
+                // Add the user to the company
+                var newUserCompany = new Database.MixedTables.UserCompany { UserID = userId, CompanyID = companyId };
+                newUserCompany.LastChange = DateTime.Now.ToUniversalTime();
+                _dbContext.UserCompanies.Add(newUserCompany);
+                _dbContext.SaveChanges();
+
+                transaction.Commit();
+                return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "User added successfully." });
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding the user." });
+            }
+        }
+    }
+
+
+    [HttpDelete]
+    [Route("removeUser")]
+    public ActionResult<Web.SimpleErrorResponse> RemoveUser(int mainUserId, string email, int companyId)
+    {
         try
         {
-            // Check if the main user has access to the company
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
             if (!hasAccess)
             {
-                return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
 
             // Find the userId based on the provided email
@@ -204,53 +282,6 @@ public class CompanyController : ControllerBase
             }
 
             int userId = userEmailEntry.UserID;
-
-            // Check if the company exists
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
-            if (existingCompany == null)
-            {
-                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
-            }
-
-            // Check if the user is already added
-            bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyId);
-            if (userExists)
-            {
-                return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
-            }
-
-            // Add the user to the company
-            var newUser = new Database.MixedTables.UserCompany
-            {
-                UserID = userId,
-                CompanyID = companyId,
-                LastChange = DateTime.UtcNow
-            };
-
-            _dbContext.UserCompanies.Add(newUser);
-            _dbContext.SaveChanges();
-
-            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "User successfully added to company" });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding the user." });
-        }
-    }
-
-
-    [HttpDelete]
-    [Route("removeUser")]
-    public ActionResult<Web.SimpleErrorResponse> RemoveUser(int mainUserId, int userId, int companyId)
-    {
-        try
-        {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
-            if (!hasAccess)
-            {
-                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
-            }
                 
             var userCompany = _dbContext.UserCompanies
                 .FirstOrDefault(uc => uc.UserID == userId && uc.CompanyID == companyId);
