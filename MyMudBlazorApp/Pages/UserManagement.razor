@@ -41,17 +41,17 @@
 
 <MudOverlay @bind-Visible="_isUserDialogVisible" DarkBackground="true">
     <MudPaper Class="pa-6" Style="max-width: 1200px; margin: 32px auto;">
-        <MudText Typo="Typo.h5" Class="mb-4">Manage Users for Selected Bank</MudText>
+        <MudText Typo="Typo.h5" Class="mb-4">Manage Users for Selected Company</MudText>
 
         <MudGrid>
             <MudItem xs="12" md="6">
                 <MudPaper Elevation="0" Class="pa-4">
                     <MudText Typo="Typo.h6" Class="mb-4">Selected Users</MudText>
-                    @foreach (var bank in _selectedBanks)
+                    @foreach (var company in _selectedCompanies)
                     {
-                        <MudExpansionPanel Text="@bank" Class="mb-2">
+                        <MudExpansionPanel Text="@company" Class="mb-2">
                             <MudList T="string" Dense="true" Clickable="true">
-                                @foreach (var user in GetSelectedUsers(bank))
+                                @foreach (var user in GetSelectedUsers(company))
                                 {
                                     <MudListItem T="string">
                                         <div class="d-flex align-center">
@@ -59,7 +59,7 @@
                                             <MudText>@user</MudText>
                                             <MudIconButton Icon="@Icons.Material.Filled.Remove"
                                                            Size="Size.Small"
-                                                           OnClick="@(() => RemoveUser(bank, user))"
+                                                           OnClick="@(() => RemoveUser(company, user))"
                                                            Class="ml-auto" />
                                         </div>
                                     </MudListItem>
@@ -83,11 +83,11 @@
                                         <div class="d-flex align-center">
                                             <MudText>@user</MudText>
                                             <MudSpacer />
-                                            @foreach (var bank in _selectedBanks)
+                                            @foreach (var company in _selectedCompanies)
                                             {
                                                 <MudIconButton Icon="@Icons.Material.Filled.Add"
                                                                Size="Size.Small"
-                                                               OnClick="@(() => AddUser(bank, user))"
+                                                               OnClick="@(() => AddUser(company, user))"
                                                                Class="ml-2" />
                                             }
                                         </div>
@@ -116,12 +116,12 @@
 </MudOverlay>
 
 @code {
-    private HashSet<string> _selectedBanks = new();
+    private HashSet<string> _selectedCompanies = new();
     private bool _isUserDialogVisible;
 
     private List<GetAllCompaniesResponse> _companies = new();
     private List<string> _userTypes = new();
-    private Dictionary<string, HashSet<string>> _selectedUsersByBank = new();
+    private Dictionary<string, HashSet<string>> _selectedUsersByCompany = new();
     private Dictionary<string, List<string>> _allUsersByType = new();
 
     // You can set this to the actual logged-in user's ID
@@ -169,10 +169,11 @@
             if (response != null)
             {
                 _allUsersByType = response
-                    .GroupBy(u => GetUserType(u)) // You'll need to implement GetUserType
+                    .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
+                    .GroupBy(x => x.Role)
                     .ToDictionary(
                         g => g.Key,
-                        g => g.Select(u => u.Name).ToList()
+                        g => g.Select(x => x.User).ToList()
                     );
             }
         }
@@ -191,7 +192,7 @@
                 var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getInfo?userID={_currentUserId}&companyId={company.companyId}");
                 if (response != null)
                 {
-                    _selectedUsersByBank[company.companyName] = new HashSet<string>(
+                    _selectedUsersByCompany[company.companyName] = new HashSet<string>(
                         response.userInformation.Select(u => u.Name)
                     );
                 }
@@ -203,23 +204,23 @@
         }
     }
 
-    private async Task AddUser(string bank, string user)
+    private async Task AddUser(string company, string user)
     {
-        var company = _companies.FirstOrDefault(c => c.companyName == bank);
-        if (company != null)
+        var companyInfo = _companies.FirstOrDefault(c => c.companyName == company);
+        if (companyInfo != null)
         {
             try
             {
-                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyId={company.companyId}", null);
+                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyId={companyInfo.companyId}", null);
                 if (response.IsSuccessStatusCode)
                 {
                     // Update local state
-                    if (!_selectedUsersByBank.ContainsKey(bank))
+                    if (!_selectedUsersByCompany.ContainsKey(company))
                     {
-                        _selectedUsersByBank[bank] = new HashSet<string>();
+                        _selectedUsersByCompany[company] = new HashSet<string>();
                     }
-                    _selectedUsersByBank[bank].Add(user);
-                    Snackbar.Add($"Added {user} to {bank}", Severity.Success);
+                    _selectedUsersByCompany[company].Add(user);
+                    Snackbar.Add($"Added {user} to {company}", Severity.Success);
 
                     // Refresh data from database
                     await LoadUsers();
@@ -236,20 +237,20 @@
         }
     }
 
-    private async Task RemoveUser(string bank, string user)
+    private async Task RemoveUser(string company, string user)
     {
-        var company = _companies.FirstOrDefault(c => c.companyName == bank);
-        if (company != null)
+        var companyInfo = _companies.FirstOrDefault(c => c.companyName == company);
+        if (companyInfo != null)
         {
             try
             {
-                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyId={company.companyId}");
+                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyId={companyInfo.companyId}");
                 if (response.IsSuccessStatusCode)
                 {
-                    if (_selectedUsersByBank.ContainsKey(bank))
+                    if (_selectedUsersByCompany.ContainsKey(company))
                     {
-                        _selectedUsersByBank[bank].Remove(user);
-                        Snackbar.Add($"Removed {user} from {bank}", Severity.Info);
+                        _selectedUsersByCompany[company].Remove(user);
+                        Snackbar.Add($"Removed {user} from {company}", Severity.Info);
                     }
                 }
                 else
@@ -280,8 +281,8 @@
 
     private void OpenUserDialog(string companyName)
     {
-        _selectedBanks.Clear();
-        _selectedBanks.Add(companyName);
+        _selectedCompanies.Clear();
+        _selectedCompanies.Add(companyName);
         _isUserDialogVisible = true;
     }
 
@@ -292,8 +293,8 @@
         _ => Icons.Material.Filled.Person
     };
 
-    private List<string> GetSelectedUsers(string bank) =>
-        _selectedUsersByBank.TryGetValue(bank, out var users)
+    private List<string> GetSelectedUsers(string company) =>
+        _selectedUsersByCompany.TryGetValue(company, out var users)
             ? users.ToList()
             : new List<string>();
 
@@ -302,17 +303,10 @@
         if (!_allUsersByType.TryGetValue(userType, out var allUsers))
             return new List<string>();
 
-        var allSelectedUsers = _selectedBanks
-            .SelectMany(bank => _selectedUsersByBank.GetValueOrDefault(bank, new HashSet<string>()))
+        var allSelectedUsers = _selectedCompanies
+            .SelectMany(company => _selectedUsersByCompany.GetValueOrDefault(company, new HashSet<string>()))
             .ToHashSet();
 
         return allUsers.Where(u => !allSelectedUsers.Contains(u)).ToList();
-    }
-
-    // Helper method to determine user type (we'll need to implement this based on our logic)
-    private string GetUserType(User user)
-    {
-        // This is a placeholder - we need to implement with logic to determine user type
-        return "Contractor"; // or "Intern" based on logic
     }
 }
