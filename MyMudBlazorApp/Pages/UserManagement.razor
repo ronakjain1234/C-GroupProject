@@ -1,30 +1,33 @@
 @page "/user-management"
 @using MudBlazor
+@using DatabaseHandler.Data.Models.Web.ResponseObjects
 @using System.Collections.Generic
 @using System.Linq
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using System.Net.Http.Json
 @inject ISnackbar Snackbar
+@inject HttpClient Http
 
 <MudContainer>
     <MudText Typo="Typo.h4" Class="mb-4 mt-12">User Management</MudText>
 
     <MudPaper Class="pa-4">
-        <MudTable T="string" Items="@_banks" Dense="true" Hover="true"
+        <MudTable T="GetAllCompaniesResponse" Items="@_companies" Dense="true" Hover="true"
                   HeaderClass="mud-theme-primary">
             <HeaderContent>
-                <MudTh>Bank Name</MudTh>
+                <MudTh>Company Name</MudTh>
                 <MudTh>Selected Users</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Bank Name">
-                    <MudButton Color="Color.Primary" OnClick="@(() => OpenUserDialog(@context))">
-                        @context
+                <MudTd DataLabel="Company Name">
+                    <MudButton Color="Color.Primary" OnClick="@(() => OpenUserDialog(@context.companyName))">
+                        @context.companyName
                     </MudButton>
                 </MudTd>
                 <MudTd DataLabel="Selected Users">
                     @{
-                        var selectedUsers = GetSelectedUsers(@context);
+                        var selectedUsers = GetSelectedUsers(@context.companyName);
                         @foreach (var user in selectedUsers)
                         {
                             <MudChip T="string" Size="Size.Small" Class="ma-1">@user</MudChip>
@@ -116,21 +119,185 @@
     private HashSet<string> _selectedBanks = new();
     private bool _isUserDialogVisible;
 
-    private readonly List<string> _banks = new() { "DNB Bank", "Danske Bank", "DeltaconiX" };
-    private readonly List<string> _userTypes = new() { "Intern", "Contractor" };
+    private List<GetAllCompaniesResponse> _companies = new();
+    private List<string> _userTypes = new();
+    private Dictionary<string, HashSet<string>> _selectedUsersByBank = new();
+    private Dictionary<string, List<string>> _allUsersByType = new();
 
-    private readonly Dictionary<string, HashSet<string>> _selectedUsersByBank = new()
-        {
-            ["DNB Bank"] = new() { "John Doe" },
-            ["Danske Bank"] = new() { "Alice Johnson" },
-            ["DeltaconiX"] = new() { "Jane Smith" }
-        };
+    // You can set this to the actual logged-in user's ID
+    private int _currentUserId = 1; // Default to user ID 1 for testing
 
-    private readonly Dictionary<string, List<string>> _allUsersByType = new()
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompanies();
+        await LoadRoles();
+        await LoadAllUsers();
+        await LoadUsers();
+    }
+
+    private async Task LoadCompanies()
+    {
+        try
         {
-            ["Intern"] = new() { "John Doe", "Jane Smith", "Mark Brown", "Sarah Wilson" },
-            ["Contractor"] = new() { "Alice Johnson", "Bob Wilson", "Carol White", "David Miller" }
-        };
+            // Use the current user ID
+            var response = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>($"/api/company/get?userID={_currentUserId}");
+            _companies = response ?? new List<GetAllCompaniesResponse>();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading companies: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            // For roles, you might need to specify a company ID
+            // This is a simplified example - you might need to adjust based on your API
+            var response = await Http.GetFromJsonAsync<List<string>>($"/api/company/getRolesInCompany?companyID=1&userID={_currentUserId}");
+            _userTypes = response ?? new List<string>();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadAllUsers()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<List<User>>("api/user/get");
+            if (response != null)
+            {
+                _allUsersByType = response
+                    .GroupBy(u => GetUserType(u)) // You'll need to implement GetUserType
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(u => u.Name).ToList()
+                    );
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading all users: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadUsers()
+    {
+        foreach (var company in _companies)
+        {
+            try
+            {
+                var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getInfo?userID={_currentUserId}&companyID={company.companyId}");
+                if (response != null)
+                {
+                    _selectedUsersByBank[company.companyName] = new HashSet<string>(
+                        response.userInformation.Select(u => u.Name)
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error loading users for {company.companyName}: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task AddUser(string bank, string user)
+    {
+        var company = _companies.FirstOrDefault(c => c.companyName == bank);
+        if (company != null)
+        {
+            try
+            {
+                // You'll need to get the user ID from the user's email
+                // This is a simplified example
+                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyID={company.companyId}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    // Update local state
+                    if (!_selectedUsersByBank.ContainsKey(bank))
+                    {
+                        _selectedUsersByBank[bank] = new HashSet<string>();
+                    }
+                    _selectedUsersByBank[bank].Add(user);
+                    Snackbar.Add($"Added {user} to {bank}", Severity.Success);
+
+                    // Refresh data from database
+                    await LoadUsers();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to add user: {response.StatusCode}", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RemoveUser(string bank, string user)
+    {
+        var company = _companies.FirstOrDefault(c => c.companyName == bank);
+        if (company != null)
+        {
+            try
+            {
+                // You'll need to get the user ID from the user's name
+                // This is a simplified example
+                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyID={company.companyId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    if (_selectedUsersByBank.ContainsKey(bank))
+                    {
+                        _selectedUsersByBank[bank].Remove(user);
+                        Snackbar.Add($"Removed {user} from {bank}", Severity.Info);
+                    }
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to remove user: {response.StatusCode}", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error removing user: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task CloseUserDialog()
+    {
+        _isUserDialogVisible = false;
+        Snackbar.Add("Changes discarded", Severity.Info);
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveChanges()
+    {
+        Snackbar.Add("Changes saved successfully", Severity.Success);
+        CloseUserDialog();
+        await Task.CompletedTask;
+    }
+
+    private void OpenUserDialog(string companyName)
+    {
+        _selectedBanks.Clear();
+        _selectedBanks.Add(companyName);
+        _isUserDialogVisible = true;
+    }
+
+    private string GetUserTypeIcon(string userType) => userType switch
+    {
+        "Intern" => Icons.Material.Filled.School,
+        "Contractor" => Icons.Material.Filled.Work,
+        _ => Icons.Material.Filled.Person
+    };
 
     private List<string> GetSelectedUsers(string bank) =>
         _selectedUsersByBank.TryGetValue(bank, out var users)
@@ -149,50 +316,10 @@
         return allUsers.Where(u => !allSelectedUsers.Contains(u)).ToList();
     }
 
-    private void AddUser(string bank, string user)
+    // Helper method to determine user type (you'll need to implement this based on your business logic)
+    private string GetUserType(User user)
     {
-        if (!_selectedUsersByBank.ContainsKey(bank))
-        {
-            _selectedUsersByBank[bank] = new HashSet<string>();
-        }
-        _selectedUsersByBank[bank].Add(user);
-        Snackbar.Add($"Added {user} to {bank}", Severity.Success);
+        // This is a placeholder - implement your own logic to determine user type
+        return "Contractor"; // or "Intern" based on your logic
     }
-
-    private void RemoveUser(string bank, string user)
-    {
-        if (_selectedUsersByBank.ContainsKey(bank))
-        {
-            _selectedUsersByBank[bank].Remove(user);
-            Snackbar.Add($"Removed {user} from {bank}", Severity.Info);
-        }
-    }
-
-    private async Task CloseUserDialog()
-    {
-        _isUserDialogVisible = false;
-        Snackbar.Add("Changes discarded", Severity.Info);
-        await Task.CompletedTask;
-    }
-
-    private async Task SaveChanges()
-    {
-        Snackbar.Add("Changes saved successfully", Severity.Success);
-        CloseUserDialog();
-        await Task.CompletedTask;
-    }
-
-    private void OpenUserDialog(string bank)
-    {
-        _selectedBanks.Clear();
-        _selectedBanks.Add(bank);
-        _isUserDialogVisible = true;
-    }
-
-    private string GetUserTypeIcon(string userType) => userType switch
-    {
-        "Intern" => Icons.Material.Filled.School,
-        "Contractor" => Icons.Material.Filled.Work,
-        _ => Icons.Material.Filled.Person
-    };
 }
