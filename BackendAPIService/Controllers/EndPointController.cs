@@ -117,6 +117,66 @@ public class EndPointController : ControllerBase
         }
     }
 
+    [HttpDelete]
+    [Route("removeEndpointFromCompany")]
+    public ActionResult RemoveEndpointFromCompany(int userID, int companyID, int endpointID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                var userCompany = _dbContext.UserCompanies
+                    .FirstOrDefault(uc => uc.CompanyID == companyID && uc.UserID == userID);
+
+                if (userCompany == null)
+                {
+                    return StatusCode(403, new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "User does not have access to the company or access has expired." 
+                    });
+                }
+
+                var endpoint = _dbContext.EndPoints.FirstOrDefault(e => e.EndPointID == endpointID);
+                if (endpoint == null)
+                {
+                    return NotFound(new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "Endpoint does not exist." 
+                    });
+                }
+
+                var companyEndpoint = _dbContext.CompanyEndPoints
+                    .FirstOrDefault(ce => ce.CompanyID == companyID && ce.EndPointID == endpointID);
+
+                if (companyEndpoint == null)
+                {
+                    return NotFound(new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "This endpoint is not assigned to the company." 
+                    });
+                }
+
+                _dbContext.CompanyEndPoints.Remove(companyEndpoint);
+                _dbContext.SaveChanges();
+
+                transaction.Commit();
+                return Ok("Endpoint successfully removed from the company.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse 
+                { 
+                    Message = "An error occurred while removing the endpoint from the company." 
+                });
+            }
+        }
+    }
+
 
 
 
