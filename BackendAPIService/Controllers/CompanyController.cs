@@ -346,17 +346,17 @@ public class CompanyController : ControllerBase
 
     [HttpGet]
     [Route("getRolesInCompany")]
-    public ActionResult<List<string>> GetCompanyRoles(int companyId, int userId )
+    public ActionResult<List<string>> GetCompanyRoles(int companyID, int userId )
     {
         try
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == userId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userId);
             if (!hasAccess)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
             var roleNames = _dbContext.CompanyRoles
-                .Where(cr => cr.CompanyID == companyId)
+                .Where(cr => cr.CompanyID == companyID)
                 .Join(_dbContext.Roles, 
                     cr => cr.RoleID, 
                     r => r.RoleID, 
@@ -533,6 +533,8 @@ public class CompanyController : ControllerBase
             }
         }
     }
+
+    
 
 }
 
