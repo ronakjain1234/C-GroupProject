@@ -244,7 +244,56 @@ public class EndPointController : ControllerBase
             }
         }
 
+    [HttpGet]
+    [Route("getCompanyEndpoints")]
+    public ActionResult<List<EndpointResponse>> GetCompanyEndpoints(int userID, int companyID)
+    {
+        try
+        {
+            
+            var hasAccess = _dbContext.UserCompanies
+                .Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
 
+            if (!hasAccess)
+            {
+                return StatusCode(403, new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User does not have access to this company."
+                });
+            }
 
+            
+            var endpointIds = _dbContext.CompanyEndPoints
+                .Where(ce => ce.CompanyID == companyID)
+                .Select(ce => ce.EndPointID)
+                .ToList();
+
+            if (!endpointIds.Any())
+            {
+                return Ok(new List<EndpointResponse>()); 
+            }
+
+            
+            var endpoints = _dbContext.EndPoints
+                .Where(e => endpointIds.Contains(e.EndPointID))
+                .Select(e => new EndpointResponse
+                {
+                    EndPointID = e.EndPointID,
+                    Path = e.Path
+                })
+                .ToList();
+
+            return Ok(endpoints);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new SimpleErrorResponse
+            {
+                Message = "An error occurred while retrieving endpoints for the company."
+            });
+        }
+    }
 
 }
