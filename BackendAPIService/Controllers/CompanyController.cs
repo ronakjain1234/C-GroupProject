@@ -534,6 +534,112 @@ public class CompanyController : ControllerBase
         }
     }
 
+    public class CompanyInfoResponse
+    {
+        public string CompanyName { get; set; } = string.Empty;
+        public List<UserInfo> Users { get; set; } = new();
+    }
+
+    public class UserInfo
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public List<RoleInfo> Roles { get; set; } = new();
+    }
+
+    public class RoleInfo
+    {
+        public int RoleID { get; set; }
+        public string RoleName { get; set; } = string.Empty;
+    }
+
+    [HttpGet]
+    [Route("getCompany")]
+    public ActionResult<CompanyInfoResponse> GetCompany(int userID, int companyID)
+    {
+        try
+        {
+            var hasAccess = _dbContext.UserCompanies
+                .Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
+
+            if (!hasAccess)
+            {
+                return StatusCode(403, new Web.SimpleErrorResponse 
+                {
+                    Success = false,
+                    Message = "User does not have access to this company."
+                });
+            }
+
+            
+            var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
+            if (company == null)
+            {
+                return NotFound(new Web.SimpleErrorResponse 
+                {
+                    Success = false,
+                    Message = "Company not found."
+                });
+            }
+
+            
+            var userCompanies = _dbContext.UserCompanies
+                .Where(uc => uc.CompanyID == companyID)
+                .ToList();
+
+            var userIDs = userCompanies.Select(uc => uc.UserID).Distinct().ToList();
+
+            var users = _dbContext.Users
+                .Where(u => userIDs.Contains(u.UserID))
+                .ToList();
+
+            var emails = _dbContext.UserEmail
+                .Where(e => userIDs.Contains(e.UserID))
+                .GroupBy(e => e.UserID)
+                .ToDictionary(g => g.Key, g => g.First().Email); 
+
+            var userRoles = _dbContext.UserRoles
+                .Where(ur => userIDs.Contains(ur.UserID))
+                .ToList();
+
+            var roleIDs = userRoles.Select(ur => ur.RoleID).Distinct().ToList();
+
+            var roles = _dbContext.Roles
+                .Where(r => roleIDs.Contains(r.RoleID))
+                .ToDictionary(r => r.RoleID, r => r.Name);
+
+            
+            var response = new CompanyInfoResponse
+            {
+                CompanyName = company.CompanyName,
+                Users = users.Select(u => new UserInfo
+                {
+                    Name = u.Name,
+                    Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
+                    Roles = userRoles
+                        .Where(ur => ur.UserID == u.UserID)
+                        .Select(ur => new RoleInfo
+                        {
+                            RoleID = ur.RoleID,
+                            RoleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
+                        }).ToList()
+                }).ToList()
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: {0}", ex.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse 
+            {
+                Message = "An error occurred while fetching the company data."
+            });
+        }
+    }
+
+
+
     
 
 }
