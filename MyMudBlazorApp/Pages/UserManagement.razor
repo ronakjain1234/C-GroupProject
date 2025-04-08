@@ -123,6 +123,7 @@
     private List<string> _userTypes = new();
     private Dictionary<string, HashSet<string>> _selectedUsersByCompany = new();
     private Dictionary<string, List<string>> _allUsersByType = new();
+    private List<User> _allUsers = new();
 
     // You can set this to the actual logged-in user's ID
     private int _currentUserId = 1; // Default to user ID 1 for testing
@@ -168,6 +169,7 @@
             var response = await Http.GetFromJsonAsync<List<User>>("/api/user/get");
             if (response != null)
             {
+                _allUsers = response;
                 _allUsersByType = response
                     .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
                     .GroupBy(x => x.Role)
@@ -237,25 +239,33 @@
         }
     }
 
-    private async Task RemoveUser(string company, string user)
+    private async Task RemoveUser(string company, string userName)
     {
         var companyInfo = _companies.FirstOrDefault(c => c.companyName == company);
         if (companyInfo != null)
         {
             try
             {
-                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyId={companyInfo.companyId}");
-                if (response.IsSuccessStatusCode)
+                var user = _allUsers.FirstOrDefault(u => u.Name == userName);
+                if (user != null)
                 {
-                    if (_selectedUsersByCompany.ContainsKey(company))
+                    var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID={user.UserID}&companyID={companyInfo.companyId}");
+                    if (response.IsSuccessStatusCode)
                     {
-                        _selectedUsersByCompany[company].Remove(user);
-                        Snackbar.Add($"Removed {user} from {company}", Severity.Info);
+                        if (_selectedUsersByCompany.ContainsKey(company))
+                        {
+                            _selectedUsersByCompany[company].Remove(userName);
+                            Snackbar.Add($"Removed {userName} from {company}", Severity.Info);
+                        }
+                    }
+                    else
+                    {
+                        Snackbar.Add($"Failed to remove user: {response.StatusCode}", Severity.Error);
                     }
                 }
                 else
                 {
-                    Snackbar.Add($"Failed to remove user: {response.StatusCode}", Severity.Error);
+                    Snackbar.Add($"Could not find user {userName}", Severity.Error);
                 }
             }
             catch (Exception ex)
