@@ -297,7 +297,7 @@ public class EndPointController : ControllerBase
     }
 
     [HttpPost]
-[   Route("createModule")]
+    [Route("createModule")]
     public ActionResult CreateModule(string moduleName)
     {
         using (var transaction = _dbContext.Database.BeginTransaction())
@@ -331,6 +331,79 @@ public class EndPointController : ControllerBase
             }
         }
     }
+
+    [HttpPost]
+    [Route("associateEndpointWithModule")]
+    public ActionResult AssociateEndpointWithModule(int moduleID, int endpointID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                
+                var module = _dbContext.Modules.FirstOrDefault(m => m.ModuleID == moduleID);
+                if (module == null)
+                {
+                    return NotFound(new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Module not found."
+                    });
+                }
+
+                
+                var endpoint = _dbContext.EndPoints.FirstOrDefault(e => e.EndPointID == endpointID);
+                if (endpoint == null)
+                {
+                    return NotFound(new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Endpoint not found."
+                    });
+                }
+
+                
+                var existingAssociation = _dbContext.ModuleEndPoints
+                    .Any(me => me.ModuleID == moduleID && me.EndPointID == endpointID);
+
+                if (existingAssociation)
+                {
+                    return StatusCode(400, new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Endpoint is already associated with this module."
+                    });
+                }
+
+                
+                var moduleEndPoint = new ModuleEndPoint
+                {
+                    ModuleID = moduleID,
+                    EndPointID = endpointID,
+                    LastChange = DateTime.UtcNow
+                };
+
+                _dbContext.ModuleEndPoints.Add(moduleEndPoint);
+                _dbContext.SaveChanges();
+
+                
+                transaction.Commit();
+
+                return Ok("Endpoint successfully associated with the module.");
+            }
+            catch (Exception ex)
+            {
+                
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse
+                {
+                    Message = "An error occurred while associating the endpoint with the module."
+                });
+            }
+        }
+    }
+
 
 
 }
