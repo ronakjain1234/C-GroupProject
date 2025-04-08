@@ -4,6 +4,7 @@ using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 using Microsoft.AspNetCore.Mvc;
 using DatabaseHandler.Data.Models.Database.MixedTables;
 using DatabaseHandler.Data.Models.Database;
+using Microsoft.Extensions.Configuration.UserSecrets;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
@@ -638,9 +639,71 @@ public class CompanyController : ControllerBase
         }
     }
 
+    [HttpDelete]
+    [Route("deleteCompany")]
+    public ActionResult DeleteCompany(int companyID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
+                if (company == null)
+                {
+                    return NotFound(new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Company not found."
+                    });
+                }
 
+                // Get all users in the company
+                var userCompanies = _dbContext.UserCompanies
+                    .Where(uc => uc.CompanyID == companyID)
+                    .ToList();
 
-    
+                var userIDs = userCompanies.Select(uc => uc.UserID).ToList();
+
+                // Remove UserRoles for those users
+                var userRolesToRemove = _dbContext.UserRoles
+                    .Where(ur => userIDs.Contains(ur.UserID))
+                    .ToList();
+                _dbContext.UserRoles.RemoveRange(userRolesToRemove);
+
+                // Remove CompanyEndPoints
+                var endPoints = _dbContext.CompanyEndPoints
+                    .Where(cep => cep.CompanyID == companyID)
+                    .ToList();
+                _dbContext.CompanyEndPoints.RemoveRange(endPoints);
+
+                // Remove CompanyRoles
+                var roles = _dbContext.CompanyRoles
+                    .Where(cr => cr.CompanyID == companyID)
+                    .ToList();
+                _dbContext.CompanyRoles.RemoveRange(roles);
+
+                // Remove UserCompanies
+                _dbContext.UserCompanies.RemoveRange(userCompanies);
+
+                // Remove the Company
+                _dbContext.Companies.Remove(company);
+
+                _dbContext.SaveChanges();
+                transaction.Commit();
+
+                return Ok("Company and all related user roles, endpoints, and references deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("Error while deleting company: {0}", ex.Message);
+                return StatusCode(500, new Web.SimpleErrorResponse
+                {
+                    Message = "An error occurred while deleting the company."
+                });
+            }
+        }
+    }
 
 }
 
