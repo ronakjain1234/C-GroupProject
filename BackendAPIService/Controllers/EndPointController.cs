@@ -39,17 +39,6 @@ public class EndPointController : ControllerBase
                     };
                 _dbContext.EndPoints.Add(newEndpoint);
                  _dbContext.SaveChanges();
-                var endpointID = newEndpoint.EndPointID;
-                var companyEndPoint = new CompanyEndPoint
-                {
-                    CompanyID = companyID,
-                    EndPointID = endpointID,
-                    LastChange = DateTime.UtcNow
-                };
-                _dbContext.CompanyEndPoints.Add(companyEndPoint);
-                _dbContext.SaveChanges();
-
-
                 transaction.Commit();
                 return Ok("Endpoint successfully created and assigned to company.");
             }
@@ -61,6 +50,74 @@ public class EndPointController : ControllerBase
             }
         }
     }
+
+    [HttpPost]
+    [Route("addEndpointToCompany")]
+    public ActionResult AddEndpointToCompany(int userID, int companyID, int endpointID)
+    {
+        using (var transaction = _dbContext.Database.BeginTransaction())
+        {
+            try
+            {
+                var userCompany = _dbContext.UserCompanies
+                    .FirstOrDefault(uc => uc.CompanyID == companyID && uc.UserID == userID);
+
+                if (userCompany == null)
+                {
+                    return StatusCode(403, new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "User does not have access to the company or access has expired." 
+                    });
+                }
+
+                var endpoint = _dbContext.EndPoints.FirstOrDefault(e => e.EndPointID == endpointID);
+                if (endpoint == null)
+                {
+                    return NotFound(new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "Endpoint does not exist." 
+                    });
+                }
+
+                bool alreadyAssigned = _dbContext.CompanyEndPoints
+                    .Any(ce => ce.CompanyID == companyID && ce.EndPointID == endpointID);
+
+                if (alreadyAssigned)
+                {
+                    return Conflict(new SimpleErrorResponse 
+                    { 
+                        Success = false, 
+                        Message = "Endpoint is already assigned to the company." 
+                    });
+                }
+
+                var companyEndPoint = new CompanyEndPoint
+                {
+                    CompanyID = companyID,
+                    EndPointID = endpointID,
+                    LastChange = DateTime.UtcNow
+                };
+                _dbContext.CompanyEndPoints.Add(companyEndPoint);
+                _dbContext.SaveChanges();
+
+                transaction.Commit();
+                return Ok("Endpoint successfully assigned to company.");
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse 
+                { 
+                    Message = "An error occurred while assigning the endpoint to the company." 
+                });
+            }
+        }
+    }
+
+
 
 
 }
