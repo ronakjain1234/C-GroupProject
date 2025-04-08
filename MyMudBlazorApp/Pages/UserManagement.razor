@@ -139,7 +139,6 @@
     {
         try
         {
-            // Use the current user ID
             var response = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>($"/api/company/get?userID={_currentUserId}");
             _companies = response ?? new List<GetAllCompaniesResponse>();
         }
@@ -153,10 +152,8 @@
     {
         try
         {
-            // For roles, you might need to specify a company ID
-            // This is a simplified example - you might need to adjust based on your API
-            var response = await Http.GetFromJsonAsync<List<string>>($"/api/company/getRolesInCompany?companyID=1&userID={_currentUserId}");
-            _userTypes = response ?? new List<string>();
+            var response = await Http.GetFromJsonAsync<GetRolesInCompanyResponse>($"/api/company/getRolesInCompany?companyId=1&userID={_currentUserId}");
+            _userTypes = response?.roles.Select(r => r.Name).ToList() ?? new List<string>();
         }
         catch (Exception ex)
         {
@@ -168,7 +165,7 @@
     {
         try
         {
-            var response = await Http.GetFromJsonAsync<List<User>>("api/user/get");
+            var response = await Http.GetFromJsonAsync<List<User>>("/api/user/get");
             if (response != null)
             {
                 _allUsersByType = response
@@ -191,7 +188,7 @@
         {
             try
             {
-                var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getInfo?userID={_currentUserId}&companyID={company.companyId}");
+                var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getInfo?userID={_currentUserId}&companyId={company.companyId}");
                 if (response != null)
                 {
                     _selectedUsersByBank[company.companyName] = new HashSet<string>(
@@ -213,9 +210,7 @@
         {
             try
             {
-                // You'll need to get the user ID from the user's email
-                // This is a simplified example
-                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyID={company.companyId}", null);
+                var response = await Http.PostAsync($"/api/company/addUser?mainUserID={_currentUserId}&email={user}&companyId={company.companyId}", null);
                 if (response.IsSuccessStatusCode)
                 {
                     // Update local state
@@ -248,9 +243,7 @@
         {
             try
             {
-                // You'll need to get the user ID from the user's name
-                // This is a simplified example
-                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyID={company.companyId}");
+                var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&userID=1&companyId={company.companyId}");
                 if (response.IsSuccessStatusCode)
                 {
                     if (_selectedUsersByBank.ContainsKey(bank))
@@ -316,10 +309,10 @@
         return allUsers.Where(u => !allSelectedUsers.Contains(u)).ToList();
     }
 
-    // Helper method to determine user type (you'll need to implement this based on your business logic)
+    // Helper method to determine user type (we'll need to implement this based on our logic)
     private string GetUserType(User user)
     {
-        // This is a placeholder - implement your own logic to determine user type
-        return "Contractor"; // or "Intern" based on your logic
+        // This is a placeholder - we need to implement with logic to determine user type
+        return "Contractor"; // or "Intern" based on logic
     }
 }
