@@ -135,11 +135,11 @@ public class CompanyController : ControllerBase
     [HttpPut]
     [Route("changeCompanyName")]
 
-    public ActionResult<Web.SimpleErrorResponse> ChangeCompanyName (int userId, int companyId, string companyName)
+    public ActionResult<Web.SimpleErrorResponse> ChangeCompanyName (int userID, int companyID, string companyName)
     {
         try
         { 
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == userId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
             if (!hasAccess)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
@@ -150,7 +150,7 @@ public class CompanyController : ControllerBase
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
 
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
@@ -172,12 +172,12 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("addUser")]
-    public ActionResult<Web.SimpleErrorResponse> AddUser(int mainUserId, string email, int companyId)
+    public ActionResult<Web.SimpleErrorResponse> AddUser(int mainUserID, string email, int companyID)
     {
         try
         {
             // Check if the main user has access to the company
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == mainUserID);
             if (!hasAccess)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
@@ -193,14 +193,14 @@ public class CompanyController : ControllerBase
             int userId = userEmailEntry.UserID;
 
             // Check if the company exists
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             // Check if the user is already added
-            bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyId);
+            bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyID);
             if (userExists)
             {
                 return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
@@ -210,7 +210,7 @@ public class CompanyController : ControllerBase
             var newUser = new Database.MixedTables.UserCompany
             {
                 UserID = userId,
-                CompanyID = companyId,
+                CompanyID = companyID,
                 LastChange = DateTime.UtcNow
             };
 
@@ -229,18 +229,18 @@ public class CompanyController : ControllerBase
 
     [HttpDelete]
     [Route("removeUser")]
-    public ActionResult<Web.SimpleErrorResponse> RemoveUser(int mainUserId, int userId, int companyId)
+    public ActionResult<Web.SimpleErrorResponse> RemoveUser(int mainUserID, int userID, int companyID)
     {
         try
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == mainUserID);
             if (!hasAccess)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
                 
             var userCompany = _dbContext.UserCompanies
-                .FirstOrDefault(uc => uc.UserID == userId && uc.CompanyID == companyId);
+                .FirstOrDefault(uc => uc.UserID == userID && uc.CompanyID == companyID);
 
             if (userCompany == null)
             {
@@ -262,29 +262,29 @@ public class CompanyController : ControllerBase
 
     [HttpPut]
     [Route("addRoletoUser")]
-    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser (int mainUserId, int userId, int companyId, int roleId)
+    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser (int mainUserID, int userID, int companyID, int roleID)
     {
         try 
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == mainUserID);
             if (!hasAccess)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
             }
 
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
-            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
+            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
             if (!existingRole)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist in compnay"});
             }
 
-            var newUserRole = new Database.MixedTables.UserRole {UserID = userId, RoleID = roleId};
+            var newUserRole = new Database.MixedTables.UserRole {UserID = userID, RoleID = roleID};
             newUserRole.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.UserRoles.Add(newUserRole);
             _dbContext.SaveChanges();
@@ -299,33 +299,33 @@ public class CompanyController : ControllerBase
 
     [HttpDelete]
     [Route("removeRoleFromUser")]
-    public ActionResult<Web.SimpleErrorResponse> RemoveRoleFromUser(int mainUserId, int userId, int companyId, int roleId)
+    public ActionResult<Web.SimpleErrorResponse> RemoveRoleFromUser(int mainUserID, int userID, int companyID, int roleID)
     {
         try
         {
             
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyId && uc.UserID == mainUserId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == mainUserID);
             if (!hasAccess)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
             }
 
         
-            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyId);
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
             
-            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyId && cr.RoleID == roleId);
+            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
             if (!existingRole)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
             }
 
            
-            var userRole = _dbContext.UserRoles.FirstOrDefault(ur => ur.UserID == userId && ur.RoleID == roleId);
+            var userRole = _dbContext.UserRoles.FirstOrDefault(ur => ur.UserID == userID && ur.RoleID == roleID);
             if (userRole == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User does not have this role." });
@@ -346,11 +346,11 @@ public class CompanyController : ControllerBase
 
     [HttpGet]
     [Route("getRolesInCompany")]
-    public ActionResult<List<string>> GetCompanyRoles(int companyID, int userId )
+    public ActionResult<List<string>> GetCompanyRoles(int companyID, int userID )
     {
         try
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userId);
+            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
             if (!hasAccess)
             {
                 return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
