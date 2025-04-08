@@ -177,6 +177,73 @@ public class EndPointController : ControllerBase
         }
     }
 
+    public class EndpointResponse
+    {
+        public int EndPointID { get; set; }
+        public string Path { get; set; } = string.Empty;
+    }
+
+    [HttpGet]
+    [Route("getEndpointsForRole")]
+    public ActionResult<List<EndpointResponse>> GetEndpointsForRole(int userID, int roleID)
+        {
+            try
+            {
+                
+                var userCompanies = _dbContext.UserCompanies
+                    .Where(uc => uc.UserID == userID)
+                    .Select(uc => uc.CompanyID)
+                    .ToList();
+
+                if (!userCompanies.Any())
+                {
+                    return StatusCode(403, new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User does not belong to any companies."
+                    });
+                }
+
+                
+                var roleAccessible = _dbContext.CompanyRoles
+                    .Any(cr => userCompanies.Contains(cr.CompanyID) && cr.RoleID == roleID);
+
+                if (!roleAccessible)
+                {
+                    return StatusCode(403, new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User does not have access to this role."
+                    });
+                }
+
+                
+                var endpointIDs = _dbContext.Set<RoleEndPoint>()
+                    .Where(re => re.RoleID == roleID)
+                    .Select(re => re.EndPointID)
+                    .ToList();
+
+                var endpointList = _dbContext.EndPoints
+                    .Where(e => endpointIDs.Contains(e.EndPointID))
+                    .Select(e => new EndpointResponse
+                    {
+                        EndPointID = e.EndPointID,
+                        Path = e.Path
+                    })
+                    .ToList();
+
+                return Ok(endpointList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new SimpleErrorResponse
+                {
+                    Message = "An error occurred while retrieving endpoints for the role."
+                });
+            }
+        }
+
 
 
 

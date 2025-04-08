@@ -657,35 +657,35 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                // Get all users in the company
+                
                 var userCompanies = _dbContext.UserCompanies
                     .Where(uc => uc.CompanyID == companyID)
                     .ToList();
 
                 var userIDs = userCompanies.Select(uc => uc.UserID).ToList();
 
-                // Remove UserRoles for those users
+                
                 var userRolesToRemove = _dbContext.UserRoles
                     .Where(ur => userIDs.Contains(ur.UserID))
                     .ToList();
                 _dbContext.UserRoles.RemoveRange(userRolesToRemove);
 
-                // Remove CompanyEndPoints
+                
                 var endPoints = _dbContext.CompanyEndPoints
                     .Where(cep => cep.CompanyID == companyID)
                     .ToList();
                 _dbContext.CompanyEndPoints.RemoveRange(endPoints);
 
-                // Remove CompanyRoles
+                
                 var roles = _dbContext.CompanyRoles
                     .Where(cr => cr.CompanyID == companyID)
                     .ToList();
                 _dbContext.CompanyRoles.RemoveRange(roles);
 
-                // Remove UserCompanies
+                
                 _dbContext.UserCompanies.RemoveRange(userCompanies);
 
-                // Remove the Company
+               
                 _dbContext.Companies.Remove(company);
 
                 _dbContext.SaveChanges();
