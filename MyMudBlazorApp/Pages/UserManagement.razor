@@ -153,7 +153,7 @@
     {
         try
         {
-            var response = await Http.GetFromJsonAsync<GetRolesInCompanyResponse>($"/api/company/getRolesInCompany?companyId=1&userID={_currentUserId}");
+            var response = await Http.GetFromJsonAsync<GetRolesInCompanyResponse>($"/api/company/getRolesInCompany?companyID=1&userID={_currentUserId}");
             _userTypes = response?.roles.Select(r => r.Name).ToList() ?? new List<string>();
         }
         catch (Exception ex)
@@ -171,13 +171,13 @@
             {
                 _allUsers = response;
                 _allUsersByType = response
-                    .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
-                    .GroupBy(x => x.Role)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(x => x.User).ToList()
-                    );
-            }
+                .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
+                .GroupBy(x => x.Role)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.User).ToList()
+                );
+        }
         }
         catch (Exception ex)
         {
@@ -191,7 +191,7 @@
         {
             try
             {
-                var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getInfo?userID={_currentUserId}&companyId={company.companyId}");
+                var response = await Http.GetFromJsonAsync<GetDetailedCompanyInfo>($"/api/company/getCompany?userID={_currentUserId}&companyID={company.companyId}");
                 if (response != null)
                 {
                     _selectedUsersByCompany[company.companyName] = new HashSet<string>(
