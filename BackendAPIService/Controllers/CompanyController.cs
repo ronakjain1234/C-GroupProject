@@ -555,28 +555,9 @@ public class CompanyController : ControllerBase
         }
     }
 
-    public class CompanyInfoResponse
-    {
-        public string CompanyName { get; set; } = string.Empty;
-        public List<UserInfo> Users { get; set; } = new();
-    }
-
-    public class UserInfo
-    {
-        public string Name { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public List<RoleInfo> Roles { get; set; } = new();
-    }
-
-    public class RoleInfo
-    {
-        public int RoleID { get; set; }
-        public string RoleName { get; set; } = string.Empty;
-    }
-
     [HttpGet]
     [Route("getCompany")]
-    public ActionResult<CompanyInfoResponse> GetCompany(int userID, int companyID)
+    public ActionResult<Web.CompanyInfoResponse> GetCompany(int userID, int companyID)
     {
         try
         {
@@ -630,16 +611,16 @@ public class CompanyController : ControllerBase
                 .ToDictionary(r => r.RoleID, r => r.Name);
 
             
-            var response = new CompanyInfoResponse
+            var response = new Web.CompanyInfoResponse
             {
                 CompanyName = company.CompanyName,
-                Users = users.Select(u => new UserInfo
+                Users = users.Select(u => new Web.UserInfo
                 {
                     Name = u.Name,
                     Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
                     Roles = userRoles
                         .Where(ur => ur.UserID == u.UserID)
-                        .Select(ur => new RoleInfo
+                        .Select(ur => new Web.RoleInfo
                         {
                             RoleID = ur.RoleID,
                             RoleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
