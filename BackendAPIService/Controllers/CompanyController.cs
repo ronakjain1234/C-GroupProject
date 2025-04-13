@@ -359,30 +359,38 @@ public class CompanyController : ControllerBase
 
     [HttpGet]
     [Route("getRolesInCompany")]
-    public ActionResult<List<string>> GetCompanyRoles(int companyID, int userID )
+    public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID, int userID)
     {
         try
         {
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
             if (!hasAccess)
             {
-                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
             }
+
             var roleNames = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID)
-                .Join(_dbContext.Roles, 
-                    cr => cr.RoleID, 
-                    r => r.RoleID, 
+                .Join(_dbContext.Roles,
+                    cr => cr.RoleID,
+                    r => r.RoleID,
                     (cr, r) => r.Name)
                 .Distinct()
                 .ToList();
 
-            return Ok(roleNames);
+            var roles = roleNames.Select(name => new Web.Role(name)).ToList();
+
+            var response = new Web.GetRolesInCompanyResponse
+            {
+                roles = roles
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
-            Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles."});
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles." });
         }
     }
 
