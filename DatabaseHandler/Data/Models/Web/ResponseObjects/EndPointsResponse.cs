@@ -13,3 +13,9 @@ public class GetEndpoints
 {
     //public required List<Endpoint>[] Modules { get; set; }
 }
+
+public class EndpointResponse
+{
+    public int EndPointID { get; set; }
+    public required string Path { get; set; }
+}

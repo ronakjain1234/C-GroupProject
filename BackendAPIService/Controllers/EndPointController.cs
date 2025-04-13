@@ -177,12 +177,6 @@ public class EndPointController : ControllerBase
         }
     }
 
-    public class EndpointResponse
-    {
-        public int EndPointID { get; set; }
-        public string Path { get; set; } = string.Empty;
-    }
-
     [HttpGet]
     [Route("getEndpointsForRole")]
     public ActionResult<List<EndpointResponse>> GetEndpointsForRole(int userID, int roleID)
@@ -464,8 +458,4 @@ public class EndPointController : ControllerBase
             }
         }
     }
-
-
-
-
 }   
