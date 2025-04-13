@@ -20,40 +20,52 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<string>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+    //Return Company Id
+    public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
-            var companies = from company in _dbContext.UserCompanies where company.UserID == userID select company;
-            List<string> companyNameList = new List<string>();
-            foreach (var company in companies)
-            {
-                companyNameList.Add(_dbContext.Companies.Find(company.CompanyID)!.CompanyName);
-            }
-            
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                List<string> returnList = new List<string>();
-                foreach (var name in companyNameList)
-                {
-                    if (!name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-                    {
-                        returnList.Add(name);
-                    }
+            var companies = from userCompany in _dbContext.UserCompanies
+                            where userCompany.UserID == userID
+                            select userCompany;
 
-                    return returnList;
+            var companyList = new List<Web.GetAllCompaniesResponse>();
+
+            foreach (var userCompany in companies)
+            {
+                var company = _dbContext.Companies.Find(userCompany.CompanyID);
+                if (company != null)
+                {
+                    companyList.Add(new Web.GetAllCompaniesResponse
+                    {
+                        companyId = company.CompanyID,
+                        companyName = company.CompanyName
+                    });
                 }
             }
-            
-            return Ok(companyNameList);
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                companyList = companyList
+                    .Where(c => c.companyName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            // Apply pagination
+            var paginatedResult = companyList
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+
+            return Ok(paginatedResult);
         }
         catch (Exception e)
         {
-            Console.WriteLine("An error occured: {0}", e.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching companies."});
+            Console.WriteLine("An error occurred: {0}", e.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching companies." });
         }
-        
     }
+
 
     [HttpPost]
     [Route("createCompany")]
