@@ -307,12 +307,14 @@
 
     [Parameter]
     public int CompanyId { get; set; }
+    
+    private int _currentUserId = 1; // Default to 1 for testing
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var rolesResult = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}");
+            var rolesResult = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={_currentUserId}");
             if (rolesResult != null)
             {
                 _roles = rolesResult;
@@ -348,7 +350,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/company/createRole", new { companyId = CompanyId, name = "New Role" });
+            var response = await Http.PostAsync($"api/company/createRole?userID={_currentUserId}&companyID={CompanyId}&name=New Role", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Role created successfully!", Severity.Success);
@@ -370,7 +372,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"api/company/deleteRole?companyId={CompanyId}&roleName={role.Name}");
+            var response = await Http.DeleteAsync($"api/company/deleteRole?userID={_currentUserId}&companyID={CompanyId}&roleID={role.RoleID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Role removed successfully!", Severity.Success);
@@ -392,7 +394,7 @@
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("api/company/createRole", new { companyId = CompanyId, name = $"{role.Name}_Copy" });
+            var response = await Http.PostAsync($"api/company/createRole?userID={_currentUserId}&companyID={CompanyId}&name={role.Name}_Copy", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Role cloned successfully!", Severity.Success);

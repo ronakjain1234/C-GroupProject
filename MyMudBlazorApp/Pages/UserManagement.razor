@@ -171,13 +171,13 @@
             {
                 _allUsers = response;
                 _allUsersByType = response
-                .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
-                .GroupBy(x => x.Role)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => x.User).ToList()
-                );
-        }
+                    .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
+                    .GroupBy(x => x.Role)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(x => x.User).ToList()
+                    );
+            }
         }
         catch (Exception ex)
         {
@@ -254,13 +254,13 @@
         {
             try
             {
-                var userEmail = _allUsers.FirstOrDefault(u => u.Name == userName)?.Email;
-                if (userEmail != null)
+                var user = _allUsers.FirstOrDefault(u => u.Name == userName);
+                if (user != null)
                 {
-                    var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&email={userEmail}&companyID={companyInfo.companyId}");
+                    var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID={_currentUserId}&companyID={companyInfo.companyId}");
                     if (response.IsSuccessStatusCode)
                     {
-                        if (_selectedUsersByCompany.ContainsKey(company))
+                        if (_selectedUsersByCompany.ContainsKey(company)) 
                         {
                             _selectedUsersByCompany[company].Remove(userName);
                             Snackbar.Add($"Removed {userName} from {company}", Severity.Info);
@@ -273,7 +273,7 @@
                 }
                 else
                 {
-                    Snackbar.Add($"Could not find email for user {userName}", Severity.Error);
+                    Snackbar.Add($"Could not find user {userName}", Severity.Error);
                 }
             }
             catch (Exception ex)
