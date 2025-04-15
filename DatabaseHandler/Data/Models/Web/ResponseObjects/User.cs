@@ -3,23 +3,16 @@ using System.Text;
 namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class User
 {
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public List<string> Roles { get; set; }
-
-    public User()
-    {
-        Name = "NOT INITIALIZED";
-        Email = "NOT INITIALIZED";
-        Roles = new();
-    }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public List<RoleInfo> Roles { get; set; } = new();
 
     public string RolesToString()
     {
         StringBuilder sb = new();
         foreach (var role in Roles)
         {
-            sb.Append(role);
+            sb.Append(role.RoleName);
             if (role != Roles.Last())
             {
                 sb.Append(", ");
@@ -28,4 +21,10 @@ public class User
 
         return sb.ToString();
     }
+}
+
+public class RoleInfo
+{
+    public int RoleID { get; set; }
+    public string RoleName { get; set; } = string.Empty;
 }
