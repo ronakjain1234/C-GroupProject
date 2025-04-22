@@ -1,0 +1,60 @@
+﻿@page "/endpoints"
+@using MudBlazor
+
+<MudMainContent>
+    <div class="mx-auto px-8">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-20 px-4">
+            <div class="flex flex-col items-center">
+                <div class="w-full">
+                    <div class="d-flex justify-space-between align-center mb-10">
+                        <MudText Typo="Typo.h3">Endpoints</MudText>
+                        <MudAutocomplete T="string" Style="width: 15rem; margin-left: auto;" Placeholder="Search Companies" Variant="Variant.Outlined" />
+                    </div>
+                    <iframe src="http://localhost:5000/swagger/index.html" style="width:90%;height:1200px;border:none;"></iframe>
+                    <MudGrid Spacing="8">
+                        @foreach (var company in Companies)
+                        {
+                            <MudItem xs="12" sm="6" lg="4" Class="mb-10">
+                                <MudCard Elevation="2" Style="height: 100%;">
+                                    <MudCardMedia Image="@company.ImageUrl" Height="180" Style="background-color: #C9C9C9;" />
+                                    <MudCardContent Class="pa-7">
+                                        <div class="d-flex justify-space-between align-center">
+                                            <MudText Typo="Typo.h6">@company.Name</MudText>
+                                            <MudButton Variant="Variant.Text" Color="Color.Primary">Edit</MudButton>
+                                        </div>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </div>
+
+                <div class="pt-12 d-flex justify-center w-100 mb-10">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add">
+                        Create Company
+                    </MudButton>
+                </div>
+            </div>
+        </MudContainer>
+    </div>
+</MudMainContent>
+
+@code {
+    private List<CompanyModel> Companies { get; set; } = new List<CompanyModel>
+    {
+        new CompanyModel { Id = 1, Name = "Company One", ImageUrl = "" },
+        new CompanyModel { Id = 2, Name = "Company Two", ImageUrl = "" },
+        new CompanyModel { Id = 3, Name = "Company Three", ImageUrl = "" },
+        new CompanyModel { Id = 4, Name = "Company Four", ImageUrl = "" },
+        new CompanyModel { Id = 5, Name = "Company Five", ImageUrl = "" },
+        new CompanyModel { Id = 6, Name = "Company Six", ImageUrl = "" },
+        new CompanyModel { Id = 7, Name = "Company Seven", ImageUrl = "" },
+    };
+
+    public class CompanyModel
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        public string? ImageUrl { get; set; }
+    }
+}
