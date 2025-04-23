@@ -9,17 +9,9 @@ public class User
 
     public string RolesToString()
     {
-        StringBuilder sb = new();
-        foreach (var role in Roles)
-        {
-            sb.Append(role.RoleName);
-            if (role != Roles.Last())
-            {
-                sb.Append(", ");
-            }
-        }
-
-        return sb.ToString();
+        return Roles != null && Roles.Any()
+            ? string.Join(", ", Roles.Select(r => r.RoleName))
+            : "No Roles";
     }
 }
 
