@@ -1,12 +1,17 @@
-﻿@page "/roles"
+﻿@page "/company/{companyId:int}/roles"
 
 @using MudBlazor
 @using MyMudBlazorApp.Models
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using System.Net.Http.Json
+@using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @inject ISnackbar Snackbar
+@inject HttpClient Http
+
 
 <style>
+/* Your existing styles remain the same */
 .mud-table th, .mud-table td {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -135,113 +140,122 @@
         </div>
     </MudContainer>
 
-    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-3" Class="main-tabs swipeable-tabs" Centered="true">
-        <MudTabPanel Text="Roles Management">
-            <div class="tab-content-container">
-                <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<string, bool>(FilterFunc1)" MultiSelection="true"
-                          @bind-SelectedItems="_selectedItems" Hover="true" FixedHeader="true">
-                    <ToolBarContent>
-                        <MudTextField @bind-Value="searchString1" 
-                                    Placeholder="Search roles" 
-                                    Adornment="Adornment.Start"
-                                    AdornmentIcon="@Icons.Material.Filled.Search" 
-                                    IconSize="Size.Medium" 
-                                    Class="mt-0 mb-4 search-field"
-                                    Immediate="true"
-                                    DebounceInterval="300"></MudTextField>
-                    </ToolBarContent>
-                    <HeaderContent>
-                        <MudTh Style="width: 50px;">
-                            <MudTableHeaderCheckbox T="string" />
-                        </MudTh>
-                        <MudTh Class="role-name-cell">Role Name</MudTh>
-                        <MudTh>Actions</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd Style="width: 50px;">
-                            <MudTableCheckbox T="string" Value="context" />
-                        </MudTd>
-                        <MudTd DataLabel="Role Name" Class="role-name-cell">
-                            <MudTextField Value="@context" ReadOnly="false" Class="mt-0 mb-0" />
-                        </MudTd>
-                        <MudTd DataLabel="Actions">
-                            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-                                <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                          OnClick="() => AddEndpoint(context)"
-                                          Size="Size.Small">Add Group</MudButton>
-                                <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
-                                          OnClick="() => CloneRole(context)"
-                                          Size="Size.Small">Clone</MudButton>
-                                <MudIconButton Icon="@Icons.Material.Filled.Delete" 
-                                             Color="Color.Error"
-                                             Size="Size.Small"
-                                             OnClick="() => RemoveRole(context)" />
-                            </MudButtonGroup>
-                        </MudTd>
-                    </RowTemplate>
-                    <PagerContent>
-                        <div class="d-flex align-center">
-                            <MudTablePager />
-                            <MudSpacer />
-                            <MudButton Color="Color.Primary" 
-                                      Variant="Variant.Outlined"
-                                      StartIcon="@Icons.Material.Filled.Settings"
-                                      OnClick="MakeChoicesForSelectedRoles"
-                                      Disabled="@(!_selectedItems.Any())"
-                                      Size="Size.Small"
-                                      Class="ml-4">Make Choices</MudButton>
+    @if (isLoading)
+    {
+        <div class="d-flex justify-center mt-6">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-3" Class="main-tabs swipeable-tabs" Centered="true">
+            <MudTabPanel Text="Roles Management">
+                <div class="tab-content-container">
+                    <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<Web.Role, bool>(FilterFunc1)" MultiSelection="true"
+                              @bind-SelectedItems="_selectedItems" Hover="true" FixedHeader="true">
+                        <ToolBarContent>
+                            <MudTextField @bind-Value="searchString1" 
+                                        Placeholder="Search roles" 
+                                        Adornment="Adornment.Start"
+                                        AdornmentIcon="@Icons.Material.Filled.Search" 
+                                        IconSize="Size.Medium" 
+                                        Class="mt-0 mb-4 search-field"
+                                        Immediate="true"
+                                        DebounceInterval="300"></MudTextField>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh Style="width: 50px;">
+                                <MudTableHeaderCheckbox T="Web.Role" />
+                            </MudTh>
+                            <MudTh Class="role-name-cell">Role Name</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd Style="width: 50px;">
+                                <MudTableCheckbox T="Web.Role" Value="context" />
+                            </MudTd>
+                            <MudTd DataLabel="Role Name" Class="role-name-cell">
+                                <MudTextField Value="@context.Name" ReadOnly="false" Class="mt-0 mb-0" />
+                            </MudTd>
+                            <MudTd DataLabel="Actions">
+                                <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                                    <MudButton StartIcon="@Icons.Material.Filled.Add" 
+                                              OnClick="() => AddEndpoint(context.Name)"
+                                              Size="Size.Small">Add Group</MudButton>
+                                    <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
+                                              OnClick="() => CloneRole(context.Name)"
+                                              Size="Size.Small">Clone</MudButton>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                                 Color="Color.Error"
+                                                 Size="Size.Small"
+                                                 OnClick="() => RemoveRole(context.Name)" />
+                                </MudButtonGroup>
+                            </MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <div class="d-flex align-center">
+                                <MudTablePager />
+                                <MudSpacer />
+                                <MudButton Color="Color.Primary" 
+                                          Variant="Variant.Outlined"
+                                          StartIcon="@Icons.Material.Filled.Settings"
+                                          OnClick="MakeChoicesForSelectedRoles"
+                                          Disabled="@(!_selectedItems.Any())"
+                                          Size="Size.Small"
+                                          Class="ml-4">Make Choices</MudButton>
+                            </div>
+                        </PagerContent>
+                    </MudTable>
+                </div>
+            </MudTabPanel>
+            
+            <MudTabPanel Text="Selected Endpoints">
+                <div class="tab-content-container">
+                    @if (!_roleEndpoints.Any())
+                    {
+                        <div class="empty-selection">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large" Class="mb-2" />
+                            <MudText Typo="Typo.h6">No endpoint selections available</MudText>
+                            <MudText Typo="Typo.body2" Class="mt-2">
+                                Select a role and click "Add Group" to assign endpoints.
+                            </MudText>
                         </div>
-                    </PagerContent>
-                </MudTable>
-            </div>
-        </MudTabPanel>
-        
-        <MudTabPanel Text="Selected Endpoints">
-            <div class="tab-content-container">
-                @if (!_roleEndpoints.Any())
-                {
-                    <div class="empty-selection">
-                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large" Class="mb-2" />
-                        <MudText Typo="Typo.h6">No endpoint selections available</MudText>
-                        <MudText Typo="Typo.body2" Class="mt-2">
-                            Select a role and click "Add Group" to assign endpoints.
-                        </MudText>
-                    </div>
-                }
-                else
-                {
-                    <div class="endpoint-selection-container">
-                        @foreach (var roleEndpoints in _roleEndpoints)
-                        {
-                            <MudPaper Elevation="2" Class="pa-4 mt-4">
-                                <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
-                                    Selected Endpoints for Role: @roleEndpoints.Key
-                                </MudText>
-                                <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true" FixedHeader="true">
-                                    <ColGroup>
-                                        <col style="width: 50px;" />
-                                        <col />
-                                    </ColGroup>
-                                    <RowTemplate>
-                                        <MudTd>
-                                            <MudIcon Icon="@Icons.Material.Filled.Link" />
-                                        </MudTd>
-                                        <MudTd DataLabel="Endpoint">@context</MudTd>
-                                    </RowTemplate>
-                                    <NoRecordsContent>
-                                        <div class="empty-selection">
-                                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Medium" Class="mb-2" />
-                                            <MudText Typo="Typo.body1">No endpoints assigned to this role</MudText>
-                                        </div>
-                                    </NoRecordsContent>
-                                </MudTable>
-                            </MudPaper>
-                        }
-                    </div>
-                }
-            </div>
-        </MudTabPanel>
-    </MudTabs>
+                    }
+                    else
+                    {
+                        <div class="endpoint-selection-container">
+                            @foreach (var roleEndpoints in _roleEndpoints)
+                            {
+                                <MudPaper Elevation="2" Class="pa-4 mt-4">
+                                    <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
+                                        Selected Endpoints for Role: @roleEndpoints.Key
+                                    </MudText>
+                                    <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true" FixedHeader="true">
+                                        <ColGroup>
+                                            <col style="width: 50px;" />
+                                            <col />
+                                        </ColGroup>
+                                        <RowTemplate>
+                                            <MudTd>
+                                                <MudIcon Icon="@Icons.Material.Filled.Link" />
+                                            </MudTd>
+                                            <MudTd DataLabel="Endpoint">@context</MudTd>
+                                        </RowTemplate>
+                                        <NoRecordsContent>
+                                            <div class="empty-selection">
+                                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Medium" Class="mb-2" />
+                                                <MudText Typo="Typo.body1">No endpoints assigned to this role</MudText>
+                                            </div>
+                                        </NoRecordsContent>
+                                    </MudTable>
+                                </MudPaper>
+                            }
+                        </div>
+                    }
+                </div>
+            </MudTabPanel>
+        </MudTabs>
+    }
 </div>
 
 @if (_isOpen)
@@ -323,14 +337,19 @@
 }
 
 @code {
+    [Parameter]
+    public int CompanyId { get; set; }
+
+    private int currentUserId = 1; // You might get this from auth state
     private string searchString1 = "";
     private bool _isOpen;
     private string _currentRole = "";
     private Dictionary<string, HashSet<string>> _roleEndpoints = new();
-    private List<string> RolesList = new List<string> { "Admin", "User", "Manager", "Editor", "Viewer" };
-    private HashSet<string> _selectedItems = new HashSet<string>();
+    private List<Web.Role> RolesList = new List<Web.Role>();
+    private HashSet<Web.Role> _selectedItems = new HashSet<Web.Role>();
     private HashSet<Endpoint> _selectedEsmaEndpoints = new();
     private HashSet<Endpoint> _selectedCalculationEndpoints = new();
+    private bool isLoading = true;
 
     private List<Endpoint> EsmaEndpoints = new()
     {
@@ -390,9 +409,32 @@
 
     private IEnumerable<Endpoint> AllEndpoints => EsmaEndpoints.Concat(CalculationEndpoints);
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ConfigureSnackbar();
+        await LoadRoles();
+    }
+
+    private async Task LoadRoles()
+    {
+        try
+        {
+            isLoading = true;
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={currentUserId}");
+            
+            if (result != null)
+            {
+                RolesList = result.roles;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
     private void ConfigureSnackbar()
@@ -404,43 +446,48 @@
         Snackbar.Configuration.VisibleStateDuration = 2000;
     }
 
-    private void AddRole()
+    private async Task AddRole()
     {
-        var newRole = "New Role";
+        var newRole = new Web.Role("New Role");
         RolesList.Add(newRole);
         StateHasChanged();
     }
 
-    private void RemoveRole(string role)
+    private async Task RemoveRole(string roleName)
     {
-        RolesList.Remove(role);
-        _roleEndpoints.Remove(role);
-        StateHasChanged();
+        var role = RolesList.FirstOrDefault(r => r.Name == roleName);
+        if (role != null)
+        {
+            RolesList.Remove(role);
+            _roleEndpoints.Remove(roleName);
+            StateHasChanged();
+        }
     }
 
-    private void CloneRole(string role)
+    private async Task CloneRole(string roleName)
     {
-        var newRole = $"{role}_Copy";
+        var newRoleName = $"{roleName}_Copy";
+        var newRole = new Web.Role(newRoleName);
         RolesList.Add(newRole);
         
-        // Clone endpoints if they exist
-        if (_roleEndpoints.ContainsKey(role))
+        
+        if (_roleEndpoints.ContainsKey(roleName))
         {
-            _roleEndpoints[newRole] = new HashSet<string>(_roleEndpoints[role]);
+            _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
         }
         
         StateHasChanged();
     }
 
-    private bool FilterFunc1(string role) => 
+    private bool FilterFunc1(Web.Role role) => 
         string.IsNullOrWhiteSpace(searchString1) || 
-        role.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
+        role.Name.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
 
     private void OpenDialog() => _isOpen = true;
     private void CloseDialog() => _isOpen = false;
 
     private void AddEndpoint(string role) => OpenEndpointDialog(new[] { role });
-    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems);
+    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems.Select(r => r.Name));
 
     private void OpenEndpointDialog(IEnumerable<string> roles)
     {
@@ -450,10 +497,8 @@
         _selectedEsmaEndpoints.Clear();
         _selectedCalculationEndpoints.Clear();
 
-        // Get common endpoints across all selected roles
         var commonEndpoints = GetCommonEndpoints(roles);
         
-        // Pre-select common endpoints
         PreSelectEndpoints(commonEndpoints);
         
         OpenDialog();
@@ -464,12 +509,12 @@
         var rolesList = roles.ToList();
         if (!rolesList.Any()) return new HashSet<string>();
 
-        // Get endpoints of first role, or empty if role has no endpoints
+      
         var commonEndpoints = _roleEndpoints.TryGetValue(rolesList[0], out var firstRoleEndpoints)
             ? new HashSet<string>(firstRoleEndpoints)
             : new HashSet<string>();
 
-        // Intersect with other roles' endpoints
+        
         foreach (var role in rolesList.Skip(1))
         {
             if (_roleEndpoints.TryGetValue(role, out var roleEndpoints))
@@ -531,7 +576,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints[role] = endpoints;
+            _roleEndpoints[role.Name] = endpoints;
         }
     }
 
@@ -539,7 +584,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints.Remove(role);
+            _roleEndpoints.Remove(role.Name);
         }
     }
 
