@@ -1,4 +1,4 @@
-﻿@page "/company/{companyId:int}"
+@page "/company/{companyId:int}"
 @using System.Net.Http.Json
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @using DatabaseHandler.Data.Models.Web.ResponseObjects;
@@ -83,46 +83,43 @@
         <MudTooltip Text="Back" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
         </MudTooltip>
-
-        <MudTooltip Text="Create User" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Create" Color="Color.Primary" OnClick="@(() => AddUserToCompany(new Web.User { Name = "New User", Email = "newuser@example.com" }))" />
-        </MudTooltip>
-
-        <MudTooltip Text="Delete" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" OnClick="@(() => RemoveUserFromCompany(_selectedItems.First()))" Disabled="@(_selectedItems.Count != 1)" />
-        </MudTooltip>
-
-        <MudTooltip Text="Make Admin" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Upgrade" Color="Color.Primary" OnClick="@(() => AddRoleToUser(_selectedItems.First(), "Admin"))" Disabled="@(_selectedItems.Count != 1)" />
-        </MudTooltip>
-
-        <MudTooltip Text="Add Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" OnClick="@(() => CreateRole("New Role"))" />
-        </MudTooltip>
-
-        <MudTooltip Text="Manage Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" OnClick="@(() => UpdateRole(_selectedItems.First().RolesToString(), "Updated Role"))" />
-        </MudTooltip>
-
-        <MudTooltip Text="Remove Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Remove" Color="Color.Primary" OnClick="@(() => RemoveRoleFromUser(_selectedItems.First(), "Admin"))" Disabled="@(_selectedItems.Count != 1)" />
-        </MudTooltip>
-    </div>
-
-    <div class="deleteCompanyButton">
-        <MudTooltip Text="Delete Company">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" />
-        </MudTooltip>
     </div>
 </div>
 
 <div class="entirePage">
     <div class="mainContent">
         <div class="companyTitle mb-10">
-            <h1 style="color: black;">@_company.CompanyName</h1>
-            <MudTooltip Text="Edit Company">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit Company Name" OnClick="@(() => ChangeCompanyName("New Company Name"))" />
-            </MudTooltip>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <MudTextField @bind-Value="_company.CompanyName"
+                              Placeholder="Company Name"
+                              Disabled="@_isCompanyNameDisabled"
+                              Class="mt-2"
+                              Variant="Variant.Outlined"
+                              Dense="true"
+                              Style="max-width: 250px;" />
+
+                <MudTooltip Text="@(_isCompanyNameDisabled ? "Edit Company" : "Cancel Edit")">
+                    <MudIconButton Icon="@(_isCompanyNameDisabled ? Icons.Material.Filled.Edit : Icons.Material.Filled.Close)"
+                                   Color="Color.Warning"
+                                   aria-label="Toggle Edit Mode"
+                                   OnClick="@ToggleEditMode" />
+                </MudTooltip>
+
+                <MudTooltip Text="Save Changes">
+                    <MudIconButton Icon="@Icons.Material.Filled.Save"
+                                   Color="Color.Success"
+                                   Disabled="@_isCompanyNameDisabled"
+                                   aria-label="Save Company Name"
+                                   OnClick="@SaveCompanyName" />
+                </MudTooltip>
+
+                <MudTooltip Text="Delete Company">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   aria-label="Delete Company"
+                                   OnClick="@(() => DeleteCompany())" />
+                </MudTooltip>
+            </div>
         </div>
 
         <MudTable class="companyTable" Items="@_company.Users" Filter="new Func<Web.User, bool>(FilterFunc)" MultiSelection="true" SelectionChangeable="true" Hover="true"
@@ -136,26 +133,63 @@
                 <MudTh>Roles</MudTh>
                 <MudTh>Actions</MudTh>
             </HeaderContent>
+
             <RowTemplate>
                 <MudTd DataLabel="Name">@context.Name</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit" Size="Size.Medium" OnClick="@(() => ChangeCompanyName(context.Name))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium" OnClick="@(() => RemoveUserFromCompany(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Edit" Size="Size.Medium" OnClick="@(() => ChangeCompanyName(context.Name))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" Size="Size.Medium" OnClick="@(() => RemoveUserFromCompany(context))"/>
                 </MudTd>
             </RowTemplate>
+            <FooterContent>
+                <MudTd ColSpan="2">
+                    <div style="display: flex; gap: 10px; align-items: center; ">
+                        <MudTextField @bind-Value="_newUserName" Placeholder="Enter Name" Variant="Variant.Text" Clearable="true" Immediate="true" />
+                        <MudTextField @bind-Value="_newUserEmail" Placeholder="Enter Email" Variant="Variant.Text" Clearable="true" Adornment="Adornment.End" Immediate="true" />
+                        <div style="margin-left: auto;">
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => CreateNewUser(_newUserName, _newUserEmail))">Add user</MudButton>
+                        </div>
+                    </div>
+                </MudTd>
+            </FooterContent>
             <PagerContent>
-                <MudTablePager />
+                <MudTablePager/>
             </PagerContent>
         </MudTable>
     </div>
 </div>
-
 @code {
     private HashSet<Web.User> _selectedItems = new();
+    private string _newUserName = string.Empty;
+    private string _newUserEmail = string.Empty;
+    private string _newCompanyName = string.Empty;
     private Web.CompanyInfoResponse _company = new() { CompanyName = "", Users = new List<Web.User>() };
     private string searchString = "";
+    private string _originalCompanyName = "";
+    private List<string> _roles = new(); 
+    private bool _isCompanyNameDisabled = true;
+
+    private void ToggleEditMode()
+    {
+        if (_isCompanyNameDisabled)
+        {
+            _originalCompanyName = _company.CompanyName;
+            _isCompanyNameDisabled = false;
+        }
+        else
+        {
+            _company.CompanyName = _originalCompanyName;
+            _isCompanyNameDisabled = true;
+        }
+    }
+
+    private async Task SaveCompanyName()
+    {
+        _isCompanyNameDisabled = true;
+        await ChangeCompanyName(_company.CompanyName);
+    }
 
     [Parameter] public int CompanyId { get; set; }
 
@@ -165,9 +199,18 @@
         {
             var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?userID=1&companyID=3");
 
+
             if (result != null)
             {
                 _company = result;
+                CompanyId = 3;
+                _newCompanyName = _company.CompanyName ?? string.Empty;
+
+                foreach (var user in result.Users)
+                {
+                    var roles = string.Join(", ", user.Roles.Select(r => r.RoleName));
+                    _roles.Add($"{user.Name}: {roles}"); 
+                }
             }
         }
         catch (Exception ex)
@@ -193,11 +236,15 @@
     {
         try
         {
-            var response = await Http.PutAsJsonAsync("/api/company/changeCompanyName", new { userID = 1, companyID = CompanyId, companyName });
+
+
+            var url = $"/api/company/changeCompanyName?userID=1&companyID={CompanyId}&companyName={Uri.EscapeDataString(companyName)}";
+
+            var response = await Http.PutAsync(url, null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Company name updated to '{companyName}' successfully!", Severity.Success);
-                await LoadCompanyData(); // Reload the company data after the update
+                await LoadCompanyData(); 
             }
             else
             {
@@ -210,8 +257,15 @@
         }
     }
 
+
     private async Task CreateRole(string roleName)
     {
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            Snackbar.Add("Role name cannot be empty.", Severity.Warning);
+            return;
+        }
+
         try
         {
             var response = await Http.PostAsJsonAsync("/api/company/createRole?userID=1&companyID=3&name=admin", new { roleName });
@@ -309,11 +363,12 @@
         }
     }
 
-    private async Task AddUserToCompany(User user)
+    private async Task AddUserToCompany(User user , string email)
     {
         try
         {
-            var response = await Http.PostAsJsonAsync("/api/company/addUser/mainUserId=1&email=cata@gmail.com&companyID=3", new { companyId = CompanyId, user = user });
+            var url = $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(email)}&companyID={CompanyId}";
+            var response = await Http.PostAsJsonAsync(url, new { companyId = CompanyId, user = user });
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User added successfully!", Severity.Success);
@@ -322,6 +377,54 @@
             else
             {
                 Snackbar.Add("Failed to add user", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+        }
+    }
+    private async Task CreateNewUser(string newUserName, string newUserEmail)
+    {
+        if (string.IsNullOrWhiteSpace(newUserName) || string.IsNullOrWhiteSpace(newUserEmail))
+        {
+            Snackbar.Add("Name and email are required.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var newUser = new User
+            {
+                Name = newUserName,
+                Email = newUserEmail,
+            };
+
+            // Step 1: Create the user
+            var createUserResponse = await Http.PostAsJsonAsync(
+                $"/api/company/createUser?userName={Uri.EscapeDataString(newUser.Name)}&userEmail={Uri.EscapeDataString(newUser.Email)}", newUser);
+
+            if (!createUserResponse.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Failed to create user '{newUser.Name}'. Please try again.", Severity.Error);
+                return;
+            }
+
+            // Step 2: Add the user to the company
+            var addUserResponse = await Http.PostAsJsonAsync(
+                $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUser.Email)}&companyID=3", newUser);
+
+            if (addUserResponse.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"User '{newUser.Name}' added to the company successfully!", Severity.Success);
+                await LoadCompanyData();
+
+                _newUserName = string.Empty;
+                _newUserEmail = string.Empty;
+            }
+            else
+            {
+                Snackbar.Add("Failed to add user to the company.", Severity.Error);
             }
         }
         catch (Exception ex)
