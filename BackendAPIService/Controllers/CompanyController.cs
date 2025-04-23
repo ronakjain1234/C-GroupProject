@@ -294,7 +294,7 @@ public class CompanyController : ControllerBase
             var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
             if (!existingRole)
             {
-                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist in compnay"});
+                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist in company"});
             }
 
             var newUserRole = new Database.MixedTables.UserRole {UserID = userID, RoleID = roleID};
@@ -614,7 +614,7 @@ public class CompanyController : ControllerBase
             var response = new Web.CompanyInfoResponse
             {
                 CompanyName = company.CompanyName,
-                Users = users.Select(u => new Web.UserInfo
+                Users = users.Select(u => new Web.User
                 {
                     Name = u.Name,
                     Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
