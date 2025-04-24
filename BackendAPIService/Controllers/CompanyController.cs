@@ -273,42 +273,60 @@ public class CompanyController : ControllerBase
     }
 
 
-    [HttpPut]
-    [Route("addRoletoUser")]
-    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser (int mainUserID, int userID, int companyID, int roleID)
+   [HttpPut]
+   [Route("addRoletoUser")]
+    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser(int mainUserID, int userID, int companyID, int roleID)
     {
         try 
         {
+            
             var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == mainUserID);
             if (!hasAccess)
             {
-                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "User does not have access"});
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
             }
 
+        
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
+            
             var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
             if (!existingRole)
             {
-                return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist in company"});
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
             }
 
-            var newUserRole = new Database.MixedTables.UserRole {UserID = userID, RoleID = roleID};
-            newUserRole.LastChange = DateTime.Now.ToUniversalTime();
+            
+            var userInCompany = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+            if (!userInCompany)
+            {
+                return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "User is not part of the company" });
+            }
+
+            
+            var newUserRole = new Database.MixedTables.UserRole
+            {
+                UserID = userID,
+                RoleID = roleID,
+                LastChange = DateTime.UtcNow
+            };
+
             _dbContext.UserRoles.Add(newUserRole);
             _dbContext.SaveChanges();
 
-            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully added user"});
-        } catch (Exception ex)
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully added user" });
+        }
+        catch (Exception ex)
         {
-            Console.WriteLine("An error occured: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "An error occurred while adding role to user"});
-        }   
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding role to user" });
+        }
     }
+
 
     [HttpDelete]
     [Route("removeRoleFromUser")]
