@@ -175,20 +175,20 @@
                                 <MudTableCheckbox T="Web.Role" Value="context" />
                             </MudTd>
                             <MudTd DataLabel="Role Name" Class="role-name-cell">
-                                <MudTextField Value="@context.Name" ReadOnly="false" Class="mt-0 mb-0" />
+                                <MudTextField Value="@context.name" ReadOnly="false" Class="mt-0 mb-0" />
                             </MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                                     <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                              OnClick="() => AddEndpoint(context.Name)"
+                                              OnClick="() => AddEndpoint(context.name)"
                                               Size="Size.Small">Add Group</MudButton>
                                     <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
-                                              OnClick="() => CloneRole(context.Name)"
+                                              OnClick="() => CloneRole(context.name)"
                                               Size="Size.Small">Clone</MudButton>
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" 
                                                  Color="Color.Error"
                                                  Size="Size.Small"
-                                                 OnClick="() => RemoveRole(context.Name)" />
+                                                 OnClick="() => RemoveRole(context.name)" />
                                 </MudButtonGroup>
                             </MudTd>
                         </RowTemplate>
@@ -340,7 +340,7 @@
     [Parameter]
     public int CompanyId { get; set; }
 
-    private int currentUserId = 1; // You might get this from auth state
+    private int currentUserID = 1; // You might get this from auth state
     private string searchString1 = "";
     private bool _isOpen;
     private string _currentRole = "";
@@ -350,6 +350,16 @@
     private HashSet<Endpoint> _selectedEsmaEndpoints = new();
     private HashSet<Endpoint> _selectedCalculationEndpoints = new();
     private bool isLoading = true;
+
+    public class Endpoint
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Module { get; set; }
+        public string Path { get; set; }
+        public string Method { get; set; }
+        public bool IsActive { get; set; }
+    }
 
     private List<Endpoint> EsmaEndpoints = new()
     {
@@ -420,7 +430,7 @@
         try
         {
             isLoading = true;
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={currentUserId}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={currentUserID}");
             
             if (result != null)
             {
@@ -448,14 +458,16 @@
 
     private async Task AddRole()
     {
-        var newRole = new Web.Role("New Role");
+        // Generate a temporary ID for the new role
+        var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
+        var newRole = new Web.Role(newRoleId, "New Role");
         RolesList.Add(newRole);
         StateHasChanged();
     }
 
     private async Task RemoveRole(string roleName)
     {
-        var role = RolesList.FirstOrDefault(r => r.Name == roleName);
+        var role = RolesList.FirstOrDefault(r => r.name == roleName);
         if (role != null)
         {
             RolesList.Remove(role);
@@ -467,27 +479,32 @@
     private async Task CloneRole(string roleName)
     {
         var newRoleName = $"{roleName}_Copy";
-        var newRole = new Web.Role(newRoleName);
-        RolesList.Add(newRole);
+        var roleToClone = RolesList.FirstOrDefault(r => r.name == roleName);
         
-        
-        if (_roleEndpoints.ContainsKey(roleName))
+        if (roleToClone != null)
         {
-            _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+            var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
+            var newRole = new Web.Role(newRoleId, newRoleName);
+            RolesList.Add(newRole);
+            
+            if (_roleEndpoints.ContainsKey(roleName))
+            {
+                _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+            }
+            
+            StateHasChanged();
         }
-        
-        StateHasChanged();
     }
 
     private bool FilterFunc1(Web.Role role) => 
         string.IsNullOrWhiteSpace(searchString1) || 
-        role.Name.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
+        role.name.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
 
     private void OpenDialog() => _isOpen = true;
     private void CloseDialog() => _isOpen = false;
 
     private void AddEndpoint(string role) => OpenEndpointDialog(new[] { role });
-    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems.Select(r => r.Name));
+    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems.Select(r => r.name));
 
     private void OpenEndpointDialog(IEnumerable<string> roles)
     {
@@ -562,12 +579,18 @@
 
         if (selectedEndpoints.Any())
         {
-            SaveEndpointsToRoles(selectedEndpoints);
+            foreach (var role in _currentRole.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                _roleEndpoints[role] = selectedEndpoints;
+            }
             ShowSuccessMessage();
         }
         else
         {
-            RemoveEndpointsFromRoles();
+            foreach (var role in _currentRole.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                _roleEndpoints.Remove(role);
+            }
             ShowWarningMessage();
         }
     }
@@ -576,7 +599,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints[role.Name] = endpoints;
+            _roleEndpoints[role.name] = endpoints;
         }
     }
 
@@ -584,7 +607,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints.Remove(role.Name);
+            _roleEndpoints.Remove(role.name);
         }
     }
 
