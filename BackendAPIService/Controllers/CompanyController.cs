@@ -38,8 +38,8 @@ public class CompanyController : ControllerBase
                 {
                     companyList.Add(new Web.GetAllCompaniesResponse
                     {
-                        companyId = company.CompanyID,
-                        companyName = company.CompanyName
+                        companyID = company.CompanyID,
+                        name = company.CompanyName
                     });
                 }
             }
@@ -47,7 +47,7 @@ public class CompanyController : ControllerBase
             if (!string.IsNullOrEmpty(searchString))
             {
                 companyList = companyList
-                    .Where(c => c.companyName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                    .Where(c => c.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
 
@@ -69,16 +69,16 @@ public class CompanyController : ControllerBase
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID ,string companyName)
+    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID ,string Name)
     {
         using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
-            if (string.IsNullOrEmpty(companyName))
+            if (string.IsNullOrEmpty(Name))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse {Success = false, Message = "Company name cannot be empty."});
             }
-            var newCompany = new Database.Company {CompanyName = companyName};
+            var newCompany = new Database.Company {CompanyName = Name};
             newCompany.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.Companies.Add(newCompany);
             _dbContext.SaveChanges(); 
@@ -614,8 +614,8 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
             
             var response = new Web.CompanyInfoResponse
             {
-                CompanyName = company.CompanyName,
-                Users = users.Select(u => new Web.User
+                name = company.CompanyName,
+                users = users.Select(u => new Web.User
                 {
                     Name = u.Name,
                     Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",

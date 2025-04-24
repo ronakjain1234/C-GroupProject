@@ -221,7 +221,7 @@ public class EndPointController : ControllerBase
                     .Where(e => endpointIDs.Contains(e.EndPointID))
                     .Select(e => new EndpointResponse
                     {
-                        EndPointID = e.EndPointID,
+                        endpointID = e.EndPointID,
                         Path = e.Path
                     })
                     .ToList();
@@ -273,7 +273,7 @@ public class EndPointController : ControllerBase
                 .Where(e => endpointIds.Contains(e.EndPointID))
                 .Select(e => new EndpointResponse
                 {
-                    EndPointID = e.EndPointID,
+                    endpointID = e.EndPointID,
                     Path = e.Path
                 })
                 .ToList();

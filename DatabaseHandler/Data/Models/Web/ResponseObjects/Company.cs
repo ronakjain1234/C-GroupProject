@@ -2,26 +2,26 @@ namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class Company
 {
     public string Name { get; set; }
-    public List<User> Users;
+    public List<User> users;
 
     public Company(string name)
     {
         Name = name;
-        Users = new();
+        users = new();
     }
 
     public void AddUser(User user)
     {
-        Users.Add(user);
+        users.Add(user);
     }
 
     public void RemoveUser(User user)
     {
-        Users.Remove(user);
+        users.Remove(user);
     }
 
     public List<User> GetUsers()
     {
-        return Users;
+        return users;
     }
 }

@@ -16,6 +16,6 @@ public class GetEndpoints
 
 public class EndpointResponse
 {
-    public int EndPointID { get; set; }
+    public int endpointID { get; set; }
     public required string Path { get; set; }
 }

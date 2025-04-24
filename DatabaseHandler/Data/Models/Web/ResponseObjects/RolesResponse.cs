@@ -8,5 +8,5 @@ public class GetRolesInCompanyResponse
 
 public class CreateRollResponse 
 {
-    public int roleId { get; set; }
+    public int roleID { get; set; }
 }
