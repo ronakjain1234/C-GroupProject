@@ -503,88 +503,91 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
 
 
 
-   [HttpDelete]
-   [Route("deleteRole")]
-   public ActionResult DeleteRole(int userID, int companyID, int roleID)
+    [HttpDelete]
+    [Route("deleteRole")]
+    public ActionResult DeleteRole(int userID, int companyID, int roleID)
     {
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
             {
-               
-                // Step 1: Get all role IDs for the main user
+                // Step 1: Check if user has CustomerAdmin role for the company
                 var userRoleIds = _dbContext.UserRoles
                     .Where(ur => ur.UserID == userID)
                     .Select(ur => ur.RoleID)
                     .ToList();
 
-                // Step 2: Filter role IDs that belong to the company
                 var companyRoleIds = _dbContext.CompanyRoles
                     .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                     .Select(cr => cr.RoleID)
                     .ToList();
 
-                // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
                 if (!hasCustomerAdminRole)
                 {
-                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+                    return StatusCode(403, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User does not have CustomerAdmin access."
+                    });
                 }
 
-                
+                // Step 2: Validate role is associated with the company
                 var companyRole = _dbContext.CompanyRoles
                     .FirstOrDefault(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
 
                 if (companyRole == null)
                 {
-                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role not assigned to the given company." });
+                    return StatusCode(400, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Role not assigned to the given company."
+                    });
                 }
 
-                
-                var isRoleAssignedToUser = _dbContext.UserRoles
-                    .Any(ur => ur.RoleID == roleID);
+                // Step 3: Delete all UserRole entries with this RoleID
+                var userRolesToDelete = _dbContext.UserRoles
+                    .Where(ur => ur.RoleID == roleID)
+                    .ToList();
 
-                if (isRoleAssignedToUser)
-                {
-                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role is currently assigned to one or more users and cannot be deleted." });
-                }
+                _dbContext.UserRoles.RemoveRange(userRolesToDelete);
 
-                
+                // Step 4: Delete the CompanyRole entry
                 _dbContext.CompanyRoles.Remove(companyRole);
-                _dbContext.SaveChanges();
 
-                
-                bool roleExistsInOtherCompanies = _dbContext.CompanyRoles
-                    .Any(cr => cr.RoleID == roleID);
+                // Step 5: If role not used by any other company, delete it from Roles table
+                bool roleUsedElsewhere = _dbContext.CompanyRoles
+                    .Any(cr => cr.RoleID == roleID && cr.CompanyID != companyID);
 
-                if (!roleExistsInOtherCompanies)
+                if (!roleUsedElsewhere)
                 {
-                    
                     var role = _dbContext.Roles.Find(roleID);
                     if (role != null)
                     {
                         _dbContext.Roles.Remove(role);
-                        _dbContext.SaveChanges();
                     }
                 }
 
-                
+                _dbContext.SaveChanges();
                 transaction.Commit();
+
                 return Ok("Role successfully deleted.");
             }
             catch (Exception ex)
             {
-                
                 transaction.Rollback();
                 Console.WriteLine("An error occurred: {0}", ex.Message);
-                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while fetching roles." });
+                return StatusCode(500, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "An error occurred while deleting the role."
+                });
             }
         }
     }
 
-    
 
    [HttpPost]
    [Route("createRole")]
