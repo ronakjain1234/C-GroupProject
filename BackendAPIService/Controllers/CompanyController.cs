@@ -938,6 +938,104 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
             }
         }
     }
+    [HttpPost]
+[Route("makeAdmin")]
+public ActionResult<Web.SimpleErrorResponse> MakeAdmin(int mainUserID, int userID, int companyID)
+{
+    try
+    {
+        // Step 1: Check if mainUserID has CustomerAdmin role in the company
+        var mainUserRoleIds = _dbContext.UserRoles
+            .Where(ur => ur.UserID == mainUserID)
+            .Select(ur => ur.RoleID)
+            .ToList();
+
+        var mainUserCompanyRoleIds = _dbContext.CompanyRoles
+            .Where(cr => cr.CompanyID == companyID && mainUserRoleIds.Contains(cr.RoleID))
+            .Select(cr => cr.RoleID)
+            .ToList();
+
+        var hasCustomerAdminAccess = _dbContext.Roles
+            .Any(r => mainUserCompanyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+
+        if (!hasCustomerAdminAccess)
+        {
+            return StatusCode(403, new Web.SimpleErrorResponse 
+            { 
+                Success = false, 
+                Message = "Main user does not have CustomerAdmin access." 
+            });
+        }
+
+        // Step 2: Get the roleID for CustomerAdmin for this company
+        var customerAdminRoleID = (from cr in _dbContext.CompanyRoles
+                                   join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                                   where cr.CompanyID == companyID && r.Name == "CustomerAdmin"
+                                   select cr.RoleID).FirstOrDefault();
+
+        if (customerAdminRoleID == 0)
+        {
+            return StatusCode(500, new Web.SimpleErrorResponse 
+            { 
+                Success = false, 
+                Message = "CustomerAdmin role does not exist in the company." 
+            });
+        }
+
+        // Step 3: Check if the user is in the company
+        var isUserInCompany = _dbContext.UserCompanies
+            .Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+
+        if (!isUserInCompany)
+        {
+            return StatusCode(400, new Web.SimpleErrorResponse 
+            { 
+                Success = false, 
+                Message = "User is not part of the company." 
+            });
+        }
+
+        // Step 4: Check if the user already has the CustomerAdmin role
+        bool alreadyHasRole = _dbContext.UserRoles
+            .Any(ur => ur.UserID == userID && ur.RoleID == customerAdminRoleID);
+
+        if (alreadyHasRole)
+        {
+            return StatusCode(400, new Web.SimpleErrorResponse 
+            { 
+                Success = false, 
+                Message = "User already has the CustomerAdmin role." 
+            });
+        }
+
+        // Step 5: Assign the role
+        var newUserRole = new Database.MixedTables.UserRole
+        {
+            UserID = userID,
+            RoleID = customerAdminRoleID,
+            LastChange = DateTime.UtcNow
+        };
+
+        _dbContext.UserRoles.Add(newUserRole);
+        _dbContext.SaveChanges();
+
+        return Ok(new Web.SimpleErrorResponse 
+        { 
+            Success = true, 
+            Message = "User has been made an admin successfully." 
+        });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new Web.SimpleErrorResponse 
+        { 
+            Success = false, 
+            Message = "An error occurred while assigning admin role." 
+        });
+    }
+}
+
 
 }
 
