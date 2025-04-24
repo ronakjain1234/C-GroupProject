@@ -4,6 +4,7 @@ namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class User
 {
     public string Name { get; set; } = string.Empty;
+    public int userID {get; set;}
     public string Email { get; set; } = string.Empty;
     public List<RoleInfo> Roles { get; set; } = new();
 
