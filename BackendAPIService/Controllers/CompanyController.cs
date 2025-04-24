@@ -19,52 +19,69 @@ public class CompanyController : ControllerBase
     }
     
     [HttpGet]
-    [Route("get")]
-    //Return Company Id
-    public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+[Route("get")]
+// Return Company Id
+public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+{
+    try
     {
-        try
+        // Check if user exists
+        bool userExists = _dbContext.Users.Any(u => u.UserID == userID);
+        if (!userExists)
         {
-            var companies = from userCompany in _dbContext.UserCompanies
-                            where userCompany.UserID == userID
-                            select userCompany;
+            return StatusCode(404, new Web.SimpleErrorResponse 
+            { 
+                Success = false, 
+                Message = "User not found." 
+            });
+        }
 
-            var companyList = new List<Web.GetAllCompaniesResponse>();
+        // Get companies for user
+        var companies = from userCompany in _dbContext.UserCompanies
+                        where userCompany.UserID == userID
+                        select userCompany;
 
-            foreach (var userCompany in companies)
+        var companyList = new List<Web.GetAllCompaniesResponse>();
+
+        foreach (var userCompany in companies)
+        {
+            var company = _dbContext.Companies.Find(userCompany.CompanyID);
+            if (company != null)
             {
-                var company = _dbContext.Companies.Find(userCompany.CompanyID);
-                if (company != null)
+                companyList.Add(new Web.GetAllCompaniesResponse
                 {
-                    companyList.Add(new Web.GetAllCompaniesResponse
-                    {
-                        companyID = company.CompanyID,
-                        name = company.CompanyName
-                    });
-                }
+                    companyID = company.CompanyID,
+                    name = company.CompanyName
+                });
             }
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                companyList = companyList
-                    .Where(c => c.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-            // Apply pagination
-            var paginatedResult = companyList
-                .Skip(offset)
-                .Take(limit)
-                .ToList();
-
-            return Ok(paginatedResult);
         }
-        catch (Exception e)
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(searchString))
         {
-            Console.WriteLine("An error occurred: {0}", e.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching companies." });
+            companyList = companyList
+                .Where(c => c.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
+
+        // Apply pagination
+        var paginatedResult = companyList
+            .Skip(offset)
+            .Take(limit)
+            .ToList();
+
+        return Ok(paginatedResult);
     }
+    catch (Exception e)
+    {
+        Console.WriteLine("An error occurred: {0}", e.Message);
+        return StatusCode(500, new Web.SimpleErrorResponse 
+        { 
+            Message = "An error occurred while fetching companies." 
+        });
+    }
+}
+
 
 
     [HttpPost]
