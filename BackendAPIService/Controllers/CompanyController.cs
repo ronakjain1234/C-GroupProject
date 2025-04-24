@@ -317,69 +317,69 @@ public class CompanyController : ControllerBase
     }
 
 
-   [HttpPut]
-[Route("addRoletoUser")]
-public ActionResult<Web.SimpleErrorResponse> AddRoleToUser(int mainUserID, int userID, int companyID, int roleID)
-{
-    try 
+    [HttpPut]
+    [Route("addRoletoUser")]
+    public ActionResult<Web.SimpleErrorResponse> AddRoleToUser(int mainUserID, int userID, int companyID, int roleID)
     {
-        // Step 1: Get all role IDs for the main user
-        var userRoleIds = _dbContext.UserRoles
-            .Where(ur => ur.UserID == mainUserID)
-            .Select(ur => ur.RoleID)
-            .ToList();
-
-        // Step 2: Filter role IDs that belong to the company
-        var companyRoleIds = _dbContext.CompanyRoles
-            .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
-            .Select(cr => cr.RoleID)
-            .ToList();
-
-        // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
-        var hasCustomerAdminRole = _dbContext.Roles
-            .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
-
-        if (!hasCustomerAdminRole)
+        try 
         {
-            return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+            // Step 1: Get all role IDs for the main user
+            var userRoleIds = _dbContext.UserRoles
+                .Where(ur => ur.UserID == mainUserID)
+                .Select(ur => ur.RoleID)
+                .ToList();
+
+            // Step 2: Filter role IDs that belong to the company
+            var companyRoleIds = _dbContext.CompanyRoles
+                .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
+                .Select(cr => cr.RoleID)
+                .ToList();
+
+            // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
+            var hasCustomerAdminRole = _dbContext.Roles
+                .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+
+            if (!hasCustomerAdminRole)
+            {
+                return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+            }
+
+            var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
+            if (existingCompany == null)
+            {
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
+            }
+
+            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
+            if (!existingRole)
+            {
+                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
+            }
+
+            var userInCompany = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+            if (!userInCompany)
+            {
+                return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "User is not part of the company" });
+            }
+
+            var newUserRole = new Database.MixedTables.UserRole
+            {
+                UserID = userID,
+                RoleID = roleID,
+                LastChange = DateTime.UtcNow
+            };
+
+            _dbContext.UserRoles.Add(newUserRole);
+            _dbContext.SaveChanges();
+
+            return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully added user" });
         }
-
-        var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
-        if (existingCompany == null)
+        catch (Exception ex)
         {
-            return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding role to user" });
         }
-
-        var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
-        if (!existingRole)
-        {
-            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
-        }
-
-        var userInCompany = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
-        if (!userInCompany)
-        {
-            return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "User is not part of the company" });
-        }
-
-        var newUserRole = new Database.MixedTables.UserRole
-        {
-            UserID = userID,
-            RoleID = roleID,
-            LastChange = DateTime.UtcNow
-        };
-
-        _dbContext.UserRoles.Add(newUserRole);
-        _dbContext.SaveChanges();
-
-        return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully added user" });
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine("An error occurred: {0}", ex.Message);
-        return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while adding role to user" });
-    }
-}
 
 
     [HttpDelete]
@@ -593,9 +593,22 @@ public ActionResult<Web.SimpleErrorResponse> AddRoleToUser(int mainUserID, int u
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
                 }
+                // Check if a role with the same name already exists in the same company
+                var existingRoleIdInCompany = (from r in _dbContext.Roles
+                                            join cr in _dbContext.CompanyRoles on r.RoleID equals cr.RoleID
+                                            where cr.CompanyID == companyID && r.Name == name
+                                            select r.RoleID).FirstOrDefault();
+
+                if (existingRoleIdInCompany != 0)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "A role with the same name already exists in this company."
+                    });
+                }
                 var role = _dbContext.Roles.FirstOrDefault(r => r.Name == name);
 
-                
                 if (role == null)
                 {
                     role = new Role
@@ -604,7 +617,7 @@ public ActionResult<Web.SimpleErrorResponse> AddRoleToUser(int mainUserID, int u
                         LastChange = DateTime.UtcNow
                     };
                     _dbContext.Roles.Add(role);
-                    _dbContext.SaveChanges(); 
+                    _dbContext.SaveChanges();
                 }
 
                 
