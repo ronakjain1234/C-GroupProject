@@ -357,42 +357,43 @@ public class CompanyController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("getRolesInCompany")]
-    public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID, int userID)
+[HttpGet]
+[Route("getRolesInCompany")]
+public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID, int userID)
+{
+    try
     {
-        try
+        var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+        if (!hasAccess)
         {
-            var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
-            if (!hasAccess)
-            {
-                return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
-            }
-
-            var roleNames = _dbContext.CompanyRoles
-                .Where(cr => cr.CompanyID == companyID)
-                .Join(_dbContext.Roles,
-                    cr => cr.RoleID,
-                    r => r.RoleID,
-                    (cr, r) => r.Name)
-                .Distinct()
-                .ToList();
-
-            var roles = roleNames.Select(name => new Web.Role(name)).ToList();
-
-            var response = new Web.GetRolesInCompanyResponse
-            {
-                roles = roles
-            };
-
-            return Ok(response);
+            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "User does not have access" });
         }
-        catch (Exception ex)
+
+        var roleEntities = _dbContext.CompanyRoles
+            .Where(cr => cr.CompanyID == companyID)
+            .Join(_dbContext.Roles,
+                cr => cr.RoleID,
+                r => r.RoleID,
+                (cr, r) => new { r.RoleID, r.Name })
+            .Distinct()
+            .ToList();
+
+        var roles = roleEntities.Select(r => new Web.Role(r.RoleID, r.Name)).ToList();
+
+        var response = new Web.GetRolesInCompanyResponse
         {
-            Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles." });
-        }
+            roles = roles
+        };
+
+        return Ok(response);
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles." });
+    }
+}
+
 
    [HttpDelete]
    [Route("deleteRole")]
@@ -464,7 +465,7 @@ public class CompanyController : ControllerBase
 
    [HttpPost]
    [Route("createRole")]
-   public ActionResult CreateRole(int userID, int companyID, string name)
+   public ActionResult<int> CreateRole(int userID, int companyID, string name)
     {
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
@@ -510,7 +511,7 @@ public class CompanyController : ControllerBase
 
                 
                 transaction.Commit();
-                return Ok("Role successfully created and assigned to company.");
+                return role.RoleID;
             }
             catch (Exception ex)
             {
