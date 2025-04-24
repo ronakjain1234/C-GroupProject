@@ -707,8 +707,8 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
         }
     }
 
-    [HttpGet]
-    [Route("getCompany")]
+   [HttpGet] 
+   [Route("getCompany")]
     public ActionResult<Web.CompanyInfoResponse> GetCompany(int userID, int companyID)
     {
         try
@@ -725,7 +725,6 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
                 });
             }
 
-            
             var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (company == null)
             {
@@ -736,7 +735,6 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
                 });
             }
 
-            
             var userCompanies = _dbContext.UserCompanies
                 .Where(uc => uc.CompanyID == companyID)
                 .ToList();
@@ -750,10 +748,16 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
             var emails = _dbContext.UserEmail
                 .Where(e => userIDs.Contains(e.UserID))
                 .GroupBy(e => e.UserID)
-                .ToDictionary(g => g.Key, g => g.First().Email); 
+                .ToDictionary(g => g.Key, g => g.First().Email);
+
+            // Get roles only associated with the company
+            var companyRoleIDs = _dbContext.CompanyRoles
+                .Where(cr => cr.CompanyID == companyID)
+                .Select(cr => cr.RoleID)
+                .ToList();
 
             var userRoles = _dbContext.UserRoles
-                .Where(ur => userIDs.Contains(ur.UserID))
+                .Where(ur => userIDs.Contains(ur.UserID) && companyRoleIDs.Contains(ur.RoleID))
                 .ToList();
 
             var roleIDs = userRoles.Select(ur => ur.RoleID).Distinct().ToList();
@@ -762,24 +766,22 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
                 .Where(r => roleIDs.Contains(r.RoleID))
                 .ToDictionary(r => r.RoleID, r => r.Name);
 
-            
             var response = new Web.CompanyInfoResponse
             {
                 name = company.CompanyName,
                 users = users.Select(u => new Web.User
-            {
-                userID = u.UserID,
-                Name = u.Name,
-                Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
-                Roles = userRoles
-                    .Where(ur => ur.UserID == u.UserID)
-                    .Select(ur => new Web.RoleInfo
-                    {
-                        RoleID = ur.RoleID,
-                        RoleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
-                    }).ToList()
-            }).ToList()
-
+                {
+                    userID = u.UserID,
+                    Name = u.Name,
+                    Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
+                    Roles = userRoles
+                        .Where(ur => ur.UserID == u.UserID)
+                        .Select(ur => new Web.RoleInfo
+                        {
+                            RoleID = ur.RoleID,
+                            RoleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
+                        }).ToList()
+                }).ToList()
             };
 
             return Ok(response);
@@ -793,6 +795,7 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
             });
         }
     }
+
 
     [HttpDelete]
     [Route("deleteCompany")]
