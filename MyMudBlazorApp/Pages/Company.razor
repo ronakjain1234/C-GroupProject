@@ -9,7 +9,7 @@
 
 
 
-<PageTitle>@_company.CompanyName</PageTitle>
+<PageTitle>@_company.name</PageTitle>
 
 <style>
     .companySideBar {
@@ -117,7 +117,7 @@
     <div class="mainContent">
         <div class="companyTitle mb-10">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <MudTextField @bind-Value="_company.CompanyName"
+                <MudTextField @bind-Value="_company.name"
                               Placeholder="Company Name"
                               Disabled="@_isCompanyNameDisabled"
                               Class="mt-2"
@@ -144,7 +144,7 @@
             </div>
         </div>
 
-        <MudTable class="companyTable" Items="@_company.Users" Filter="new Func<Web.User, bool>(FilterFunc)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+        <MudTable class="companyTable" Items="@_company.users" Filter="new Func<Web.User, bool>(FilterFunc)" MultiSelection="true" SelectionChangeable="true" Hover="true"
                   @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -233,7 +233,7 @@
     private string _newUserName = string.Empty;
     private string _newUserEmail = string.Empty;
     private string _newCompanyName = string.Empty;
-    private Web.CompanyInfoResponse _company = new() { CompanyName = "", Users = new List<Web.User>() };
+    private Web.CompanyInfoResponse _company = new() { name = "", users = new List<Web.User>() };
     private string searchString = "";
     private string _originalCompanyName = "";
     private List<string> _roles = new(); 
@@ -294,12 +294,12 @@
     {
         if (_isCompanyNameDisabled)
         {
-            _originalCompanyName = _company.CompanyName;
+            _originalCompanyName = _company.name;
             _isCompanyNameDisabled = false;
         }
         else
         {
-            _company.CompanyName = _originalCompanyName;
+            _company.name = _originalCompanyName;
             _isCompanyNameDisabled = true;
         }
     }
@@ -307,7 +307,7 @@
     private async Task SaveCompanyName()
     {
         _isCompanyNameDisabled = true;
-        await ChangeCompanyName(_company.CompanyName);
+        await ChangeCompanyName(_company.name);
     }
 
     [Parameter] public int CompanyId { get; set; }
@@ -323,9 +323,9 @@
             {
                 _company = result;
                 CompanyId = 3;
-                _newCompanyName = _company.CompanyName ?? string.Empty;
+                _newCompanyName = _company.name ?? string.Empty;
 
-                foreach (var user in result.Users)
+                foreach (var user in result.users)
                 {
                     var roles = string.Join(", ", user.Roles.Select(r => r.RoleName));
                     _roles.Add($"{user.Name}: {roles}"); 
