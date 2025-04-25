@@ -775,14 +775,14 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
                 users = users.Select(u => new Web.User
                 {
                     userID = u.UserID,
-                    Name = u.Name,
+                    name = u.Name,
                     Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
                     Roles = userRoles
                         .Where(ur => ur.UserID == u.UserID)
                         .Select(ur => new Web.RoleInfo
                         {
-                            RoleID = ur.RoleID,
-                            RoleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
+                            roleID = ur.RoleID,
+                            name = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
                         }).ToList()
                 }).ToList()
             };
