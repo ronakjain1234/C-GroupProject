@@ -3,15 +3,15 @@ using System.Text;
 namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class User
 {
-    public string name { get; set; } = string.Empty;
+    public string userName { get; set; } = string.Empty;
     public int userID {get; set;}
-    public string Email { get; set; } = string.Empty;
-    public List<RoleInfo> Roles { get; set; } = new();
+    public string email { get; set; } = string.Empty;
+    public List<RoleInfo> roles { get; set; } = new();
 
     public string RolesToString()
     {
-        return Roles != null && Roles.Any()
-            ? string.Join(", ", Roles.Select(r => r.name))
+        return roles != null && roles.Any()
+            ? string.Join(", ", roles.Select(r => r.roleName))
             : "No Roles";
     }
 }
@@ -19,5 +19,5 @@ public class User
 public class RoleInfo
 {
     public int roleID { get; set; }
-    public string name { get; set; } = string.Empty;
+    public string roleName { get; set; } = string.Empty;
 }

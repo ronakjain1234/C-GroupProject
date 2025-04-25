@@ -1,12 +1,12 @@
 namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class Company
 {
-    public string name { get; set; }
+    public string companyName { get; set; }
     public List<User> users;
 
-    public Company(string name)
+    public Company(string companyName)
     {
-        this.name = name;
+        this.companyName = companyName;
         users = new();
     }
 

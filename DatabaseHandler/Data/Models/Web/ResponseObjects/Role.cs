@@ -2,12 +2,12 @@ namespace DatabaseHandler.Data.Models.Web.ResponseObjects;
 public class Role
 {
     public int roleID {get; set;}
-    public string name { get; set; }
+    public string roleName { get; set; }
     
 
-    public Role(int roleID, string name)
+    public Role(int roleID, string roleName)
     {   
         this.roleID = roleID;
-        this.name = name;
+        this.roleName = roleName;
     }
 }

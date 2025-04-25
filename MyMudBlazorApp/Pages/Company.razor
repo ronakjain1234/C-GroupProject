@@ -9,7 +9,7 @@
 
 
 
-<PageTitle>@_company.name</PageTitle>
+<PageTitle>@_company.companyName</PageTitle>
 
 <style>
     .companySideBar {
@@ -117,7 +117,7 @@
     <div class="mainContent">
         <div class="companyTitle mb-10">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <MudTextField @bind-Value="_company.name"
+                <MudTextField @bind-Value="_company.companyName"
                               Placeholder="Company Name"
                               Disabled="@_isCompanyNameDisabled"
                               Class="mt-2"
@@ -157,14 +157,14 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name">@context.name</MudTd>
-                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Name">@context.userName</MudTd>
+                <MudTd DataLabel="Email">@context.email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Add Role" Size="Size.Medium" 
-                        OnClick="@(() => AddRoleToUser(context, context.Roles.FirstOrDefault()?.roleID ?? 7))"/>
+                        OnClick="@(() => AddRoleToUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium" 
-                        OnClick="@(() => RemoveRoleFromUser(context, context.Roles.FirstOrDefault()?.roleID ?? 7))"/>
+                        OnClick="@(() => RemoveRoleFromUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))"/>
                 </MudTd>
             </RowTemplate>
 
@@ -202,7 +202,7 @@
         <MudPaper Class="pa-4 mb-4">
             @foreach (var user in _selectedItems)
             {
-                <MudText>@($"{user.name} ({user.Email})")</MudText>
+                <MudText>@($"{user.userName} ({user.email})")</MudText>
             }
         </MudPaper>
         
@@ -233,7 +233,7 @@
     private string _newUserName = string.Empty;
     private string _newUserEmail = string.Empty;
     private string _newCompanyName = string.Empty;
-    private Web.CompanyInfoResponse _company = new() { name = "", users = new List<Web.User>() };
+    private Web.CompanyInfoResponse _company = new() { companyName = "", users = new List<Web.User>() };
     private string searchString = "";
     private string _originalCompanyName = "";
     private List<string> _roles = new(); 
@@ -294,12 +294,12 @@
     {
         if (_isCompanyNameDisabled)
         {
-            _originalCompanyName = _company.name;
+            _originalCompanyName = _company.companyName;
             _isCompanyNameDisabled = false;
         }
         else
         {
-            _company.name = _originalCompanyName;
+            _company.companyName = _originalCompanyName;
             _isCompanyNameDisabled = true;
         }
     }
@@ -307,7 +307,7 @@
     private async Task SaveCompanyName()
     {
         _isCompanyNameDisabled = true;
-        await ChangeCompanyName(_company.name);
+        await ChangeCompanyName(_company.companyName);
     }
 
     [Parameter] public int CompanyId { get; set; }
@@ -323,12 +323,12 @@
             {
                 _company = result;
                 CompanyId = 3;
-                _newCompanyName = _company.name ?? string.Empty;
+                _newCompanyName = _company.companyName ?? string.Empty;
 
                 foreach (var user in result.users)
                 {
-                    var roles = string.Join(", ", user.Roles.Select(r => r.name));
-                    _roles.Add($"{user.name}: {roles}"); 
+                    var roles = string.Join(", ", user.roles.Select(r => r.roleName));
+                    _roles.Add($"{user.userName}: {roles}"); 
                 }
             }
         }
@@ -344,9 +344,9 @@
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (user.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (user.userName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (user.email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
@@ -410,8 +410,8 @@
             var response = await Http.PostAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID=7&companyID=3&roleID=4", null);
             if (response.IsSuccessStatusCode)
             {
-                var role = user.Roles.FirstOrDefault(r => r.roleID == roleId);
-                var roleName = role?.name ?? "Unknown Role";
+                var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
+                var roleName = role?.roleName ?? "Unknown Role";
                 Snackbar.Add($"Role '{roleName}' added to user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
@@ -433,8 +433,8 @@
             var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID=5&companyID=3&roleID=8");
             if (response.IsSuccessStatusCode)
             {
-                var role = user.Roles.FirstOrDefault(r => r.roleID == roleId);
-                var roleName = role?.name ?? "Unknown Role";
+                var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
+                var roleName = role?.roleName ?? "Unknown Role";
                 Snackbar.Add($"Role '{roleName}' removed from user successfully!", Severity.Success);
                 await LoadCompanyData();
             }

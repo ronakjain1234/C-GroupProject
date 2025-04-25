@@ -4,7 +4,7 @@ using System.Text;
 public class GetAllCompaniesResponse
 {
     public int companyID { get; set; }
-    public required string name { get; set; }
+    public required string companyName { get; set; }
 }
 
 public class CreateCompanyResponse
@@ -14,6 +14,6 @@ public class CreateCompanyResponse
 
 public class CompanyInfoResponse
 {
-    public string name { get; set; } = string.Empty;
+    public string companyName { get; set; } = string.Empty;
     public List<User> users { get; set; } = new();
 }

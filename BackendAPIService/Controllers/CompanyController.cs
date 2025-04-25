@@ -51,7 +51,7 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
                 companyList.Add(new Web.GetAllCompaniesResponse
                 {
                     companyID = company.CompanyID,
-                    name = company.CompanyName
+                    companyName = company.CompanyName
                 });
             }
         }
@@ -60,7 +60,7 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
         if (!string.IsNullOrEmpty(searchString))
         {
             companyList = companyList
-                .Where(c => c.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+                .Where(c => c.companyName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
@@ -86,24 +86,24 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID, string name)
+    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID, string companyName)
     {
         using (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(companyName))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
 
             // Check for duplicate company name (case-insensitive)
-            bool companyExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == name.ToLower());
+            bool companyExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == companyName.ToLower());
             if (companyExists)
             {
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "A company with this name already exists." });
             }
 
-            var newCompany = new Database.Company { CompanyName = name };
+            var newCompany = new Database.Company { CompanyName = companyName };
             newCompany.LastChange = DateTime.UtcNow;
             _dbContext.Companies.Add(newCompany);
             _dbContext.SaveChanges();
@@ -142,21 +142,21 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
 
     [HttpPost]
     [Route("createUser")]
-    public ActionResult<Web.SimpleErrorResponse> CreateUser(string userName, string userEmail)
+    public ActionResult<Web.SimpleErrorResponse> CreateUser(string user, string email)
     {
         using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
-            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(userEmail))
+            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(email))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse {Success = false, Message = "Parameters undefined."});
             }
-            var newUser = new Database.User {Name = userName};
+            var newUser = new Database.User {Name = user};
             newUser.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges(); 
             var userId = newUser.UserID;
-            var newUserEmail = new Database.ReferencingTables.UserEmail {UserID = userId, Email = userEmail};
+            var newUserEmail = new Database.ReferencingTables.UserEmail {UserID = userId, Email = email};
             newUserEmail.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.UserEmail.Add(newUserEmail);
             _dbContext.SaveChanges();
@@ -173,8 +173,7 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
 
     [HttpPut]
     [Route("changeCompanyName")]
-
-    public ActionResult<Web.SimpleErrorResponse> ChangeCompanyName (int userID, int companyID, string companyName)
+    public ActionResult<Web.SimpleErrorResponse> ChangeCompanyName(int userID, int companyID, string newCompanyName)
     {
         try
         { 
@@ -199,7 +198,7 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
 
-            if (string.IsNullOrEmpty(companyName))
+            if (string.IsNullOrEmpty(newCompanyName))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
@@ -210,7 +209,7 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
-            existingCompany.CompanyName = companyName;
+            existingCompany.CompanyName = newCompanyName;
 
             _dbContext.SaveChanges();
 
@@ -771,18 +770,18 @@ public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID
 
             var response = new Web.CompanyInfoResponse
             {
-                name = company.CompanyName,
+                companyName = company.CompanyName,
                 users = users.Select(u => new Web.User
                 {
                     userID = u.UserID,
-                    name = u.Name,
-                    Email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
-                    Roles = userRoles
+                    userName = u.Name,
+                    email = emails.ContainsKey(u.UserID) ? emails[u.UserID] : "",
+                    roles = userRoles
                         .Where(ur => ur.UserID == u.UserID)
                         .Select(ur => new Web.RoleInfo
                         {
                             roleID = ur.RoleID,
-                            name = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
+                            roleName = roles.ContainsKey(ur.RoleID) ? roles[ur.RoleID] : "Unknown"
                         }).ToList()
                 }).ToList()
             };

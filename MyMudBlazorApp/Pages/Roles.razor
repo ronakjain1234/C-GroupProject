@@ -175,20 +175,20 @@
                                 <MudTableCheckbox T="Web.Role" Value="context" />
                             </MudTd>
                             <MudTd DataLabel="Role Name" Class="role-name-cell">
-                                <MudTextField Value="@context.name" ReadOnly="false" Class="mt-0 mb-0" />
+                                <MudTextField Value="@context.roleName" ReadOnly="false" Class="mt-0 mb-0" />
                             </MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                                     <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                              OnClick="() => AddEndpoint(context.name)"
+                                              OnClick="() => AddEndpoint(context.roleName)"
                                               Size="Size.Small">Add Group</MudButton>
                                     <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
-                                              OnClick="() => CloneRole(context.name)"
+                                              OnClick="() => CloneRole(context.roleName)"
                                               Size="Size.Small">Clone</MudButton>
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" 
                                                  Color="Color.Error"
                                                  Size="Size.Small"
-                                                 OnClick="() => RemoveRole(context.name)" />
+                                                 OnClick="() => RemoveRole(context.roleName)" />
                                 </MudButtonGroup>
                             </MudTd>
                         </RowTemplate>
@@ -467,7 +467,7 @@
 
     private async Task RemoveRole(string roleName)
     {
-        var role = RolesList.FirstOrDefault(r => r.name == roleName);
+        var role = RolesList.FirstOrDefault(r => r.roleName == roleName);
         if (role != null)
         {
             RolesList.Remove(role);
@@ -479,7 +479,7 @@
     private async Task CloneRole(string roleName)
     {
         var newRoleName = $"{roleName}_Copy";
-        var roleToClone = RolesList.FirstOrDefault(r => r.name == roleName);
+        var roleToClone = RolesList.FirstOrDefault(r => r.roleName == roleName);
         
         if (roleToClone != null)
         {
@@ -498,13 +498,13 @@
 
     private bool FilterFunc1(Web.Role role) => 
         string.IsNullOrWhiteSpace(searchString1) || 
-        role.name.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
+        role.roleName.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
 
     private void OpenDialog() => _isOpen = true;
     private void CloseDialog() => _isOpen = false;
 
     private void AddEndpoint(string role) => OpenEndpointDialog(new[] { role });
-    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems.Select(r => r.name));
+    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems.Select(r => r.roleName));
 
     private void OpenEndpointDialog(IEnumerable<string> roles)
     {
@@ -599,7 +599,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints[role.name] = endpoints;
+            _roleEndpoints[role.roleName] = endpoints;
         }
     }
 
@@ -607,7 +607,7 @@
     {
         foreach (var role in _selectedItems)
         {
-            _roleEndpoints.Remove(role.name);
+            _roleEndpoints.Remove(role.roleName);
         }
     }
 
