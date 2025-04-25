@@ -157,14 +157,14 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Name">@context.name</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Add Role" Size="Size.Medium" 
-                        OnClick="@(() => AddRoleToUser(context, context.Roles.FirstOrDefault()?.RoleID ?? 7))"/>
+                        OnClick="@(() => AddRoleToUser(context, context.Roles.FirstOrDefault()?.roleID ?? 7))"/>
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium" 
-                        OnClick="@(() => RemoveRoleFromUser(context, context.Roles.FirstOrDefault()?.RoleID ?? 7))"/>
+                        OnClick="@(() => RemoveRoleFromUser(context, context.Roles.FirstOrDefault()?.roleID ?? 7))"/>
                 </MudTd>
             </RowTemplate>
 
@@ -202,7 +202,7 @@
         <MudPaper Class="pa-4 mb-4">
             @foreach (var user in _selectedItems)
             {
-                <MudText>@($"{user.Name} ({user.Email})")</MudText>
+                <MudText>@($"{user.name} ({user.Email})")</MudText>
             }
         </MudPaper>
         
@@ -327,8 +327,8 @@
 
                 foreach (var user in result.users)
                 {
-                    var roles = string.Join(", ", user.Roles.Select(r => r.RoleName));
-                    _roles.Add($"{user.Name}: {roles}"); 
+                    var roles = string.Join(", ", user.Roles.Select(r => r.name));
+                    _roles.Add($"{user.name}: {roles}"); 
                 }
             }
         }
@@ -344,7 +344,7 @@
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (user.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (user.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (user.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
@@ -410,8 +410,8 @@
             var response = await Http.PostAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID=7&companyID=3&roleID=4", null);
             if (response.IsSuccessStatusCode)
             {
-                var role = user.Roles.FirstOrDefault(r => r.RoleID == roleId);
-                var roleName = role?.RoleName ?? "Unknown Role";
+                var role = user.Roles.FirstOrDefault(r => r.roleID == roleId);
+                var roleName = role?.name ?? "Unknown Role";
                 Snackbar.Add($"Role '{roleName}' added to user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
@@ -433,8 +433,8 @@
             var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID=5&companyID=3&roleID=8");
             if (response.IsSuccessStatusCode)
             {
-                var role = user.Roles.FirstOrDefault(r => r.RoleID == roleId);
-                var roleName = role?.RoleName ?? "Unknown Role";
+                var role = user.Roles.FirstOrDefault(r => r.roleID == roleId);
+                var roleName = role?.name ?? "Unknown Role";
                 Snackbar.Add($"Role '{roleName}' removed from user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
