@@ -86,24 +86,24 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
 
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID, string Name)
+    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID, string name)
     {
         using (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(name))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
             }
 
             // Check for duplicate company name (case-insensitive)
-            bool companyExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == Name.ToLower());
+            bool companyExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == name.ToLower());
             if (companyExists)
             {
                 return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "A company with this name already exists." });
             }
 
-            var newCompany = new Database.Company { CompanyName = Name };
+            var newCompany = new Database.Company { CompanyName = name };
             newCompany.LastChange = DateTime.UtcNow;
             _dbContext.Companies.Add(newCompany);
             _dbContext.SaveChanges();
