@@ -83,11 +83,11 @@
         <MudTooltip Text="Back" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
         </MudTooltip>
-        
+
         <MudTooltip Text="Add User" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
-                          Color="Color.Primary"
-                          OnClick="@(() => OpenAddUserDialog())" />
+                           Color="Color.Primary"
+                           OnClick="@(() => OpenAddUserDialog())" />
         </MudTooltip>
 
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
@@ -98,17 +98,17 @@
 
         <MudTooltip Text="Bulk Manage Roles" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.GroupAdd"
-                          Color="Color.Primary"
-                          Disabled="@(!_selectedItems.Any())"
-                          OnClick="@OpenBulkRolesDialog" />
+                           Color="Color.Primary"
+                           Disabled="@(!_selectedItems.Any())"
+                           OnClick="@OpenBulkRolesDialog" />
         </MudTooltip>
 
         <MudTooltip Text="Delete Company" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                          Color="Color.Error"
-                          aria-label="Delete Company"
-                          Class="deleteCompanyButton"
-                          OnClick="@(() => DeleteCompany())" />
+                           Color="Color.Error"
+                           aria-label="Delete Company"
+                           Class="deleteCompanyButton"
+                           OnClick="@(() => DeleteCompany())" />
         </MudTooltip>
     </div>
 </div>
@@ -161,15 +161,15 @@
                 <MudTd DataLabel="Email">@context.email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Add Role" Size="Size.Medium" 
-                        OnClick="@(() => AddRoleToUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))"/>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium" 
-                        OnClick="@(() => RemoveRoleFromUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Add Role" Size="Size.Medium"
+                                   OnClick="@(() => AddRoleToUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
+                                   OnClick="@(() => RemoveRoleFromUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))" />
                 </MudTd>
             </RowTemplate>
 
             <PagerContent>
-                <MudTablePager/>
+                <MudTablePager />
             </PagerContent>
         </MudTable>
     </div>
@@ -180,14 +180,14 @@
         <MudText Typo="Typo.h6">Add User to Company</MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="_newUserEmail" 
-                     Label="Email"
-                     Variant="Variant.Outlined"/>
+        <MudTextField @bind-Value="_newUserEmail"
+                      Label="Email"
+                      Variant="Variant.Outlined" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(() => addUserDialogVisible = false)">Cancel</MudButton>
-        <MudButton Color="Color.Primary" 
-                  OnClick="@(() => CreateNewUser(_newUserEmail))">
+        <MudButton Color="Color.Primary"
+                   OnClick="@(() => CreateNewUser(_newUserEmail))">
             Add User
         </MudButton>
     </DialogActions>
@@ -236,17 +236,16 @@
     private Web.CompanyInfoResponse _company = new() { companyName = "", users = new List<Web.User>() };
     private string searchString = "";
     private string _originalCompanyName = "";
-    private List<string> _roles = new(); 
+    private List<string> _roles = new();
     private bool _isCompanyNameDisabled = true;
-    private bool bulkRolesDialogVisible = false;
-    private bool addUserDialogVisible = false;
-    private DialogOptions dialogOptions = new DialogOptions 
-    { 
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true,
-        CloseOnEscapeKey = true,
-        Position = DialogPosition.Center
-    };
+    private bool bulkRolesDialogVisible;
+    private bool addUserDialogVisible;
+    private DialogOptions dialogOptions = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+            CloseOnEscapeKey = true
+        };
 
     private void OpenBulkRolesDialog()
     {
@@ -363,7 +362,7 @@
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Company name updated to '{companyName}' successfully!", Severity.Success);
-                await LoadCompanyData(); 
+                await LoadCompanyData();
             }
             else
             {
@@ -407,7 +406,7 @@
     {
         try
         {
-            var response = await Http.PostAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID=7&companyID=3&roleID=4", null);
+            var response = await Http.PostAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID=5&companyID=3&roleID=8", null);
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
@@ -486,7 +485,7 @@
         }
     }
 
-    private async Task AddUserToCompany(User user , string email)
+    private async Task AddUserToCompany(User user, string email)
     {
         try
         {
@@ -518,8 +517,7 @@
         try
         {
             var addUserResponse = await Http.PostAsync(
-                $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID=3", 
-                null);
+                $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID=3", null);
 
             if (addUserResponse.IsSuccessStatusCode)
             {
