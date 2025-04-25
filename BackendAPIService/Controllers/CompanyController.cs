@@ -142,16 +142,16 @@ public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, 
 
     [HttpPost]
     [Route("createUser")]
-    public ActionResult<Web.SimpleErrorResponse> CreateUser(string user, string email)
+    public ActionResult<Web.SimpleErrorResponse> CreateUser(string userName, string email)
     {
         using  (var transaction = _dbContext.Database.BeginTransaction())
         try
         {
-            if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(email))
             {
                 return StatusCode(400, new Web.SimpleErrorResponse {Success = false, Message = "Parameters undefined."});
             }
-            var newUser = new Database.User {Name = user};
+            var newUser = new Database.User {Name = userName};
             newUser.LastChange = DateTime.Now.ToUniversalTime();
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges(); 
