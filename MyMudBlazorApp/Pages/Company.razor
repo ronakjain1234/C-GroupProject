@@ -166,7 +166,7 @@
                                  Size="Size.Medium"
                                  OnClick="@(() => OpenUserRolesDialog(context))" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
-                                   OnClick="@(() => RemoveRoleFromUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))" />
+                                   OnClick="@(() => RemoveUserFromCompany(context))" />
                 </MudTd>
             </RowTemplate>
 
@@ -341,8 +341,8 @@
             }
             CloseBulkRolesDialog();
             await LoadCompanyData();
-            Snackbar.Add($"Roles added to {_selectedItems.Count} users successfully!", Severity.Success);
-        }
+                Snackbar.Add($"Roles added to {_selectedItems.Count} users successfully!", Severity.Success);
+            }
         catch (Exception ex)
         {
             Snackbar.Add($"Error adding roles: {ex.Message}", Severity.Error);
@@ -457,16 +457,22 @@
         }
     }
 
-    private async Task AddRoleToUser(User user, int roleId)
+    private async Task AddRoleToUser(User user, int roleID)
     {
         try
         {
-            var response = await Http.PostAsync($"api/company/addRoletoUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleId}", null);
+            if (user == null || roleID <= 0)
+            {
+                Snackbar.Add("Invalid user or role ID", Severity.Error);
+                return;
+            }
+
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
+            
             if (response.IsSuccessStatusCode)
             {
-                var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
+                var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
                 var roleName = role?.roleName ?? "Unknown Role";
-                Snackbar.Add($"Role '{roleName}' added to user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
             else
@@ -480,14 +486,14 @@
         }
     }
 
-    private async Task RemoveRoleFromUser(User user, int roleId)
+    private async Task RemoveRoleFromUser(User user, int roleID)
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleId}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}");
             if (response.IsSuccessStatusCode)
             {
-                var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
+                var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
                 var roleName = role?.roleName ?? "Unknown Role";
                 Snackbar.Add($"Role '{roleName}' removed from user successfully!", Severity.Success);
                 await LoadCompanyData();
