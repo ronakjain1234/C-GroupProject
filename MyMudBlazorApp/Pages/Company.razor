@@ -160,8 +160,11 @@
                 <MudTd DataLabel="Email">@context.email</MudTd>
                 <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" aria-label="Add Role" Size="Size.Medium"
-                                   OnClick="@(() => AddRoleToUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                 Color="Color.Warning" 
+                                 aria-label="Manage Roles" 
+                                 Size="Size.Medium"
+                                 OnClick="@(() => OpenUserRolesDialog(context))" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
                                    OnClick="@(() => RemoveRoleFromUser(context, context.roles.FirstOrDefault()?.roleID ?? 7))" />
                 </MudTd>
@@ -233,16 +236,16 @@
                                  Elevation="0" Style="background-color: white;" MultiSelection="true"
                                  @bind-SelectedItems="_selectedRoles">
                             <HeaderContent>
-                                <MudTh Style="width: 80px;">
+                                <MudTh Style="width: 50px;">
                                     <MudTableHeaderCheckbox T="Web.Role" />
                                 </MudTh>
-                                <MudTh>Role Name</MudTh>
+                                <MudTh Style="width: 50px;">Role Name</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd Style="width: 80px;">
+                                <MudTd Style="width: 50px;">
                                     <MudTableCheckbox T="Web.Role" Value="context" />
                                 </MudTd>
-                                <MudTd>@context.roleName</MudTd>
+                                <MudTd Style="width: 50px;">@context.roleName</MudTd>
                             </RowTemplate>
                         </MudTable>
                     </MudPaper>
@@ -290,13 +293,14 @@
         CloseButton = true,
         NoHeader = false
     };
+    private Web.User _selectedUser;
 
-    private void OpenBulkRolesDialog()
+    private async Task OpenBulkRolesDialog()
     {
         if (_selectedItems.Any())
         {
+            await LoadAvailableRoles();
             _isBulkRolesOpen = true;
-            LoadAvailableRoles();
             StateHasChanged();
         }
     }
@@ -371,13 +375,11 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?userID=1&companyID=3");
-
+            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"http://localhost:5000/api/company/getCompany?userID=1&companyID={companyID}");
 
             if (result != null)
             {
                 _company = result;
-                companyID = 3;
                 _newCompanyName = _company.companyName ?? string.Empty;
 
                 foreach (var user in result.users)
@@ -410,8 +412,6 @@
     {
         try
         {
-
-
             var url = $"/api/company/changeCompanyName?userID=1&companyID={companyID}&newCompanyName={Uri.EscapeDataString(companyName)}";
 
             var response = await Http.PutAsync(url, null);
@@ -431,7 +431,6 @@
         }
     }
 
-
     private async Task CreateRole(string roleName)
     {
         if (string.IsNullOrWhiteSpace(roleName))
@@ -442,7 +441,7 @@
 
         try
         {
-            var response = await Http.PostAsJsonAsync("/api/company/createRole?userID=1&companyID=3&name=admin", new { roleName });
+            var response = await Http.PostAsync($"/api/company/createRole?userID=1&companyID={companyID}&name={Uri.EscapeDataString(roleName)}", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
@@ -462,7 +461,7 @@
     {
         try
         {
-            var response = await Http.PostAsync($"api/company/addRoletoUser?mainUserID=1&userID=1&companyID=3&roleID=8", null);
+            var response = await Http.PostAsync($"api/company/addRoletoUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleId}", null);
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
@@ -485,7 +484,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID=1&companyID=3&roleID=8");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleId}");
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
@@ -508,7 +507,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID=1&userID=4&companyID=3");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?mainUserID=1&userID={user.userID}&companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User removed successfully!", Severity.Success);
@@ -574,7 +573,7 @@
         try
         {
             var addUserResponse = await Http.PostAsync(
-                $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID=3", null);
+                $"http://localhost:5000/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID={companyID}", null);
 
             if (addUserResponse.IsSuccessStatusCode)
             {
@@ -663,6 +662,13 @@
     private bool IsValidEmail(string email)
     {
         return !string.IsNullOrWhiteSpace(email) && email.Contains("@") && email.Contains(".");
+    }
+
+    private void OpenUserRolesDialog(Web.User user)
+    {
+        _selectedItems.Clear();
+        _selectedItems.Add(user);
+        OpenBulkRolesDialog();
     }
 
 }

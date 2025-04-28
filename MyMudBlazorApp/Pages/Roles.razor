@@ -294,6 +294,47 @@
     }
 </div>
 
+
+@if (_isAddRoleOpen)
+{
+    <MudOverlay Visible="_isAddRoleOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                    <MudText Typo="Typo.h5">Add New Role</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Company: @_companyName</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseAddRoleDialog" />
+            </div>
+            
+            <MudPaper Elevation="0" Class="pa-4">
+                <MudTextField @bind-Value="_newRoleName"
+                            Label="Role Name"
+                            Variant="Variant.Outlined"
+                            FullWidth="true"
+                            Class="mt-4"
+                            Immediate="true"
+                            Validation="@(new Func<string, IEnumerable<string>>(ValidateRoleName))" />
+            </MudPaper>
+
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
+
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseAddRoleDialog">Cancel</MudButton>
+                      
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.PersonAdd" 
+                          OnClick="@(() => CreateRole(_newRoleName))"
+                          Disabled="@(string.IsNullOrWhiteSpace(_newRoleName))">Add Role</MudButton>
+            </div>
+        </MudPaper>
+    </MudOverlay>
+}
+
 @if (_isOpen)
 {
     <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
@@ -375,6 +416,9 @@
 @code {
     [Parameter]
     public int CompanyId { get; set; }
+    private bool _isAddRoleOpen;
+    private string _newRoleName = string.Empty;
+    private string _companyName = string.Empty;
 
     private int currentUserID = 1; // You might get this from auth state
     private string searchString1 = "";
@@ -492,14 +536,29 @@
         Snackbar.Configuration.VisibleStateDuration = 2000;
     }
 
+    private void OpenAddRoleDialog()
+    {
+        _newRoleName = string.Empty;
+        _isAddRoleOpen = true;
+        StateHasChanged();
+    }
+
+    private void CloseAddRoleDialog()
+    {
+        _isAddRoleOpen = false;
+        _newRoleName = string.Empty;
+        StateHasChanged();
+    }
+
+    private IEnumerable<string> ValidateRoleName(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+            yield return "Role name is required";
+    }
+
     private async Task AddRole()
     {
-        // Generate a temporary ID for the new role
-        var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
-        var newRole = new Web.Role(newRoleId, "New Role");
-        RolesList.Add(newRole);
-        ShowSnackbar("Role added successfully!", Severity.Success);
-        StateHasChanged();
+        OpenAddRoleDialog();
     }
 
     private async Task RemoveRole(string roleName)
@@ -629,6 +688,35 @@
                 _roleEndpoints.Remove(role);
             }
             ShowWarningMessage();
+        }
+    }
+    
+
+    private async Task CreateRole(string roleName)
+    {
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            Snackbar.Add("Role name cannot be empty.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsync($"/api/company/createRole?userID=1&companyID={CompanyId}&name={Uri.EscapeDataString(roleName)}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
+                CloseAddRoleDialog();
+                await LoadRoles();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to create role '{roleName}'", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating role: {ex.Message}", Severity.Error);
         }
     }
 
