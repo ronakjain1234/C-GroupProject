@@ -83,6 +83,7 @@
         <MudTooltip Text="Back" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
         </MudTooltip>
+        
 
         <MudTooltip Text="Add User" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
@@ -118,29 +119,27 @@
         <div class="companyTitle mb-10">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <MudTextField @bind-Value="_company.companyName"
-                              Placeholder="Company Name"
-                              Disabled="@_isCompanyNameDisabled"
-                              Class="mt-2"
-                              Variant="Variant.Outlined"
-                              Dense="true"
-                              Style="max-width: 250px;" />
+                            Placeholder="Company Name"
+                            Disabled="@_isCompanyNameDisabled"
+                            Class="mt-2"
+                            Typo="Typo.h3"
+                            Style="max-width: 250px; color: black;"
+                            Variant="Variant.Text" />
 
                 <MudTooltip Text="@(_isCompanyNameDisabled ? "Edit Company" : "Cancel Edit")">
                     <MudIconButton Icon="@(_isCompanyNameDisabled ? Icons.Material.Filled.Edit : Icons.Material.Filled.Close)"
-                                   Color="Color.Warning"
-                                   aria-label="Toggle Edit Mode"
-                                   OnClick="@ToggleEditMode" />
+                                 Color="Color.Warning"
+                                 aria-label="Toggle Edit Mode"
+                                 OnClick="@ToggleEditMode" />
                 </MudTooltip>
 
                 <MudTooltip Text="Save Changes">
                     <MudIconButton Icon="@Icons.Material.Filled.Save"
-                                   Color="Color.Success"
-                                   Disabled="@_isCompanyNameDisabled"
-                                   aria-label="Save Company Name"
-                                   OnClick="@SaveCompanyName" />
+                                 Color="Color.Success"
+                                 Disabled="@_isCompanyNameDisabled"
+                                 aria-label="Save Company Name"
+                                 OnClick="@SaveCompanyName" />
                 </MudTooltip>
-
-
             </div>
         </div>
 
@@ -175,58 +174,98 @@
     </div>
 </div>
 
-<MudDialog @bind-IsVisible="addUserDialogVisible" Options="dialogOptions">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Add User to Company</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField @bind-Value="_newUserEmail"
-                      Label="Email"
-                      Variant="Variant.Outlined" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="@(() => addUserDialogVisible = false)">Cancel</MudButton>
-        <MudButton Color="Color.Primary"
-                   OnClick="@(() => CreateNewUser(_newUserEmail))">
-            Add User
-        </MudButton>
-    </DialogActions>
-</MudDialog>
+@if (_isAddUserOpen)
+{
+    <MudOverlay Visible="_isAddUserOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                    <MudText Typo="Typo.h5">Add User to Company</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">@_company.companyName</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseAddUserDialog" />
+            </div>
+            
+            <MudPaper Elevation="0" Class="pa-4">
+                <MudTextField @bind-Value="_newUserEmail"
+                            Label="Email"
+                            Variant="Variant.Outlined"
+                            FullWidth="true"
+                            Class="mt-4"
+                            Immediate="true"
+                            Validation="@(new Func<string, IEnumerable<string>>(ValidateEmail))" />
+            </MudPaper>
 
-<MudDialog @bind-IsVisible="bulkRolesDialogVisible" Options="dialogOptions">
-    <TitleContent>
-        <MudText Typo="Typo.h6">Manage Roles for Selected Users (@_selectedItems.Count users)</MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudText Class="mb-4">Selected users:</MudText>
-        <MudPaper Class="pa-4 mb-4">
-            @foreach (var user in _selectedItems)
-            {
-                <MudText>@($"{user.userName} ({user.email})")</MudText>
-            }
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
+
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseAddUserDialog">Cancel</MudButton>
+                      
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.PersonAdd" 
+                          OnClick="@(() => CreateNewUser(_newUserEmail))"
+                          Disabled="@(!IsValidEmail(_newUserEmail))">Add User</MudButton>
+            </div>
         </MudPaper>
-        
-        <MudDivider Class="my-4"/>
-        
-        <MudStack Row="true" Class="mt-4">
-            <MudButton Variant="Variant.Filled" 
-                      Color="Color.Success" 
-                      OnClick="@(() => BulkAddRoleToUsers(8))"
-                      StartIcon="@Icons.Material.Filled.Add">
-                Add Role
-            </MudButton>
-            <MudButton Variant="Variant.Filled" 
-                      Color="Color.Error" 
-                      OnClick="@(() => BulkRemoveRoleFromUsers(8))"
-                      StartIcon="@Icons.Material.Filled.Remove">
-                Remove Role
-            </MudButton>
-        </MudStack>
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="@(() => bulkRolesDialogVisible = false)">Close</MudButton>
-    </DialogActions>
-</MudDialog>
+    </MudOverlay>
+}
+
+@if (_isBulkRolesOpen)
+{
+    <MudOverlay Visible="_isBulkRolesOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                    <MudText Typo="Typo.h5">Bulk Role Management</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Selected Users: @_selectedItems.Count</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseBulkRolesDialog" />
+            </div>
+            
+            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0" Class="swipeable-tabs" Centered="true">
+                <MudTabPanel Text="Available Roles" Style="padding: 0">
+                    <MudPaper Elevation="0" Class="endpoint-paper">
+                        <MudTable Items="@AvailableRoles" Dense="true" Hover="true" Class="endpoint-table"
+                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
+                                 @bind-SelectedItems="_selectedRoles">
+                            <HeaderContent>
+                                <MudTh Style="width: 80px;">
+                                    <MudTableHeaderCheckbox T="Web.Role" />
+                                </MudTh>
+                                <MudTh>Role Name</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd Style="width: 80px;">
+                                    <MudTableCheckbox T="Web.Role" Value="context" />
+                                </MudTd>
+                                <MudTd>@context.roleName</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+                </MudTabPanel>
+            </MudTabs>
+
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
+
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseBulkRolesDialog">Close</MudButton>
+                      
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Add" 
+                          OnClick="BulkAddSelectedRoles"
+                          Disabled="@(!_selectedRoles.Any())">Add Selected Roles</MudButton>
+            </div>
+        </MudPaper>
+    </MudOverlay>
+}
 
 @code {
     private HashSet<Web.User> _selectedItems = new();
@@ -238,57 +277,74 @@
     private string _originalCompanyName = "";
     private List<string> _roles = new();
     private bool _isCompanyNameDisabled = true;
-    private bool bulkRolesDialogVisible;
-    private bool addUserDialogVisible;
+    private bool _isBulkRolesOpen;
+    private bool _isAddUserOpen;
+    private HashSet<Web.Role> _selectedRoles = new();
+    private List<Web.Role> AvailableRoles = new();
     private DialogOptions dialogOptions = new DialogOptions
-        {
-            MaxWidth = MaxWidth.Small,
-            FullWidth = true,
-            CloseOnEscapeKey = true
-        };
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseOnEscapeKey = true,
+        Position = DialogPosition.Center,
+        CloseButton = true,
+        NoHeader = false
+    };
 
     private void OpenBulkRolesDialog()
     {
         if (_selectedItems.Any())
         {
-            bulkRolesDialogVisible = true;
+            _isBulkRolesOpen = true;
+            LoadAvailableRoles();
+            StateHasChanged();
         }
     }
 
-    private async Task BulkAddRoleToUsers(int roleId)
+    private void CloseBulkRolesDialog()
+    {
+        _isBulkRolesOpen = false;
+        _selectedRoles.Clear();
+        StateHasChanged();
+    }
+
+    private async Task LoadAvailableRoles()
     {
         try
         {
-            foreach (var user in _selectedItems)
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}&userID=1");
+            if (result != null)
             {
-                await AddRoleToUser(user, roleId);
+                AvailableRoles = result.roles;
             }
-            bulkRolesDialogVisible = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task BulkAddSelectedRoles()
+    {
+        try
+        {
+            foreach (var role in _selectedRoles)
+            {
+                foreach (var user in _selectedItems)
+                {
+                    await AddRoleToUser(user, role.roleID);
+                }
+            }
+            CloseBulkRolesDialog();
             await LoadCompanyData();
-            Snackbar.Add($"Role added to {_selectedItems.Count} users successfully!", Severity.Success);
+            Snackbar.Add($"Roles added to {_selectedItems.Count} users successfully!", Severity.Success);
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Error adding roles: {ex.Message}", Severity.Error);
         }
     }
-    private async Task BulkRemoveRoleFromUsers(int roleId)
-    {
-        try
-        {
-            foreach (var user in _selectedItems)
-            {
-                await RemoveRoleFromUser(user, roleId);
-            }
-            bulkRolesDialogVisible = false;
-            await LoadCompanyData();
-            Snackbar.Add($"Role removed from {_selectedItems.Count} users successfully!", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Error removing roles: {ex.Message}", Severity.Error);
-        }
-    }
+
     private void ToggleEditMode()
     {
         if (_isCompanyNameDisabled)
@@ -309,7 +365,7 @@
         await ChangeCompanyName(_company.companyName);
     }
 
-    [Parameter] public int CompanyId { get; set; }
+    [Parameter] public int companyID { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -321,7 +377,7 @@
             if (result != null)
             {
                 _company = result;
-                CompanyId = 3;
+                companyID = 3;
                 _newCompanyName = _company.companyName ?? string.Empty;
 
                 foreach (var user in result.users)
@@ -356,7 +412,7 @@
         {
 
 
-            var url = $"/api/company/changeCompanyName?userID=1&companyID={CompanyId}&companyName={Uri.EscapeDataString(companyName)}";
+            var url = $"/api/company/changeCompanyName?userID=1&companyID={companyID}&newCompanyName={Uri.EscapeDataString(companyName)}";
 
             var response = await Http.PutAsync(url, null);
             if (response.IsSuccessStatusCode)
@@ -406,7 +462,7 @@
     {
         try
         {
-            var response = await Http.PostAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID=5&companyID=3&roleID=8", null);
+            var response = await Http.PostAsync($"api/company/addRoletoUser?mainUserID=1&userID=1&companyID=3&roleID=8", null);
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
@@ -429,7 +485,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID=5&companyID=3&roleID=8");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID=1&companyID=3&roleID=8");
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleId);
@@ -452,7 +508,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID=1&userID=1&companyID={CompanyId}");
+            var response = await Http.DeleteAsync($"/api/company/removeUser?mainUserID=1&userID=4&companyID=3");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User removed successfully!", Severity.Success);
@@ -473,7 +529,7 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?userID=1&companyID={CompanyId}");
+            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?userID=1&companyID={companyID}");
             if (result != null)
             {
                 _company = result;
@@ -488,9 +544,10 @@
     private async Task AddUserToCompany(User user, string email)
     {
         try
-        {
-            var url = $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(email)}&companyID={CompanyId}";
-            var response = await Http.PostAsJsonAsync(url, new { companyId = CompanyId, user = user });
+        {            
+            var url = $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(email)}&companyID={companyID}";
+
+            var response = await Http.PostAsJsonAsync(url, new { companyID = companyID, user = user });
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User added successfully!", Severity.Success);
@@ -521,7 +578,7 @@
 
             if (addUserResponse.IsSuccessStatusCode)
             {
-                addUserDialogVisible = false;
+                _isAddUserOpen = false;
                 Snackbar.Add($"User added to the company successfully!", Severity.Success);
                 await LoadCompanyData();
             }
@@ -556,6 +613,7 @@
         {
             Snackbar.Add($"Error updating role: {ex.Message}", Severity.Error);
         }
+
     }
 
 
@@ -563,7 +621,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"/api/company/delete?companyId={CompanyId}");
+            var response = await Http.DeleteAsync($"/api/company/delete?companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Company deleted successfully!", Severity.Success);
@@ -583,7 +641,29 @@
     private void OpenAddUserDialog()
     {
         _newUserEmail = string.Empty;
-        addUserDialogVisible = true;
+        _isAddUserOpen = true;
+        StateHasChanged();
+    }
+
+    private void CloseAddUserDialog()
+    {
+        _isAddUserOpen = false;
+        _newUserEmail = string.Empty;
+        StateHasChanged();
+    }
+
+    private IEnumerable<string> ValidateEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            yield return "Email is required";
+        else if (!email.Contains("@") || !email.Contains("."))
+            yield return "Please enter a valid email address";
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        return !string.IsNullOrWhiteSpace(email) && email.Contains("@") && email.Contains(".");
     }
 
 }
+

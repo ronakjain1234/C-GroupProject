@@ -8,6 +8,7 @@
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @inject ISnackbar Snackbar
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 
 <style>
@@ -124,21 +125,56 @@
     height: 100%;
     overflow-y: auto;
 }
+
+.companySideBar {
+    width: 64px;
+    height: calc(100vh - 64px);
+    position: fixed;
+    left: 0;
+    top: 64px;
+    padding: 16px 8px;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.mainContent {
+    margin-left: 80px;
+    padding: 20px;
+    padding-top: 84px;
+}
+
+.entirePage {
+    background-color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
 </style>
 
+<div class="companySideBar">
+    <div class="sideBarButtons">
+        <MudTooltip Text="Back" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/company/{CompanyId}"))" />
+        </MudTooltip>
+        <MudTooltip Text="Add Role" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
+                           Color="Color.Primary"
+                           OnClick="AddRole"/>
+        </MudTooltip>
+
+    </div>
+</div>
+
 <div class="entirePage">
-    <MudContainer Class="pa-4" Style="max-width: 100%;">
-        <div class="d-flex justify-space-between align-center page-title">
-            <MudText Typo="Typo.h4" class="mt-7">Roles</MudText>
-            <MudTooltip Text="Add Role" Arrow="true" Placement="Placement.Left">
-                <MudIconButton Icon="@Icons.Material.Filled.Add" 
-                              Variant="Variant.Filled" 
-                              Color="Color.Error" 
-                              Size="Size.Medium" 
-                              OnClick="AddRole" />
-            </MudTooltip>
+    <div class="mainContent">
+        <div class="d-flex align-center mb-10" style="gap: 10px;">
+            <MudText Typo="Typo.h3" Style="color: black;">Roles</MudText>
+
         </div>
-    </MudContainer>
+    </div>
 
     @if (isLoading)
     {
@@ -462,6 +498,7 @@
         var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
         var newRole = new Web.Role(newRoleId, "New Role");
         RolesList.Add(newRole);
+        ShowSnackbar("Role added successfully!", Severity.Success);
         StateHasChanged();
     }
 
