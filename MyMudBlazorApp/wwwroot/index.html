@@ -1,5 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
+<script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+<script>
+    window.loadSwaggerUI = function (url) {
+        SwaggerUIBundle({
+            url: url,
+            dom_id: '#swagger-ui',
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIBundle.SwaggerUIStandalonePreset
+            ],
+            layout: "BaseLayout"
+        });
+    };
+</script>
+
 
 <head>
     <meta charset="utf-8" />

@@ -1,5 +1,6 @@
 ﻿@page "/endpoints"
 @using MudBlazor
+@inject IJSRuntime JSRuntime
 
 <MudMainContent>
     <div class="mx-auto px-8">
@@ -9,10 +10,19 @@
                     <div class="d-flex justify-space-between align-center mb-10">
                         <MudText Typo="Typo.h3">Endpoints</MudText>
                     </div>
-                    
+                    <div id="swagger-ui"></div>
                 </div>
             </div>
         </MudContainer>
-        <iframe src="http://localhost:5000/swagger/index.html" style="height:1200px;"></iframe>
     </div>
 </MudMainContent>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("loadSwaggerUI", "http://localhost:5000/api/swagger");
+        }
+    }
+}
