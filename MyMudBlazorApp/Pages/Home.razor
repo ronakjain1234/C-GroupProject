@@ -85,55 +85,50 @@
     </div>
 </div>
 
-<MudDialog @bind-IsVisible="createCompanyDialog" 
-          Options="dialogOptions"
-          Class="pa-4"
-          MaxWidth="MaxWidth.Small"
-          FullWidth="true">
-    <TitleContent>
-        <MudText Typo="Typo.h6" Class="d-flex align-center">
-            <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-2" />
-            Create New Company
-        </MudText>
-    </TitleContent>
-    <DialogContent>
-        <MudTextField @bind-Value="newCompanyName" 
-                      Label="Company Name" 
-                      Required="true" 
-                      RequiredError="Company name is required!"
-                      Variant="Variant.Outlined"
-                      FullWidth="true"
-                      Class="mt-4" />
-    </DialogContent>
-    <DialogActions>
-        <MudButton OnClick="Cancel" 
-                  Variant="Variant.Text"
-                  Color="Color.Default">
-            Cancel
-        </MudButton>
-        <MudButton Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   OnClick="CreateCompany">
-            Create
-        </MudButton>
-    </DialogActions>
-</MudDialog>
+@if (_isCreateCompanyDialogOpen)
+{
+    <MudOverlay Visible="_isCreateCompanyDialogOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                    <MudText Typo="Typo.h5">Add Company</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseCreateCompanyDialog" />
+            </div>
+        
+            <MudPaper Elevation="0" Class="pa-4">
+                <MudTextField @bind-Value="newCompanyName"
+                            Label="Company Name"
+                            Variant="Variant.Outlined"
+                            FullWidth="true"
+                            Class="mt-4"
+                            Immediate="true"
+                            Required="true"
+                            RequiredError="Company name is required!"/>
+            </MudPaper>
+
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
+
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseCreateCompanyDialog">Cancel</MudButton>
+                  
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Add" 
+                          OnClick="CreateCompany">Create</MudButton>
+            </div>
+        </MudPaper>
+    </MudOverlay>
+}
 
 @code {
     private List<GetAllCompaniesResponse> Companies { get; set; } = new();
     private string searchString = "";
-    private bool createCompanyDialog;
+    private bool _isCreateCompanyDialogOpen;
     private string newCompanyName = "";
-
-    private DialogOptions dialogOptions = new DialogOptions
-    {
-        MaxWidth = MaxWidth.Small,
-        FullWidth = true,
-        CloseOnEscapeKey = true,
-        Position = DialogPosition.Center,
-        CloseButton = true,
-        NoHeader = false
-    };
 
     private List<GetAllCompaniesResponse> FilteredCompanies => 
         Companies.Where(c => FilterFunc(c)).ToList();
@@ -171,12 +166,12 @@
 
     private void OpenCreateCompanyDialog()
     {
-        createCompanyDialog = true;
+        _isCreateCompanyDialogOpen = true;
     }
 
-    private void Cancel()
+    private void CloseCreateCompanyDialog()
     {
-        createCompanyDialog = false;
+        _isCreateCompanyDialogOpen = false;
         newCompanyName = "";
     }
 
@@ -190,8 +185,8 @@
 
         try
         {
-            var payload = new { userID = 1, companyName = newCompanyName };
-            var response = await Http.PostAsJsonAsync("api/company/createCompany", payload);
+            var url = $"http://localhost:5000/api/company/createCompany?userID=1&companyName={Uri.EscapeDataString(newCompanyName)}";
+            var response = await Http.PostAsync(url, null);
             
             if (response.IsSuccessStatusCode)
             {
@@ -199,8 +194,7 @@
                 if (result != null)
                 {
                     Snackbar.Add("Company created successfully!", Severity.Success);
-                    createCompanyDialog = false;
-                    newCompanyName = "";
+                    CloseCreateCompanyDialog();
                     await LoadCompanies();
                 }
                 else

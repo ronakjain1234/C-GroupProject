@@ -94,7 +94,7 @@
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts"
                           Color="Color.Primary"
-                          OnClick="@(() => Navigation.NavigateTo("http://localhost:5084/company/3/roles"))" />
+                          OnClick="@(() => Navigation.NavigateTo($"http://localhost:5084/company/{companyID}/roles"))" />
         </MudTooltip>
 
         <MudTooltip Text="Bulk Manage Roles" Placement="Placement.Right">
@@ -626,7 +626,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"/api/company/delete?companyID={companyID}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/deleteCompany?companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Company deleted successfully!", Severity.Success);
