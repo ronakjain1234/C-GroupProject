@@ -37,6 +37,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<RoleEndPoint> RoleEndPoints { get; set; }
     public DbSet<EndPointParameter> EndPointParameters { get; set; }
     
+    public DbSet<EndPointParameter> EndPointReturnValues { get; set; }
+    
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

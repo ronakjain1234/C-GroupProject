@@ -50,6 +50,10 @@ namespace DatabaseHandler.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("EndPointID");
 
                     b.ToTable("EndPoints");
@@ -103,7 +107,7 @@ namespace DatabaseHandler.Migrations
 
                     b.HasKey("ParameterID", "EndPointID");
 
-                    b.ToTable("EndPointParameters");
+                    b.ToTable("EndPointParameter");
                 });
 
             modelBuilder.Entity("DatabaseHandler.Data.Models.Database.MixedTables.ModuleEndPoint", b =>
