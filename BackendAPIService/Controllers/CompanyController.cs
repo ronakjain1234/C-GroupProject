@@ -4,7 +4,8 @@ using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 using Microsoft.AspNetCore.Mvc;
 using DatabaseHandler.Data.Models.Database.MixedTables;
 using DatabaseHandler.Data.Models.Database;
-using Microsoft.Extensions.Configuration.UserSecrets;
+using System.Security.Claims;
+
 namespace BackendAPIService.Controllers;
 
 [ApiController]
@@ -18,126 +19,166 @@ public class CompanyController : ControllerBase
         _dbContext = context;
     }
     
-    [HttpGet]
+  [HttpGet]
 [Route("get")]
-// Return Company Id
-public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int userID, int limit = 50, int offset = 0, string? searchString = null)
+public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(
+    int limit = 50,
+    int offset = 0,
+    string? searchString = null)
 {
     try
     {
-        // Check if user exists
-        bool userExists = _dbContext.Users.Any(u => u.UserID == userID);
-        if (!userExists)
+        // Extract user ID from JWT
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
         {
-            return StatusCode(404, new Web.SimpleErrorResponse 
-            { 
-                Success = false, 
-                Message = "User not found." 
+            return Unauthorized(new Web.SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
             });
         }
 
-        // Get companies for user
-        var companies = from userCompany in _dbContext.UserCompanies
-                        where userCompany.UserID == userID
-                        select userCompany;
+        // Fetch associated company IDs
+        var companyIds = _dbContext.UserCompanies
+            .Where(uc => uc.UserID == userID)
+            .Select(uc => uc.CompanyID)
+            .Distinct()
+            .ToList();
 
-        var companyList = new List<Web.GetAllCompaniesResponse>();
-
-        foreach (var userCompany in companies)
+        if (!companyIds.Any())
         {
-            var company = _dbContext.Companies.Find(userCompany.CompanyID);
-            if (company != null)
-            {
-                companyList.Add(new Web.GetAllCompaniesResponse
-                {
-                    companyID = company.CompanyID,
-                    companyName = company.CompanyName
-                });
-            }
+            return Ok(new List<Web.GetAllCompaniesResponse>()); // No companies
         }
 
-        // Apply search filter
-        if (!string.IsNullOrEmpty(searchString))
+        // Get companies
+        var companiesQuery = _dbContext.Companies
+            .Where(c => companyIds.Contains(c.CompanyID));
+
+        // Apply search filter if provided
+        if (!string.IsNullOrWhiteSpace(searchString))
         {
-            companyList = companyList
-                .Where(c => c.companyName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            companiesQuery = companiesQuery
+                .Where(c => c.CompanyName.Contains(searchString, StringComparison.OrdinalIgnoreCase));
         }
 
         // Apply pagination
-        var paginatedResult = companyList
+        var result = companiesQuery
+            .OrderBy(c => c.CompanyName)
             .Skip(offset)
             .Take(limit)
+            .Select(c => new Web.GetAllCompaniesResponse
+            {
+                companyID = c.CompanyID,
+                companyName = c.CompanyName
+            })
             .ToList();
 
-        return Ok(paginatedResult);
+        return Ok(result);
     }
-    catch (Exception e)
+    catch (Exception ex)
     {
-        Console.WriteLine("An error occurred: {0}", e.Message);
-        return StatusCode(500, new Web.SimpleErrorResponse 
-        { 
-            Message = "An error occurred while fetching companies." 
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new Web.SimpleErrorResponse
+        {
+            Message = "An error occurred while fetching companies.",
+            Success = false
         });
     }
 }
 
-
-
     [HttpPost]
-    [Route("createCompany")]
-    public ActionResult<Web.SimpleErrorResponse> CreateCompany(int userID, string companyName)
+[Route("createCompany")]
+public ActionResult<Web.SimpleErrorResponse> CreateCompany(string companyName)
+{
+    // Extract userID from JWT
+    int userID = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+    using var transaction = _dbContext.Database.BeginTransaction();
+    try
     {
-        using (var transaction = _dbContext.Database.BeginTransaction())
-        try
+        if (string.IsNullOrWhiteSpace(companyName))
         {
-            if (string.IsNullOrEmpty(companyName))
+            return BadRequest(new Web.SimpleErrorResponse
             {
-                return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "Company name cannot be empty." });
-            }
-
-            // Check for duplicate company name (case-insensitive)
-            bool companyExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == companyName.ToLower());
-            if (companyExists)
-            {
-                return StatusCode(400, new Web.SimpleErrorResponse { Success = false, Message = "A company with this name already exists." });
-            }
-
-            var newCompany = new Database.Company { CompanyName = companyName };
-            newCompany.LastChange = DateTime.UtcNow;
-            _dbContext.Companies.Add(newCompany);
-            _dbContext.SaveChanges();
-
-            var userCompany = new UserCompany() { CompanyID = newCompany.CompanyID, UserID = userID };
-            userCompany.LastChange = DateTime.UtcNow;
-            _dbContext.UserCompanies.Add(userCompany);
-            _dbContext.SaveChanges();
-
-            var localAdminRole = new Database.Role() { Name = "CustomerAdmin" };
-            localAdminRole.LastChange = DateTime.UtcNow;
-            _dbContext.Roles.Add(localAdminRole);
-            _dbContext.SaveChanges();
-
-            var companyRole = new CompanyRole() { CompanyID = newCompany.CompanyID, RoleID = localAdminRole.RoleID };
-            companyRole.LastChange = DateTime.UtcNow;
-            _dbContext.CompanyRoles.Add(companyRole);
-            _dbContext.SaveChanges();
-
-            var userRole = new UserRole() { UserID = userID, RoleID = companyRole.RoleID };
-            userRole.LastChange = DateTime.UtcNow;
-            _dbContext.UserRoles.Add(userRole);
-
-            _dbContext.SaveChanges();
-            transaction.Commit();
-            return Ok();
+                Success = false,
+                Message = "Company name cannot be empty."
+            });
         }
-        catch (Exception ex)
+
+        bool companyExists = _dbContext.Companies
+            .Any(c => c.CompanyName.ToLower() == companyName.ToLower());
+
+        if (companyExists)
         {
-            transaction.Rollback();
-            Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while creating the company" });
+            return BadRequest(new Web.SimpleErrorResponse
+            {
+                Success = false,
+                Message = "A company with this name already exists."
+            });
         }
+
+        var newCompany = new Database.Company
+        {
+            CompanyName = companyName,
+            LastChange = DateTime.UtcNow
+        };
+        _dbContext.Companies.Add(newCompany);
+        _dbContext.SaveChanges();
+
+        var userCompany = new UserCompany
+        {
+            CompanyID = newCompany.CompanyID,
+            UserID = userID,
+            LastChange = DateTime.UtcNow
+        };
+        _dbContext.UserCompanies.Add(userCompany);
+
+        var adminRole = new Database.Role
+        {
+            Name = "CustomerAdmin",
+            LastChange = DateTime.UtcNow
+        };
+        _dbContext.Roles.Add(adminRole);
+        _dbContext.SaveChanges();
+
+        var companyRole = new CompanyRole
+        {
+            CompanyID = newCompany.CompanyID,
+            RoleID = adminRole.RoleID,
+            LastChange = DateTime.UtcNow
+        };
+        _dbContext.CompanyRoles.Add(companyRole);
+        _dbContext.SaveChanges();
+
+        var userRole = new UserRole
+        {
+            UserID = userID,
+            RoleID = adminRole.RoleID,
+            LastChange = DateTime.UtcNow
+        };
+        _dbContext.UserRoles.Add(userRole);
+        _dbContext.SaveChanges();
+
+        transaction.Commit();
+
+        return Ok(new Web.SimpleErrorResponse
+        {
+            Success = true,
+            Message = "Company created successfully."
+        });
     }
+    catch (Exception ex)
+    {
+        transaction.Rollback();
+        Console.WriteLine("An error occurred: {0}", ex.Message);
+        return StatusCode(500, new Web.SimpleErrorResponse
+        {
+            Success = false,
+            Message = "An error occurred while creating the company."
+        });
+    }
+}
 
 
     [HttpPost]
