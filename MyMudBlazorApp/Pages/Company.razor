@@ -183,6 +183,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         try
         {
             var result = await Http.GetFromJsonAsync<Web.GetDetailedCompanyInfo>($"api/company/getInfo?userID=0&companyID={CompanyId}");
