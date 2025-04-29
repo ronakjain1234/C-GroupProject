@@ -1,9 +1,8 @@
 ﻿@page "/roles"
-
-@using MudBlazor
-@using MyMudBlazorApp.Models
-@using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Components.Web
+@using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
+@using DatabaseHandler.Data.Models.Web.ResponseObjects;
+@inject HttpClient Http
+@inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
 <style>
@@ -138,7 +137,7 @@
     <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-3" Class="main-tabs swipeable-tabs" Centered="true">
         <MudTabPanel Text="Roles Management">
             <div class="tab-content-container">
-                <MudTable class="rolesTable" Items="@RolesList" Filter="new Func<string, bool>(FilterFunc1)" MultiSelection="true"
+                <MudTable class="rolesTable" Items="@_roles.roles" Filter="new Func<Web.Role, bool>(FilterFunc1)" MultiSelection="true"
                           @bind-SelectedItems="_selectedItems" Hover="true" FixedHeader="true">
                     <ToolBarContent>
                         <MudTextField @bind-Value="searchString1" 
@@ -152,23 +151,20 @@
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh Style="width: 50px;">
-                            <MudTableHeaderCheckbox T="string" />
+                            <MudTableHeaderCheckbox T="Web.Role" />
                         </MudTh>
                         <MudTh Class="role-name-cell">Role Name</MudTh>
                         <MudTh>Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd Style="width: 50px;">
-                            <MudTableCheckbox T="string" Value="context" />
+                            <MudTableCheckbox T="Web.Role" Value="context" />
                         </MudTd>
                         <MudTd DataLabel="Role Name" Class="role-name-cell">
-                            <MudTextField Value="@context" ReadOnly="false" Class="mt-0 mb-0" />
+                            <MudTextField Value="@context.Name" ReadOnly="false" Class="mt-0 mb-0" />
                         </MudTd>
                         <MudTd DataLabel="Actions">
                             <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-                                <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                          OnClick="() => AddEndpoint(context)"
-                                          Size="Size.Small">Add Group</MudButton>
                                 <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
                                           OnClick="() => CloneRole(context)"
                                           Size="Size.Small">Clone</MudButton>
@@ -183,19 +179,13 @@
                         <div class="d-flex align-center">
                             <MudTablePager />
                             <MudSpacer />
-                            <MudButton Color="Color.Primary" 
-                                      Variant="Variant.Outlined"
-                                      StartIcon="@Icons.Material.Filled.Settings"
-                                      OnClick="MakeChoicesForSelectedRoles"
-                                      Disabled="@(!_selectedItems.Any())"
-                                      Size="Size.Small"
-                                      Class="ml-4">Make Choices</MudButton>
                         </div>
                     </PagerContent>
                 </MudTable>
             </div>
         </MudTabPanel>
         
+        @* Temporarily commented out endpoints tab
         <MudTabPanel Text="Selected Endpoints">
             <div class="tab-content-container">
                 @if (!_roleEndpoints.Any())
@@ -241,9 +231,11 @@
                 }
             </div>
         </MudTabPanel>
+        *@
     </MudTabs>
 </div>
 
+@* Temporarily commented out endpoint dialog
 @if (_isOpen)
 {
     <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
@@ -257,51 +249,31 @@
             </div>
             
             <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0" Class="swipeable-tabs" Centered="true">
-                <MudTabPanel Text="Module ESMA" Style="padding: 0">
-                    <MudPaper Elevation="0" Class="endpoint-paper">
-                        <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true" Class="endpoint-table"
-                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
-                                 @bind-SelectedItems="_selectedEsmaEndpoints">
-                            <HeaderContent>
-                                <MudTh Style="width: 80px;">
-                                    <MudTableHeaderCheckbox T="Endpoint" />
-                                </MudTh>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Description</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd Style="width: 80px;">
-                                    <MudTableCheckbox T="Endpoint" Value="context" />
-                                </MudTd>
-                                <MudTd>@context.Name</MudTd>
-                                <MudTd>@context.Description</MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudPaper>
-                </MudTabPanel>
-                
-                <MudTabPanel Text="Module Calculations" Style="padding: 0">
-                    <MudPaper Elevation="0" Class="endpoint-paper">
-                        <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true" Class="endpoint-table"
-                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
-                                 @bind-SelectedItems="_selectedCalculationEndpoints">
-                            <HeaderContent>
-                                <MudTh Style="width: 80px;">
-                                    <MudTableHeaderCheckbox T="Endpoint" />
-                                </MudTh>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Description</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd Style="width: 80px;">
-                                    <MudTableCheckbox T="Endpoint" Value="context" />
-                                </MudTd>
-                                <MudTd>@context.Name</MudTd>
-                                <MudTd>@context.Description</MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudPaper>
-                </MudTabPanel>
+                @foreach (var module in _endpointsForRoles.Modules)
+                {
+                    <MudTabPanel Text="@module.Name" Style="padding: 0">
+                        <MudPaper Elevation="0" Class="endpoint-paper">
+                            <MudTable Items="@module.Endpoints" Dense="true" Hover="true" Class="endpoint-table"
+                                     Elevation="0" Style="background-color: white;" MultiSelection="true"
+                                     @bind-SelectedItems="_selectedEndpoints">
+                                <HeaderContent>
+                                    <MudTh Style="width: 80px;">
+                                        <MudTableHeaderCheckbox T="Web.Endpoint" />
+                                    </MudTh>
+                                    <MudTh>Name</MudTh>
+                                    <MudTh>Description</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd Style="width: 80px;">
+                                        <MudTableCheckbox T="Web.Endpoint" Value="context" />
+                                    </MudTd>
+                                    <MudTd>@context.Name</MudTd>
+                                    <MudTd>@context.Description</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudPaper>
+                    </MudTabPanel>
+                }
             </MudTabs>
 
             <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
@@ -321,241 +293,172 @@
         </MudPaper>
     </MudOverlay>
 }
+*@
 
 @code {
     private string searchString1 = "";
     private bool _isOpen;
     private string _currentRole = "";
     private Dictionary<string, HashSet<string>> _roleEndpoints = new();
-    private List<string> RolesList = new List<string> { "Admin", "User", "Manager", "Editor", "Viewer" };
-    private HashSet<string> _selectedItems = new HashSet<string>();
-    private HashSet<Endpoint> _selectedEsmaEndpoints = new();
-    private HashSet<Endpoint> _selectedCalculationEndpoints = new();
+    private HashSet<Web.Role> _selectedItems = new();
+    //private HashSet<Web.Endpoint> _selectedEndpoints = new();
+    private Web.GetRolesInCompanyResponse _roles = new() { roles = new List<Web.Role>() };
+    //private Web.GetEndpointsForRolesResponse _endpointsForRoles = new();
 
-    private List<Endpoint> EsmaEndpoints = new()
+    [Parameter]
+    public int CompanyId { get; set; }
+    
+    private int _currentUserId = 1; // Default to 1 for testing
+
+    protected override async Task OnInitializedAsync()
     {
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 1",
-            Description = "Retrieves ESMA financial data",
-            Module = "ESMA",
-            Path = "/api/esma/financial-data",
-            Method = "GET",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 2",
-            Description = "Updates ESMA market statistics",
-            Module = "ESMA",
-            Path = "/api/esma/market-stats",
-            Method = "POST",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 3",
-            Description = "Fetches ESMA regulatory reports",
-            Module = "ESMA",
-            Path = "/api/esma/regulatory-reports",
-            Method = "GET",
-            IsActive = true
-        }
-    };
-
-    private List<Endpoint> CalculationEndpoints = new()
-    {
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 1",
-            Description = "Performs risk assessment calculations",
-            Module = "Calculations",
-            Path = "/api/calc/risk-assessment",
-            Method = "POST",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 2",
-            Description = "Calculates market volatility metrics",
-            Module = "Calculations",
-            Path = "/api/calc/volatility",
-            Method = "GET",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 3",
-            Description = "Generates performance analytics",
-            Module = "Calculations",
-            Path = "/api/calc/performance",
-            Method = "GET",
-            IsActive = true
-        }
-    };
-
-    private IEnumerable<Endpoint> AllEndpoints => EsmaEndpoints.Concat(CalculationEndpoints);
-
-    protected override void OnInitialized()
-    {
-        ConfigureSnackbar();
-    }
-
-    private void ConfigureSnackbar()
-    {
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomRight;
-        Snackbar.Configuration.SnackbarVariant = Variant.Filled;
-        Snackbar.Configuration.ShowTransitionDuration = 200;
-        Snackbar.Configuration.HideTransitionDuration = 200;
-        Snackbar.Configuration.VisibleStateDuration = 2000;
-    }
-
-    private void AddRole()
-    {
-        var newRole = "New Role";
-        RolesList.Add(newRole);
-        StateHasChanged();
-    }
-
-    private void RemoveRole(string role)
-    {
-        RolesList.Remove(role);
-        _roleEndpoints.Remove(role);
-        StateHasChanged();
-    }
-
-    private void CloneRole(string role)
-    {
-        var newRole = $"{role}_Copy";
-        RolesList.Add(newRole);
-        
-        // Clone endpoints if they exist
-        if (_roleEndpoints.ContainsKey(role))
+        try
         {
-            _roleEndpoints[newRole] = new HashSet<string>(_roleEndpoints[role]);
-        }
-        
-        StateHasChanged();
-    }
-
-    private bool FilterFunc1(string role) => 
-        string.IsNullOrWhiteSpace(searchString1) || 
-        role.Contains(searchString1, StringComparison.OrdinalIgnoreCase);
-
-    private void OpenDialog() => _isOpen = true;
-    private void CloseDialog() => _isOpen = false;
-
-    private void AddEndpoint(string role) => OpenEndpointDialog(new[] { role });
-    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems);
-
-    private void OpenEndpointDialog(IEnumerable<string> roles)
-    {
-        if (!roles.Any()) return;
-
-        _currentRole = string.Join(", ", roles);
-        _selectedEsmaEndpoints.Clear();
-        _selectedCalculationEndpoints.Clear();
-
-        // Get common endpoints across all selected roles
-        var commonEndpoints = GetCommonEndpoints(roles);
-        
-        // Pre-select common endpoints
-        PreSelectEndpoints(commonEndpoints);
-        
-        OpenDialog();
-    }
-
-    private HashSet<string> GetCommonEndpoints(IEnumerable<string> roles)
-    {
-        var rolesList = roles.ToList();
-        if (!rolesList.Any()) return new HashSet<string>();
-
-        // Get endpoints of first role, or empty if role has no endpoints
-        var commonEndpoints = _roleEndpoints.TryGetValue(rolesList[0], out var firstRoleEndpoints)
-            ? new HashSet<string>(firstRoleEndpoints)
-            : new HashSet<string>();
-
-        // Intersect with other roles' endpoints
-        foreach (var role in rolesList.Skip(1))
-        {
-            if (_roleEndpoints.TryGetValue(role, out var roleEndpoints))
+            var rolesResult = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={_currentUserId}");
+            if (rolesResult != null)
             {
-                commonEndpoints.IntersectWith(roleEndpoints);
+                _roles = rolesResult;
+            }
+
+            @* Temporarily commented out endpoint loading
+            var endpointsResult = await Http.GetFromJsonAsync<Web.GetEndpointsForRolesResponse>($"api/endpoint/getEndpointsForRoles?companyID={CompanyId}");
+            if (endpointsResult != null)
+            {
+                _endpointsForRoles = endpointsResult;
+            }
+            *@
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to load roles data", Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(Web.Role element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Web.Role element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task AddRole()
+    {
+        try
+        {
+            var response = await Http.PostAsync($"api/company/createRole?userID={_currentUserId}&companyID={CompanyId}&name=New Role", null);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role created successfully!", Severity.Success);
+                await OnInitializedAsync();
             }
             else
             {
-                commonEndpoints.Clear();
-                break;
+                Snackbar.Add("Failed to create role", Severity.Error);
             }
         }
-
-        return commonEndpoints;
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to create role", Severity.Error);
+        }
     }
 
-    private void PreSelectEndpoints(HashSet<string> endpointNames)
+    private async Task RemoveRole(Web.Role role)
     {
-        if (endpointNames == null || !endpointNames.Any()) return;
-
-        _selectedEsmaEndpoints = new HashSet<Endpoint>(
-            EsmaEndpoints.Where(e => endpointNames.Contains(e.Name))
-        );
-
-        _selectedCalculationEndpoints = new HashSet<Endpoint>(
-            CalculationEndpoints.Where(e => endpointNames.Contains(e.Name))
-        );
+        try
+        {
+            var response = await Http.DeleteAsync($"api/company/deleteRole?userID={_currentUserId}&companyID={CompanyId}&roleID={role.RoleID}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role removed successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to remove role", Severity.Error);
+        }
     }
 
-    private bool HasSelectedEndpoints() => 
-        _selectedEsmaEndpoints.Any() || _selectedCalculationEndpoints.Any();
-
-    private void SaveAndClose()
+    private async Task CloneRole(Web.Role role)
     {
-        SaveSelection();
+        try
+        {
+            var response = await Http.PostAsync($"api/company/createRole?userID={_currentUserId}&companyID={CompanyId}&name={role.Name}_Copy", null);
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Role cloned successfully!", Severity.Success);
+                await OnInitializedAsync();
+            }
+            else
+            {
+                Snackbar.Add("Failed to clone role", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to clone role", Severity.Error);
+        }
+    }
+
+    @* Temporarily commented out endpoint-related methods
+    private void OpenDialog() => _isOpen = true;
+    private void CloseDialog() => _isOpen = false;
+
+    private void AddEndpoint(Web.Role role) => OpenEndpointDialog(new[] { role });
+    private void MakeChoicesForSelectedRoles() => OpenEndpointDialog(_selectedItems);
+
+    private void OpenEndpointDialog(IEnumerable<Web.Role> roles)
+    {
+        if (!roles.Any()) return;
+
+        _currentRole = string.Join(", ", roles.Select(r => r.Name));
+        _selectedEndpoints.Clear();
+        OpenDialog();
+    }
+
+    private bool HasSelectedEndpoints() => _selectedEndpoints.Any();
+
+    private async Task SaveAndClose()
+    {
+        await SaveSelection();
         CloseDialog();
     }
 
-    private void SaveSelection()
+    private async Task SaveSelection()
     {
-        var selectedEndpoints = _selectedEsmaEndpoints
-            .Concat(_selectedCalculationEndpoints)
-            .Select(e => e.Name)
-            .ToHashSet();
-
-        if (selectedEndpoints.Any())
+        try
         {
-            SaveEndpointsToRoles(selectedEndpoints);
-            ShowSuccessMessage();
+            foreach (var role in _selectedItems)
+            {
+                foreach (var endpoint in _selectedEndpoints)
+                {
+                    var response = await Http.PostAsJsonAsync("api/endpoint/addEndpointToRole", new { roleID = role.RoleID, endpointID = endpoint.EndpointID });
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Snackbar.Add($"Failed to add endpoint to role {role.Name}", Severity.Error);
+                    }
+                }
+            }
+            Snackbar.Add("Endpoints saved successfully!", Severity.Success);
+            await OnInitializedAsync();
         }
-        else
+        catch (Exception ex)
         {
-            RemoveEndpointsFromRoles();
-            ShowWarningMessage();
-        }
-    }
-
-    private void SaveEndpointsToRoles(HashSet<string> endpoints)
-    {
-        foreach (var role in _selectedItems)
-        {
-            _roleEndpoints[role] = endpoints;
+            Console.WriteLine($"Error: {ex.Message}");
+            Snackbar.Add("Failed to save endpoints", Severity.Error);
         }
     }
-
-    private void RemoveEndpointsFromRoles()
-    {
-        foreach (var role in _selectedItems)
-        {
-            _roleEndpoints.Remove(role);
-        }
-    }
-
-    private void ShowSuccessMessage() =>
-        ShowSnackbar($"Endpoints saved successfully for roles: {_currentRole}!", Severity.Info);
-
-    private void ShowWarningMessage() =>
-        ShowSnackbar("Please select at least one endpoint", Severity.Warning);
-
-    private void ShowSnackbar(string message, Severity severity)
-    {
-        Snackbar.Add(message, severity, config =>
-        {
-            config.ShowCloseIcon = true;
-            config.Action = "Dismiss";
-            config.ActionColor = Color.Surface;
-        });
-    }
+    *@
 }
