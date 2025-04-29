@@ -9,3 +9,10 @@ DatabaseHandler/bin/
 DatabaseHandler/obj/
 BackendAPIService/bin/
 C-GroupProject.sln.DotSettings.user
+.vs/
+*.vsidx
+*.jfm
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
