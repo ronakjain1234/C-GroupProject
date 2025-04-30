@@ -467,7 +467,7 @@
                 return;
             }
 
-            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=4&userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
             
             if (response.IsSuccessStatusCode)
             {
@@ -490,7 +490,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=4&userID={user.userID}&companyID={companyID}&roleID={roleID}");
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
@@ -513,7 +513,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?mainUserID=1&userID={user.userID}&companyID={companyID}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?mainUserID=4&userID={user.userID}&companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User removed successfully!", Severity.Success);
@@ -550,7 +550,7 @@
     {
         try
         {            
-            var url = $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(email)}&companyID={companyID}";
+            var url = $"/api/company/addUser?mainUserID=4&email={Uri.EscapeDataString(email)}&companyID={companyID}";
 
             var response = await Http.PostAsJsonAsync(url, new { companyID = companyID, user = user });
             if (response.IsSuccessStatusCode)
@@ -579,7 +579,7 @@
         try
         {
             var addUserResponse = await Http.PostAsync(
-                $"http://localhost:5000/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID={companyID}", null);
+                $"http://localhost:5000/api/company/addUser?mainUserID=4&email={Uri.EscapeDataString(newUserEmail)}&companyID={companyID}", null);
 
             if (addUserResponse.IsSuccessStatusCode)
             {

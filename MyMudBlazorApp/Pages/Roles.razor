@@ -566,9 +566,25 @@
         var role = RolesList.FirstOrDefault(r => r.roleName == roleName);
         if (role != null)
         {
-            RolesList.Remove(role);
-            _roleEndpoints.Remove(roleName);
-            StateHasChanged();
+            try
+            {
+                var response = await Http.DeleteAsync($"http://localhost:5000/api/company/deleteRole?userID={currentUserID}&companyID={CompanyId}&roleID={role.roleID}");
+                if (response.IsSuccessStatusCode)
+                {
+                    RolesList.Remove(role);
+                    _roleEndpoints.Remove(roleName);
+                    Snackbar.Add($"Role '{roleName}' deleted successfully!", Severity.Success);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add("Failed to delete role", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting role: {ex.Message}", Severity.Error);
+            }
         }
     }
 
@@ -579,16 +595,31 @@
         
         if (roleToClone != null)
         {
-            var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
-            var newRole = new Web.Role(newRoleId, newRoleName);
-            RolesList.Add(newRole);
-            
-            if (_roleEndpoints.ContainsKey(roleName))
+            try
             {
-                _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+                var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={CompanyId}&name={Uri.EscapeDataString(newRoleName)}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadRoles(); // Refresh the roles list to get the new role
+                    
+                    // Copy the endpoints if they exist
+                    if (_roleEndpoints.ContainsKey(roleName))
+                    {
+                        _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+                    }
+                    
+                    Snackbar.Add($"Role '{newRoleName}' created successfully!", Severity.Success);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to clone role '{roleName}'", Severity.Error);
+                }
             }
-            
-            StateHasChanged();
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error cloning role: {ex.Message}", Severity.Error);
+            }
         }
     }
 
@@ -702,7 +733,7 @@
 
         try
         {
-            var response = await Http.PostAsync($"/api/company/createRole?userID=1&companyID={CompanyId}&name={Uri.EscapeDataString(roleName)}", null);
+            var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={CompanyId}&name={Uri.EscapeDataString(roleName)}", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
