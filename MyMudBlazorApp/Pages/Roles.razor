@@ -211,7 +211,11 @@
                                 <MudTableCheckbox T="Web.Role" Value="context" />
                             </MudTd>
                             <MudTd DataLabel="Role Name" Class="role-name-cell">
-                                <MudTextField Value="@context.roleName" ReadOnly="false" Class="mt-0 mb-0" />
+                                <MudTextField Value="@context.roleName" 
+                                            ReadOnly="false" 
+                                            Class="mt-0 mb-0"
+                                            ValueChanged="@(async (string newName) => await UpdateRoleName(context, newName))"
+                                            Immediate="true" />
                             </MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -781,5 +785,37 @@
             config.Action = "Dismiss";
             config.ActionColor = Color.Surface;
         });
+    }
+
+    private async Task UpdateRoleName(Web.Role role, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName) || role.roleName == newName)
+            return;
+
+        try
+        {
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/updateRoles?userID={currentUserID}&roleID={role.roleID}&name={Uri.EscapeDataString(newName)}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                role.roleName = newName;
+                // Update the endpoints dictionary key if it exists
+                if (_roleEndpoints.ContainsKey(role.roleName))
+                {
+                    var endpoints = _roleEndpoints[role.roleName];
+                    _roleEndpoints.Remove(role.roleName);
+                    _roleEndpoints[newName] = endpoints;
+                }
+                Snackbar.Add($"Role name updated to '{newName}'", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update role name", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating role name: {ex.Message}", Severity.Error);
+        }
     }
 }
