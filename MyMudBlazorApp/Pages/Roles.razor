@@ -157,7 +157,7 @@
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/company/{CompanyId}"))" />
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/company/{companyId}"))" />
         </MudTooltip>
         <MudTooltip Text="Add Role" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
@@ -215,7 +215,13 @@
                                             ReadOnly="false" 
                                             Class="mt-0 mb-0"
                                             ValueChanged="@(async (string newName) => await UpdateRoleName(context, newName))"
-                                            Immediate="true" />
+                                            Immediate="false"
+                                            OnKeyDown="@(async (KeyboardEventArgs e) => {
+                                                if (e.Key == "Enter") {
+                                                    await UpdateRoleName(context, context.roleName);
+                                                }
+                                            })"
+                                            OnBlur="@(async () => await UpdateRoleName(context, context.roleName))" />
                             </MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -418,8 +424,10 @@
 }
 
 @code {
+
     [Parameter]
-    public int CompanyId { get; set; }
+    public int companyId { get; set; }
+
     private bool _isAddRoleOpen;
     private string _newRoleName = string.Empty;
     private string _companyName = string.Empty;
@@ -514,7 +522,7 @@
         try
         {
             isLoading = true;
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&userID={currentUserID}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyId}&userID={currentUserID}");
             
             if (result != null)
             {
@@ -572,7 +580,7 @@
         {
             try
             {
-                var response = await Http.DeleteAsync($"http://localhost:5000/api/company/deleteRole?userID={currentUserID}&companyID={CompanyId}&roleID={role.roleID}");
+                var response = await Http.DeleteAsync($"http://localhost:5000/api/company/deleteRole?userID={currentUserID}&companyID={companyId}&roleID={role.roleID}");
                 if (response.IsSuccessStatusCode)
                 {
                     RolesList.Remove(role);
@@ -601,7 +609,7 @@
         {
             try
             {
-                var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={CompanyId}&name={Uri.EscapeDataString(newRoleName)}", null);
+                var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={companyId}&name={Uri.EscapeDataString(newRoleName)}", null);
                 if (response.IsSuccessStatusCode)
                 {
                     await LoadRoles(); // Refresh the roles list to get the new role
@@ -737,7 +745,7 @@
 
         try
         {
-            var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={CompanyId}&name={Uri.EscapeDataString(roleName)}", null);
+            var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?userID={currentUserID}&companyID={companyId}&name={Uri.EscapeDataString(roleName)}", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
