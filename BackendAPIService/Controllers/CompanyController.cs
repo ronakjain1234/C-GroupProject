@@ -84,11 +84,18 @@ public class CompanyController : ControllerBase
         }
     }
 
+    
+    public class CreateCompanyRequest
+    {
+        public required string companyName { get; set; }
+    }
+
     [HttpPost]
     [Route("createCompany")]
-    public ActionResult<Web.SimpleErrorResponse> CreateCompany(string companyName)
+    public ActionResult<Web.SimpleErrorResponse> CreateCompany([FromBody] CreateCompanyRequest request)
     {
-            
+        string companyName = request.companyName;
+
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
         {
