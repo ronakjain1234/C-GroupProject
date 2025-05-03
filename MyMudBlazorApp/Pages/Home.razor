@@ -5,7 +5,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject HttpClient Http
-
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <style>
     .companySideBar {
@@ -149,6 +149,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+        if (string.IsNullOrEmpty(token))
+        {
+            Snackbar.Add("You are not logged in", Severity.Warning);
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
         await LoadCompanies();
     }
 
@@ -156,7 +168,7 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>("/api/company/get?userID=1");
+            var result = await Http.GetFromJsonAsync<List<GetAllCompaniesResponse>>("/api/company/get");
             if (result != null)
             {
                 Companies = result;
@@ -190,23 +202,23 @@
 
         try
         {
-            var payload = new { userID = 1, companyName = newCompanyName };
-            var response = await Http.PostAsJsonAsync("api/company/createCompany", payload);
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var content = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("companyName", newCompanyName)
+            });
+
+            var response = await Http.PostAsync("api/company/createCompany", content);
             
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<CreateCompanyResponse>();
-                if (result != null)
-                {
-                    Snackbar.Add("Company created successfully!", Severity.Success);
-                    createCompanyDialog = false;
-                    newCompanyName = "";
-                    await LoadCompanies();
-                }
-                else
-                {
-                    Snackbar.Add("Failed to parse response", Severity.Error);
-                }
+                Snackbar.Add("Company created successfully!", Severity.Success);
+                createCompanyDialog = false;
+                newCompanyName = "";
+                await LoadCompanies();
             }
             else
             {
