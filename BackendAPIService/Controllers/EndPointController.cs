@@ -1,9 +1,9 @@
 using DatabaseHandler.Data.Models.Web.ResponseObjects;
 using DatabaseHandler;
-using Database = DatabaseHandler.Data.Models.Database;
 using Microsoft.AspNetCore.Mvc;
 using DatabaseHandler.Data.Models.Database.MixedTables;
 using DatabaseHandler.Data.Models.Database;
+using System.Security.Claims;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
@@ -19,8 +19,17 @@ public class EndPointController : ControllerBase
     
     [HttpPost]
     [Route("createEndpoint")]
-    public ActionResult CreateEndpoint(int userID,  string endPointPath, int companyID, int? moduleID = null)
+    public ActionResult CreateEndpoint( string endPointPath, int companyID, int? moduleID = null)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
@@ -53,8 +62,17 @@ public class EndPointController : ControllerBase
 
     [HttpPost]
     [Route("addEndpointToCompany")]
-    public ActionResult AddEndpointToCompany(int userID, int companyID, int endpointID)
+    public ActionResult AddEndpointToCompany(int companyID, int endpointID)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
@@ -119,8 +137,17 @@ public class EndPointController : ControllerBase
 
     [HttpDelete]
     [Route("removeEndpointFromCompany")]
-    public ActionResult RemoveEndpointFromCompany(int userID, int companyID, int endpointID)
+    public ActionResult RemoveEndpointFromCompany(int companyID, int endpointID)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
@@ -179,8 +206,17 @@ public class EndPointController : ControllerBase
 
     [HttpGet]
     [Route("getEndpointsForRole")]
-    public ActionResult<List<EndpointResponse>> GetEndpointsForRole(int userID, int roleID)
+    public ActionResult<List<EndpointResponse>> GetEndpointsForRole(int roleID)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized(new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Invalid or missing authentication token."
+                });
+            }
             try
             {
                 
@@ -240,8 +276,17 @@ public class EndPointController : ControllerBase
 
     [HttpGet]
     [Route("getCompanyEndpoints")]
-    public ActionResult<List<EndpointResponse>> GetCompanyEndpoints(int userID, int companyID)
+    public ActionResult<List<EndpointResponse>> GetCompanyEndpoints(int companyID)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         try
         {
             
@@ -294,6 +339,15 @@ public class EndPointController : ControllerBase
     [Route("createModule")]
     public ActionResult CreateModule(string moduleName)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
@@ -330,6 +384,15 @@ public class EndPointController : ControllerBase
     [Route("associateEndpointWithModule")]
     public ActionResult AssociateEndpointWithModule(int moduleID, int endpointID)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
@@ -402,6 +465,15 @@ public class EndPointController : ControllerBase
     [Route("deleteEndpoint")]
     public ActionResult DeleteEndpoint(int endpointID)
     {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
