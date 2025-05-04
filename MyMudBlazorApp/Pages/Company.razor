@@ -31,7 +31,6 @@
     .mainContent {
         margin-left: 80px;
         padding: 20px;
-        padding-top: 84px;
     }
 
     .entirePage {
@@ -95,7 +94,7 @@
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts"
                           Color="Color.Primary"
-                          OnClick="@(() => Navigation.NavigateTo("http://localhost:5084/company/3/roles"))" />
+                          OnClick="@(() => Navigation.NavigateTo($"http://localhost:5084/company/{companyID}/roles"))" />
         </MudTooltip>
 
         <MudTooltip Text="Bulk Manage Roles" Placement="Placement.Right">
@@ -459,7 +458,7 @@
                 return;
             }
 
-            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?companyID={companyID}&roleID={roleID}", null);
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
             
             if (response.IsSuccessStatusCode)
             {
@@ -618,7 +617,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"/api/company/delete?companyID={companyID}");
+            var response = await Http.DeleteAsync($"/api/company/deleteCompany?companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Company deleted successfully!", Severity.Success);
