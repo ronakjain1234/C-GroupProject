@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using DatabaseHandler.Data.Models.Database.MixedTables;
 using DatabaseHandler.Data.Models.Database;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackendAPIService.Controllers;
 
@@ -332,7 +333,7 @@ public class CompanyController : ControllerBase
         }
     }
 
-
+    
     [HttpDelete]
     [Route("removeUser")]
     public ActionResult<Web.SimpleErrorResponse> RemoveUser(int userID, int companyID)

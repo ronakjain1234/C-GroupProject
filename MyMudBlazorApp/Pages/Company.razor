@@ -6,6 +6,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 
 
@@ -316,7 +317,7 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}&userID=1");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}");
             if (result != null)
             {
                 AvailableRoles = result.roles;
@@ -373,28 +374,19 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        
+        if (string.IsNullOrEmpty(token))
         {
-            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"http://localhost:5000/api/company/getCompany?userID=1&companyID={companyID}");
-
-            if (result != null)
-            {
-                _company = result;
-                _newCompanyName = _company.companyName ?? string.Empty;
-
-                foreach (var user in result.users)
-                {
-                    var roles = string.Join(", ", user.roles.Select(r => r.roleName));
-                    _roles.Add($"{user.userName}: {roles}"); 
-                }
-            }
+            Snackbar.Add("You are not logged in", Severity.Warning);
+            Navigation.NavigateTo("/login");
+            return;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-            Snackbar.Add("Failed to load company data", Severity.Error);
-            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-        }
+
+        Http.DefaultRequestHeaders.Authorization = 
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        await LoadCompanyData();
     }
 
     private bool FilterFunc(Web.User user)
@@ -412,7 +404,7 @@
     {
         try
         {
-            var url = $"/api/company/changeCompanyName?userID=1&companyID={companyID}&newCompanyName={Uri.EscapeDataString(companyName)}";
+            var url = $"/api/company/changeCompanyName?companyID={companyID}&newCompanyName={Uri.EscapeDataString(companyName)}";
 
             var response = await Http.PutAsync(url, null);
             if (response.IsSuccessStatusCode)
@@ -441,7 +433,7 @@
 
         try
         {
-            var response = await Http.PostAsync($"/api/company/createRole?userID=1&companyID={companyID}&name={Uri.EscapeDataString(roleName)}", null);
+            var response = await Http.PostAsync($"/api/company/createRole?companyID={companyID}&name={Uri.EscapeDataString(roleName)}", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
@@ -467,7 +459,7 @@
                 return;
             }
 
-            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?companyID={companyID}&roleID={roleID}", null);
             
             if (response.IsSuccessStatusCode)
             {
@@ -490,7 +482,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?mainUserID=1&userID={user.userID}&companyID={companyID}&roleID={roleID}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeRoleFromUser?&userID={user.userID}&companyID={companyID}&roleID={roleID}");
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
@@ -513,7 +505,7 @@
     {
         try
         {
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?mainUserID=1&userID={user.userID}&companyID={companyID}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?userID={user.userID}&companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User removed successfully!", Severity.Success);
@@ -534,7 +526,7 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?userID=1&companyID={companyID}");
+            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?companyID={companyID}");
             if (result != null)
             {
                 _company = result;
@@ -550,7 +542,7 @@
     {
         try
         {            
-            var url = $"/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(email)}&companyID={companyID}";
+            var url = $"/api/company/addUser?&email={Uri.EscapeDataString(email)}&companyID={companyID}";
 
             var response = await Http.PostAsJsonAsync(url, new { companyID = companyID, user = user });
             if (response.IsSuccessStatusCode)
@@ -579,7 +571,7 @@
         try
         {
             var addUserResponse = await Http.PostAsync(
-                $"http://localhost:5000/api/company/addUser?mainUserID=1&email={Uri.EscapeDataString(newUserEmail)}&companyID={companyID}", null);
+                $"http://localhost:5000/api/company/addUser?email={Uri.EscapeDataString(newUserEmail)}&companyID={companyID}", null);
 
             if (addUserResponse.IsSuccessStatusCode)
             {

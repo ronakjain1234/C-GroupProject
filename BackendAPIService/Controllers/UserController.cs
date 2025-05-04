@@ -7,6 +7,8 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using Database = DatabaseHandler.Data.Models.Database;
+
 
 namespace BackendAPIService.Controllers
 {
@@ -24,33 +26,47 @@ namespace BackendAPIService.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string userEmail, string userPassword)
+    public async Task<IActionResult> Register(string userEmail, string userPassword, string firstName, string lastName)
+    {
+        if (await _dbContext.UserEmail.AnyAsync(u => u.Email == userEmail))
+            return BadRequest("Email already exists.");
+
+        // Generate salt + hash
+        var salt = RandomNumberGenerator.GetBytes(16);
+        var hash = new Rfc2898DeriveBytes(userPassword, salt, 100_000, HashAlgorithmName.SHA256)
+                        .GetBytes(32);
+        var combinedHash = Convert.ToBase64String(salt.Concat(hash).ToArray());
+
+        // Generate a consistent user ID
+        var userId = Guid.NewGuid().GetHashCode();
+
+        // Add to User table
+        var newUser = new Database.User {UserID = userId, Name = firstName + " " + lastName};
+        newUser.LastChange = DateTime.Now.ToUniversalTime();
+        _dbContext.Users.Add(newUser);
+        _dbContext.SaveChanges(); 
+
+        // Add to UserEmail table
+        await _dbContext.UserEmail.AddAsync(new UserEmail
         {
-            if (await _dbContext.UserEmail.AnyAsync(u => u.Email == userEmail))
-                return BadRequest("Email already exists.");
+            UserID = userId,
+            Email = userEmail,
+            LastChange = DateTime.UtcNow
+        });
 
-            // generate salt + hash
-            var salt  = RandomNumberGenerator.GetBytes(16);
-            var hash  = new Rfc2898DeriveBytes(userPassword, salt, 100_000, HashAlgorithmName.SHA256)
-                            .GetBytes(32);
-            var combinedHash = Convert.ToBase64String(salt.Concat(hash).ToArray());
+        // Add to UserPassword table
+        await _dbContext.UserPassword.AddAsync(new UserPassword
+        {
+            UserID = userId,
+            Password = combinedHash,
+            LastChange = DateTime.UtcNow
+        });
 
-            // NOTE: you may want to change this to use a Guid directly rather than GetHashCode()
-            var userId = Guid.NewGuid().GetHashCode();
-            await _dbContext.UserEmail.AddAsync(new UserEmail {
-                UserID     = userId,
-                Email      = userEmail,
-                LastChange = DateTime.UtcNow
-            });
-            await _dbContext.UserPassword.AddAsync(new UserPassword {
-                UserID     = userId,
-                Password   = combinedHash,
-                LastChange = DateTime.UtcNow
-            });
-            await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
-            return Ok("User registered.");
-        }
+        return Ok("User registered.");
+    }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] string email, [FromForm] string password)
