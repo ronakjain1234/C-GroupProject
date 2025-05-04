@@ -14,7 +14,7 @@ public class UserController : ControllerBase
     {
         _dbContext = dbContext;
     }
-    
+
     [HttpGet]
     [Route("get")]
     public ActionResult<List<User>> GetUsers()
