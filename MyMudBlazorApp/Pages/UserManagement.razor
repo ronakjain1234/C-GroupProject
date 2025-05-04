@@ -171,7 +171,7 @@
             {
                 _allUsers = response;
                 _allUsersByType = response
-                    .SelectMany(u => u.Roles.Select(r => new { Role = r.Name, User = u.Name }))
+                    .SelectMany(u => u.Roles.Select(r => new { Role = r, User = u.Name }))
                     .GroupBy(x => x.Role)
                     .ToDictionary(
                         g => g.Key,
