@@ -190,17 +190,9 @@
             
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<CreateCompanyResponse>();
-                if (result != null)
-                {
-                    Snackbar.Add("Company created successfully!", Severity.Success);
-                    CloseCreateCompanyDialog();
-                    await LoadCompanies();
-                }
-                else
-                {
-                    Snackbar.Add("Failed to parse response", Severity.Error);
-                }
+                Snackbar.Add("Company created successfully!", Severity.Success);
+                CloseCreateCompanyDialog();
+                await LoadCompanies();
             }
             else
             {
