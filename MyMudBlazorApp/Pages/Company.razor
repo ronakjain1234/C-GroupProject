@@ -186,7 +186,34 @@
             <RowTemplate>
                 <MudTd DataLabel="Name">@context.userName</MudTd>
                 <MudTd DataLabel="Email">@context.email</MudTd>
-                <MudTd DataLabel="Roles">@context.RolesToString()</MudTd>
+                <MudTd DataLabel="Roles">
+                    <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Text" 
+                                     Color="Color.Primary" 
+                                     EndIcon="@Icons.Material.Filled.ArrowDropDown">
+                                @(context.roles.Count > 0 ? $"{context.roles.Count} Roles" : "No Roles")
+                            </MudButton>
+                        </ActivatorContent>
+                        <ChildContent>
+                            @if (context.roles.Any())
+                            {
+                                @foreach (var role in context.roles)
+                                {
+                                    <MudMenuItem>
+                                        <MudText>@role.roleName</MudText>
+                                    </MudMenuItem>
+                                }
+                            }
+                            else
+                            {
+                                <MudMenuItem Disabled="true">
+                                    <MudText>No roles assigned</MudText>
+                                </MudMenuItem>
+                            }
+                        </ChildContent>
+                    </MudMenu>
+                </MudTd>
                 <MudTd DataLabel="Actions">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                  Color="Color.Warning" 
