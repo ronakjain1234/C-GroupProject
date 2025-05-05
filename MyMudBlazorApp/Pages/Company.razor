@@ -291,13 +291,13 @@
                 <MudButton Color="Color.Primary" 
                           Variant="Variant.Filled" 
                           StartIcon="@Icons.Material.Filled.Add" 
-                          OnClick="BulkAddSelectedRoles"
+                          OnClick="@(async () => { await BulkAddSelectedRoles(); CloseBulkRolesDialog(); })"
                           Disabled="@(!_selectedRoles.Any())">Add Selected Roles</MudButton>
 
                 <MudButton Color="Color.Error" 
                           Variant="Variant.Filled" 
                           StartIcon="@Icons.Material.Filled.Remove" 
-                          OnClick="BulkRemoveSelectedRoles"
+                          OnClick="@(async () => { await BulkRemoveSelectedRoles(); CloseBulkRolesDialog(); })"
                           Disabled="@(!_selectedRoles.Any())">Remove Selected Roles</MudButton>
             </div>
         </MudPaper>
@@ -474,10 +474,9 @@
                     await AddRoleToUser(user, role.roleID);
                 }
             }
-            CloseBulkRolesDialog();
             await LoadCompanyData();
-                Snackbar.Add($"Roles added to users successfully!", Severity.Success);
-            }
+            Snackbar.Add($"Roles added to users successfully!", Severity.Success);
+        }
         catch (Exception ex)
         {
             Snackbar.Add($"Error adding roles: {ex.Message}", Severity.Error);
@@ -924,6 +923,7 @@
             }
             await LoadCompanyData();
             Snackbar.Add("Roles removed from users successfully!", Severity.Success);
+            CloseBulkRemoveRolesDialog();
         }
         catch (Exception ex)
         {
