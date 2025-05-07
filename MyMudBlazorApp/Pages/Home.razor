@@ -1,4 +1,4 @@
-@page "/"
+﻿@page "/"
 @using MudBlazor
 @using System.Net.Http.Json
 @using DatabaseHandler.Data.Models.Web.ResponseObjects
@@ -43,75 +43,84 @@
     }
 </style>
 
+@if (_isLoading)
+{
+    <div class="d-flex justify-center align-center" style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else if (_isAuthenticated)
+{
+    <div class="entirePage">
+        <div class="mainContent">
+            <div class="d-flex justify-space-between align-center mb-10 page-title">
+                <MudText Typo="Typo.h3" Style="color: black;">Companies</MudText>
+                <MudTextField @bind-Value="searchString" 
+                              Placeholder="Search" 
+                              Adornment="Adornment.Start" 
+                              AdornmentIcon="@Icons.Material.Filled.Search" 
+                              IconSize="Size.Medium" 
+                              Class="mt-0"
+                              Style="width: 200px; margin-left: auto;" />
+            </div>
 
+            <MudGrid Spacing="8">
+                @foreach (var company in FilteredCompanies)
+                {
+                    <MudItem xs="12" sm="6" lg="4" Class="mb-10">
+                        <MudCard Elevation="2" Style="height: 100%;">
+                            <MudCardContent Class="pa-7">
+                                <div class="d-flex justify-space-between align-center">
+                                    <MudText Typo="Typo.h6">@company.companyName</MudText>
+                                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => NavigateToCompany(company.companyID))">View Details</MudButton>
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
 
-<div class="entirePage">
-    <div class="mainContent">
-        <div class="d-flex justify-space-between align-center mb-10 page-title">
-            <MudText Typo="Typo.h3" Style="color: black;">Companies</MudText>
-            <MudTextField @bind-Value="searchString" 
-                          Placeholder="Search" 
-                          Adornment="Adornment.Start" 
-                          AdornmentIcon="@Icons.Material.Filled.Search" 
-                          IconSize="Size.Medium" 
-                          Class="mt-0"
-                          Style="width: 200px; margin-left: auto;" />
-        </div>
-
-        <MudGrid Spacing="8">
-            @foreach (var company in FilteredCompanies)
-            {
-                <MudItem xs="12" sm="6" lg="4" Class="mb-10">
-                    <MudCard Elevation="2" Style="height: 100%;">
-                        <MudCardContent Class="pa-7">
-                            <div class="d-flex justify-space-between align-center">
-                                <MudText Typo="Typo.h6">@company.companyName</MudText>
-                                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => NavigateToCompany(company.companyID))">View Details</MudButton>
-                            </div>
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
-
-        <div class="pt-12 d-flex justify-center w-100 mb-10">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog">
-                Create Company
-            </MudButton>
+            <div class="pt-12 d-flex justify-center w-100 mb-10">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog">
+                    Create Company
+                </MudButton>
+            </div>
         </div>
     </div>
-</div>
 
-@if (_isCreateCompanyOpen)
-{
-    <MudOverlay Visible="_isCreateCompanyOpen" DarkBackground="true" AutoClose="false">
-        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
-            <div class="d-flex justify-space-between align-center mb-2">
-                <MudText Typo="Typo.h5">Create New Company</MudText>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseCreateCompanyDialog" />
-            </div>
+    @if (_isCreateCompanyOpen)
+    {
+        <MudOverlay Visible="_isCreateCompanyOpen" DarkBackground="true" AutoClose="false">
+            <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+                <div class="d-flex justify-space-between align-center mb-2">
+                    <MudText Typo="Typo.h5">Create New Company</MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseCreateCompanyDialog" />
+                </div>
 
-            <MudTextField @bind-Value="_newCompanyName"
-                          Label="Company Name"
-                          Required="true"
-                          RequiredError="Company name is required!"
-                          Variant="Variant.Outlined"
-                          FullWidth="true"
-                          Class="mt-4" 
-                        Immediate="true"/>
+                <MudTextField @bind-Value="_newCompanyName"
+                              Label="Company Name"
+                              Required="true"
+                              RequiredError="Company name is required!"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Class="mt-4" 
+                            Immediate="true"/>
 
-            <div class="d-flex justify-end gap-2 mt-6">
-                <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="CloseCreateCompanyDialog">Cancel</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateCompany" Disabled="@string.IsNullOrWhiteSpace(_newCompanyName)">Create</MudButton>
-            </div>
-        </MudPaper>
-    </MudOverlay>
+                <div class="d-flex justify-end gap-2 mt-6">
+                    <MudButton Variant="Variant.Text" Color="Color.Default" OnClick="CloseCreateCompanyDialog">Cancel</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateCompany" Disabled="@string.IsNullOrWhiteSpace(_newCompanyName)">Create</MudButton>
+                </div>
+            </MudPaper>
+        </MudOverlay>
+    }
 }
 
 @code {
     private List<GetAllCompaniesResponse> Companies { get; set; } = new();
     private string searchString = "";
 
+    private bool _isLoading = true;
+    private bool _isAuthenticated = false;
     private bool _isCreateCompanyOpen = false;
     private string _newCompanyName = "";
 
@@ -120,19 +129,39 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        await CheckAuthentication();
+    }
 
-        if (string.IsNullOrEmpty(token))
+    private async Task CheckAuthentication()
+    {
+        try
         {
-            Snackbar.Add("You are not logged in", Severity.Warning);
-            Navigation.NavigateTo("/login");
-            return;
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _isAuthenticated = false;
+                Snackbar.Add("You are not logged in", Severity.Warning);
+                _isLoading = false;  // Set loading to false before navigating
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            _isAuthenticated = true;
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            await LoadCompanies();
         }
-
-        Http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        await LoadCompanies();
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            _isAuthenticated = false;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     private async Task LoadCompanies()
@@ -147,6 +176,14 @@
         {
             Snackbar.Add("Failed to load companies", Severity.Error);
             Console.WriteLine(ex.Message);
+            
+            // If we get an unauthorized response, redirect to login
+            if (ex is HttpRequestException httpEx && httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await LocalStorage.RemoveItemAsync("authToken");
+                _isAuthenticated = false;
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
         }
     }
 
@@ -184,12 +221,31 @@
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Error response: {errorContent}");
+                
+                // Handle unauthorized error
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    await LocalStorage.RemoveItemAsync("authToken");
+                    _isAuthenticated = false;
+                    Snackbar.Add("Your session has expired", Severity.Warning);
+                    Navigation.NavigateTo("/login", forceLoad: true);
+                    return;
+                }
+                
                 Snackbar.Add($"Failed to create company: {response.StatusCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Failed to create company: {ex.Message}", Severity.Error);
+            
+            // If we get an unauthorized exception, redirect to login
+            if (ex is HttpRequestException httpEx && httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await LocalStorage.RemoveItemAsync("authToken");
+                _isAuthenticated = false;
+                Navigation.NavigateTo("/login", forceLoad: true);
+            }
         }
     }
 

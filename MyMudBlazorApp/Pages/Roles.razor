@@ -13,7 +13,7 @@
 
 
 <style>
-/* Your existing styles remain the same */
+
 .mud-table th, .mud-table td {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -23,8 +23,8 @@
 }
 
 .rolesTable {
-    /* Remove max-height to prevent inner scrolling */
-    width: 100%; /* Use full width of container */
+    
+    width: 100%; 
     margin: 0 auto;
 }
 
@@ -67,7 +67,7 @@
     margin-bottom: 16px;
 }
 
-/* Styling for tabs */
+
 .mud-tabs-panels {
     padding: 0 !important;
 }
@@ -91,7 +91,7 @@
     max-height: 80vh;
 }
 
-/* Styling for main content tabs */
+
 .main-tabs {
     margin-top: 16px;
     width: 90%;
@@ -100,8 +100,8 @@
 }
 
 .main-tabs .mud-tabs-panels {
-    min-height: 500px; /* Set consistent height for all tab panels */
-    overflow-y: auto; /* Add scrolling to the tab panels instead of tables */
+    min-height: 500px; 
+    overflow-y: auto; 
 }
 
 .empty-selection {
@@ -153,7 +153,13 @@
     padding: 20px;
 }
 </style>
-
+@if (!_authChecked)
+{
+    <div class="d-flex justify-center align-center" style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else {
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
@@ -430,6 +436,9 @@
     private HashSet<Endpoint> _selectedEsmaEndpoints = new();
     private HashSet<Endpoint> _selectedCalculationEndpoints = new();
     private bool isLoading = true;
+    private bool _isAuthenticated = false;
+    private bool _authChecked = false;
+
 
     public class Endpoint
     {
@@ -501,20 +510,38 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-        
-        if (string.IsNullOrEmpty(token))
+        try
         {
-            Snackbar.Add("You are not logged in", Severity.Warning);
-            Navigation.NavigateTo("/login");
-            return;
-        }
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
 
-        Http.DefaultRequestHeaders.Authorization = 
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        ConfigureSnackbar();
-        await LoadRoles();
+            if (string.IsNullOrEmpty(token))
+            {
+                _isAuthenticated = false;
+                Snackbar.Add("You are not logged in", Severity.Warning);
+                _authChecked = true;
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            _isAuthenticated = true;
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            ConfigureSnackbar();
+            await LoadRoles();
+        }
+        catch (Exception ex)
+        {
+            _isAuthenticated = false;
+            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        finally
+        {
+            _authChecked = true;
+        }
     }
+
 
     private async Task LoadRoles()
     {
@@ -762,4 +789,5 @@
             config.ActionColor = Color.Surface;
         });
     }
+}
 }

@@ -10,7 +10,7 @@
 
 
 
-<PageTitle>@_company.companyName</PageTitle>
+
 
 <style>
     .companySideBar {
@@ -86,6 +86,15 @@
     }
 </style>
 
+@if (_isLoading)
+{
+    <div class="d-flex justify-center align-center" style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+
+else {
+<PageTitle>@_company.companyName</PageTitle>
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
@@ -440,6 +449,10 @@
     private bool _isCreateUserOpen;
     private HashSet<Web.Role> _selectedRoles = new();
     private List<Web.Role> AvailableRoles = new();
+    
+    private bool _isLoading = true;
+    private bool _isAuthenticated = false;
+
     private DialogOptions dialogOptions = new DialogOptions
     {
         MaxWidth = MaxWidth.Small,
@@ -529,20 +542,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-        
-        if (string.IsNullOrEmpty(token))
+        try
         {
-            Snackbar.Add("You are not logged in", Severity.Warning);
-            Navigation.NavigateTo("/login");
-            return;
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _isAuthenticated = false;
+                Snackbar.Add("You are not logged in", Severity.Warning);
+                _isLoading = false;
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            _isAuthenticated = true;
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            await LoadCompanyData();
         }
-
-        Http.DefaultRequestHeaders.Authorization = 
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        await LoadCompanyData();
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            _isAuthenticated = false;
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
+
 
     private bool FilterFunc(Web.User user)
     {
@@ -913,5 +943,6 @@
         }
     }
        
+}
 }
 
