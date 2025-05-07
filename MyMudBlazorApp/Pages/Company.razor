@@ -31,6 +31,7 @@
     .mainContent {
         margin-left: 80px;
         padding: 20px;
+        padding-top: 84px;
     }
 
     .entirePage {
@@ -367,6 +368,11 @@
                           StartIcon="@Icons.Material.Filled.Close" 
                           OnClick="CloseCreateUserDialog">Cancel</MudButton>
                       
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.PersonAdd" 
+                          OnClick="@(() => CreateNewUserAccount(_newUserName, _newUserEmail))"
+                          Disabled="@(!IsValidEmail(_newUserEmail) || string.IsNullOrWhiteSpace(_newUserName))">Create User</MudButton>
             </div>
         </MudPaper>
     </MudOverlay>
@@ -530,7 +536,7 @@
     protected override async Task OnInitializedAsync()
     {
         var token = await LocalStorage.GetItemAsync<string>("authToken");
-        
+
         if (string.IsNullOrEmpty(token))
         {
             Snackbar.Add("You are not logged in", Severity.Warning);
@@ -538,7 +544,7 @@
             return;
         }
 
-        Http.DefaultRequestHeaders.Authorization = 
+        Http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         await LoadCompanyData();
@@ -615,7 +621,7 @@
             }
 
             var response = await Http.PutAsync($"http://localhost:5000/api/company/addRoletoUser?userID={user.userID}&companyID={companyID}&roleID={roleID}", null);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
@@ -831,12 +837,42 @@
         StateHasChanged();
     }
 
-     private void CloseCreateUserDialog()
+    private void CloseCreateUserDialog()
     {
         _isCreateUserOpen = false;
         _newUserName = string.Empty;
         _newUserEmail = string.Empty;
         StateHasChanged();
+    }
+
+    private async Task CreateNewUserAccount(string userName, string email)
+    {
+        if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email))
+        {
+            Snackbar.Add("Both name and email are required.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsync(
+                $"http://localhost:5000/api/company/createUser?userName={Uri.EscapeDataString(userName)}&email={Uri.EscapeDataString(email)}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _isCreateUserOpen = false;
+                Snackbar.Add($"User '{userName}' created successfully!", Severity.Success);
+                await LoadCompanyData();
+            }
+            else
+            {
+                Snackbar.Add("Failed to create user.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating user: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task MakeSelectedUserAdmin()
@@ -912,6 +948,6 @@
             Snackbar.Add($"Error removing roles: {ex.Message}", Severity.Error);
         }
     }
-       
+
 }
 
