@@ -19,7 +19,7 @@ public class EndPointController : ControllerBase
     
     [HttpPost]
     [Route("createEndpoint")]
-    public ActionResult CreateEndpoint( string endPointPath, int companyID, int? moduleID = null)
+    public ActionResult CreateEndpoint(string name, string spec)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -34,22 +34,25 @@ public class EndPointController : ControllerBase
         {
             try
             {
-                var hasAccess = _dbContext.UserCompanies.Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
-                if (!hasAccess)
+                bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
+                if (!allowed)
                 {
-                    return StatusCode(403, new SimpleErrorResponse { Success = false, Message = "User does not have access" });
+                    return Unauthorized(new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Invalid or missing authentication token."
+                    });
                 }
-
-
                 var newEndpoint = new EndPoint
-                    {   
-                        Path = endPointPath,
+                    {
+                        EndPointName = name,
+                        Specification = spec,
                         LastChange = DateTime.UtcNow
                     };
                 _dbContext.EndPoints.Add(newEndpoint);
                  _dbContext.SaveChanges();
                 transaction.Commit();
-                return Ok("Endpoint successfully created and assigned to company.");
+                return Ok("Endpoint successfully created");
             }
             catch (Exception ex)
             {
@@ -258,7 +261,7 @@ public class EndPointController : ControllerBase
                     .Select(e => new EndpointResponse
                     {
                         endpointID = e.EndPointID,
-                        Path = e.Path
+                        Name = e.EndPointName
                     })
                     .ToList();
 
@@ -319,7 +322,7 @@ public class EndPointController : ControllerBase
                 .Select(e => new EndpointResponse
                 {
                     endpointID = e.EndPointID,
-                    Path = e.Path
+                    Name = e.EndPointName
                 })
                 .ToList();
 
