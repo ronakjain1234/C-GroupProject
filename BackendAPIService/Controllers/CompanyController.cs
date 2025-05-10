@@ -780,8 +780,8 @@ public class CompanyController : ControllerBase
         }
     }
 
-   [HttpPut]
-   [Route("updateRoles")]
+    [HttpPut]
+    [Route("updateRoles")]
     public ActionResult UpdateRoleName(int roleID, string name)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -817,17 +817,39 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                bool nameExists = _dbContext.Roles
-                    .Any(r => r.Name.ToLower() == name.Trim().ToLower() && r.RoleID != roleID);
+                // Get the companyID associated with this role
+                var companyID = _dbContext.CompanyRoles
+                    .Where(cr => cr.RoleID == roleID)
+                    .Select(cr => cr.CompanyID)
+                    .FirstOrDefault();
+
+                if (companyID == 0)
+                {
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Associated company not found for this role."
+                    });
+                }
+
+                // Check for duplicate name within the same company
+                bool nameExists = (from cr in _dbContext.CompanyRoles
+                                join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                                where cr.CompanyID == companyID &&
+                                        r.RoleID != roleID &&
+                                        r.Name.ToLower() == name.Trim().ToLower()
+                                select r).Any();
+
                 if (nameExists)
                 {
                     return BadRequest(new Web.SimpleErrorResponse
                     {
                         Success = false,
-                        Message = "A role with this name already exists."
+                        Message = "A role with this name already exists in the same company."
                     });
                 }
 
+                // Proceed with update
                 role.Name = name.Trim();
                 role.LastChange = DateTime.UtcNow;
 
@@ -848,6 +870,7 @@ public class CompanyController : ControllerBase
             }
         }
     }
+
 
 
    [HttpGet] 
