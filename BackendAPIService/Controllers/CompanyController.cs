@@ -26,7 +26,7 @@ public class CompanyController : ControllerBase
     {
         try
         {
-            // Extract user ID from JWT
+       
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
             {
@@ -36,8 +36,8 @@ public class CompanyController : ControllerBase
                     Message = "Invalid or missing authentication token."
                 });
             }
+            
 
-            // Fetch associated company IDs
             var companyIds = _dbContext.UserCompanies
                 .Where(uc => uc.UserID == userID)
                 .Select(uc => uc.CompanyID)
@@ -49,18 +49,17 @@ public class CompanyController : ControllerBase
                 return Ok(new List<Web.GetAllCompaniesResponse>()); // No companies
             }
 
-            // Get companies
             var companiesQuery = _dbContext.Companies
                 .Where(c => companyIds.Contains(c.CompanyID));
 
-            // Apply search filter if provided
+            
             if (!string.IsNullOrWhiteSpace(searchString))
             {
                 companiesQuery = companiesQuery
                     .Where(c => c.CompanyName.Contains(searchString, StringComparison.OrdinalIgnoreCase));
             }
 
-            // Apply pagination
+           
             var result = companiesQuery
                 .OrderBy(c => c.CompanyName)
                 .Skip(offset)
@@ -209,19 +208,18 @@ public class CompanyController : ControllerBase
         }
         try
         { 
-            // Step 1: Get all role IDs for the main user
+           
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == userID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-            // Step 2: Filter role IDs that belong to the company
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
+            
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -275,13 +273,12 @@ public class CompanyController : ControllerBase
             .Select(ur => ur.RoleID)
             .ToList();
 
-        // Step 2: Filter role IDs that belong to the company
         var companyRoleIds = _dbContext.CompanyRoles
             .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
             .Select(cr => cr.RoleID)
             .ToList();
 
-        // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
+        
         var hasCustomerAdminRole = _dbContext.Roles
             .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -290,7 +287,7 @@ public class CompanyController : ControllerBase
             return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
         }
 
-            // Find the userId based on the provided email
+          
             var userEmailEntry = _dbContext.UserEmail.FirstOrDefault(ue => ue.Email == email);
             if (userEmailEntry == null)
             {
@@ -299,21 +296,20 @@ public class CompanyController : ControllerBase
 
             int userId = userEmailEntry.UserID;
 
-            // Check if the company exists
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
-            // Check if the user is already added
+            
             bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyID);
             if (userExists)
             {
                 return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
             }
 
-            // Add the user to the company
+            
             var newUser = new Database.MixedTables.UserCompany
             {
                 UserID = userId,
@@ -347,9 +343,19 @@ public class CompanyController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
+
+        if (mainUserID == userID)
+        {
+            return BadRequest(new Web.SimpleErrorResponse
+            {
+                Success = false,
+                Message = "You cannot remove yourself from the company."
+            });
+        }
+
         try
         {
-           // Step 1: Get all role IDs for the main user
+       
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
