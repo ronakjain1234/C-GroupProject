@@ -548,7 +548,7 @@ else {
         try
         {
             isLoading = true;
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&showCustomerAdminRole={false}");
             
             if (result != null)
             {

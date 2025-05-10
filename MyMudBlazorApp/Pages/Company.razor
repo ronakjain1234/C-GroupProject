@@ -469,7 +469,7 @@ else {
     {
         if (_selectedItems.Any())
         {
-            await LoadAvailableRoles();
+            await LoadAvailableRoles(false);
             _isBulkRolesOpen = true;
             StateHasChanged();
         }
@@ -482,11 +482,11 @@ else {
         StateHasChanged();
     }
 
-    private async Task LoadAvailableRoles()
+    private async Task LoadAvailableRoles(bool showCustomerAdminRole)
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}&showCustomerAdminRole={showCustomerAdminRole}");
             if (result != null)
             {
                 AvailableRoles = result.roles;
@@ -909,7 +909,7 @@ else {
     {
         if (_selectedItems.Any())
         {
-            await LoadAvailableRoles();
+            await LoadAvailableRoles(true);
             _isBulkRemoveRolesOpen = true;
             StateHasChanged();
         }

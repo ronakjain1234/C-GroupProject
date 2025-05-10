@@ -361,13 +361,13 @@ public class CompanyController : ControllerBase
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-            // Step 2: Filter role IDs that belong to the company
+           
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
+          
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -412,19 +412,17 @@ public class CompanyController : ControllerBase
         }
         try 
         {
-            // Step 1: Get all role IDs for the main user
+          
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-            // Step 2: Filter role IDs that belong to the company
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -487,19 +485,20 @@ public class CompanyController : ControllerBase
         try
         {
             
-            // Step 1: Get all role IDs for the main user
+          
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-            // Step 2: Filter role IDs that belong to the company
+           
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            // Step 3: Check if any of the filtered roles has the name "CustomerAdmin"
+            
+            
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -544,7 +543,7 @@ public class CompanyController : ControllerBase
 
     [HttpGet]
     [Route("getRolesInCompany")]
-    public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID)
+    public ActionResult<Web.GetRolesInCompanyResponse> GetCompanyRoles(int companyID, bool showCustomerAdminRole)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -555,12 +554,23 @@ public class CompanyController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
+
         try
         {
-            var roles = (from cr in _dbContext.CompanyRoles
-                        join r in _dbContext.Roles on cr.RoleID equals r.RoleID
-                        where cr.CompanyID == companyID
-                        select new Web.Role(r.RoleID, r.Name)).ToList();
+            var rolesQuery = from cr in _dbContext.CompanyRoles
+                            join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                            where cr.CompanyID == companyID
+                            select new { r.RoleID, r.Name };
+
+            
+            if (!showCustomerAdminRole)
+            {
+                rolesQuery = rolesQuery.Where(role => role.Name != "CustomerAdmin");
+            }
+
+            var roles = rolesQuery
+                .Select(role => new Web.Role(role.RoleID, role.Name))
+                .ToList();
 
             var response = new Web.GetRolesInCompanyResponse
             {
@@ -572,9 +582,13 @@ public class CompanyController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while fetching roles." });
+            return StatusCode(500, new Web.SimpleErrorResponse
+            {
+                Message = "An error occurred while fetching roles."
+            });
         }
     }
+
 
 
 
