@@ -780,9 +780,9 @@ public class CompanyController : ControllerBase
         }
     }
 
-    [HttpPut]
-    [Route("updateRoles")]
-    public ActionResult UpdateRoleName( int roleID, string name)
+   [HttpPut]
+   [Route("updateRoles")]
+    public ActionResult UpdateRoleName(int roleID, string name)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -793,37 +793,42 @@ public class CompanyController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
+
         using (var transaction = _dbContext.Database.BeginTransaction())
         {
             try
             {
-                var userRoleIds = _dbContext.UserRoles
-                    .Where(ur => ur.UserID == userID)
-                    .Select(ur => ur.RoleID)
-                    .ToList();
-
-                var companyRoleIds = _dbContext.CompanyRoles
-                    .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
-                    .Select(cr => cr.RoleID)
-                    .ToList();
-
-                var hasCustomerAdminRole = _dbContext.Roles
-                    .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
-
-                if (!hasCustomerAdminRole)
-                {
-                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
-                }
-
                 var role = _dbContext.Roles.Find(roleID);
-
                 if (role == null)
                 {
-                    return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role does not exist."});
+                    return StatusCode(500, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Role does not exist."
+                    });
                 }
 
-                
-                role.Name = name;
+                if (string.Equals(name.Trim(), "CustomerAdmin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Cannot rename role to 'CustomerAdmin'."
+                    });
+                }
+
+                bool nameExists = _dbContext.Roles
+                    .Any(r => r.Name.ToLower() == name.Trim().ToLower() && r.RoleID != roleID);
+                if (nameExists)
+                {
+                    return BadRequest(new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "A role with this name already exists."
+                    });
+                }
+
+                role.Name = name.Trim();
                 role.LastChange = DateTime.UtcNow;
 
                 _dbContext.SaveChanges();
@@ -834,11 +839,16 @@ public class CompanyController : ControllerBase
             catch (Exception ex)
             {
                 transaction.Rollback();
-                Console.WriteLine("An error occured: {0}", ex.Message);
-                return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while updating roles."});
+                Console.WriteLine("An error occurred: {0}", ex.Message);
+                return StatusCode(500, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "An error occurred while updating roles."
+                });
             }
         }
     }
+
 
    [HttpGet] 
    [Route("getCompany")]
