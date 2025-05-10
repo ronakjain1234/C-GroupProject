@@ -798,6 +798,24 @@ public class CompanyController : ControllerBase
         {
             try
             {
+                var userRoleIds = _dbContext.UserRoles
+                    .Where(ur => ur.UserID == userID)
+                    .Select(ur => ur.RoleID)
+                    .ToList();
+
+                var companyRoleIds = _dbContext.CompanyRoles
+                    .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
+                    .Select(cr => cr.RoleID)
+                    .ToList();
+
+                
+                var hasCustomerAdminRole = _dbContext.Roles
+                    .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+
+                if (!hasCustomerAdminRole)
+                {
+                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+                }
                 var role = _dbContext.Roles.Find(roleID);
                 if (role == null)
                 {
