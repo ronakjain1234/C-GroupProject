@@ -1,0 +1,341 @@
+@page "/manageEndpoints"
+@using System.Net.Http.Json
+@using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
+@using DatabaseHandler.Data.Models.Web.ResponseObjects;
+@using MyMudBlazorApp.Services
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+
+
+<PageTitle>"Manage Endpoints"</PageTitle>
+
+<style>
+    .companySideBar {
+        width: 64px;
+        height: calc(100vh - 64px);
+        position: fixed;
+        left: 0;
+        top: 64px;
+        padding: 16px 8px;
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        z-index: 1;
+    }
+
+    .mainContent {
+        margin-left: 80px;
+        padding: 20px;
+        padding-top: 84px;
+    }
+
+    .entirePage {
+        background-color: white;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .companyTable {
+        background-color: white;
+        border-radius: 8px;
+    }
+
+    .sideBarButtons {
+        margin-top: 16px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .deleteCompanyButton {
+        margin-top: auto;
+        margin-bottom: 16px;
+    }
+
+    .companyTitle {
+        display: flex;
+        align-items: center;
+    }
+
+        .companyTitle h1 {
+            margin: 0;
+            padding: 0;
+        }
+
+    .mud-table th, .mud-table td {
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mud-overlay {
+        z-index: 1300 !important;
+    }
+
+    .mud-dialog {
+        z-index: 1301 !important;
+    }
+</style>
+
+<div class="companySideBar">
+    <div class="sideBarButtons">
+        <MudTooltip Text="Back" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
+        </MudTooltip>
+        
+
+        <MudTooltip Text="Add User" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
+                           Color="Color.Primary"
+                           OnClick="@(() => OpenAddUserDialog())" />
+        </MudTooltip>
+    </div>
+</div>
+
+<div class="entirePage">
+    <div class="mainContent">
+        <div class="companyTitle mb-10">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <MudTextField
+                            Placeholder="Manage Endpoints"
+                            Disabled="@_isCompanyNameDisabled"
+                            Class="mt-2"
+                            Typo="Typo.h3"
+                            Style="max-width: 250px; color: black;"
+                            Variant="Variant.Text" />
+            </div>
+        </div>
+
+        <MudTable class="companyTable" Items="@_company" Filter="new Func<Web.EndpointResponse, bool>(FilterFunc)" MultiSelection="false" Hover="true"/>
+            <ToolBarContent>
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
+                                 Color="Color.Warning" 
+                                 aria-label="Manage Roles" 
+                                 Size="Size.Medium"
+                                 OnClick="@(() => OpenEndpointDialog(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
+                                   OnClick="@(() => RemoveUserFromCompany(context))" />
+                </MudTd>
+            </RowTemplate>
+
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </div>
+</div>
+
+@if (_isAddUserOpen)
+{
+    <MudOverlay Visible="_isAddUserOpen" DarkBackground="true" AutoClose="false">
+        <MudPaper Elevation="24" Class="pa-4 compact-dialog">
+            <div class="d-flex justify-space-between align-center mb-2">
+                <div>
+                    <MudText Typo="Typo.h5">Add User to Company</MudText>
+                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">@_company</MudText>
+                </div>
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseAddUserDialog" />
+            </div>
+            
+            <MudPaper Elevation="0" Class="pa-4">
+                <MudTextField @bind-Value="_newEndpointName"
+                              Label="Endpoint Name"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Class="mt-4"
+                              Immediate="true"/>
+                <MudTextField @bind-Value="_newEndpointSpec"
+                              Label="Endpoint Spec"
+                              Variant="Variant.Outlined"
+                              FullWidth="true"
+                              Class="mt-4"
+                              Immediate="true"/>
+            </MudPaper>
+
+            <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
+
+            <div class="d-flex justify-end gap-2">
+                <MudButton Color="Color.Error" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.Close" 
+                          OnClick="CloseAddUserDialog">Cancel</MudButton>
+                      
+                <MudButton Color="Color.Primary" 
+                          Variant="Variant.Filled" 
+                          StartIcon="@Icons.Material.Filled.PersonAdd" 
+                          OnClick="@(() => AllocateNewUser(_newUserEmail))"
+                          Disabled="@(!IsValidEmail(_newUserEmail))">Add User</MudButton>
+            </div>
+        </MudPaper>
+    </MudOverlay>
+}
+
+
+
+@code {
+    private EndpointResponse endpoint;
+    private string _newEndpointName = string.Empty;
+    private string _newEndpointSpec = string.Empty;
+    private List<EndpointResponse> _company = new();
+    private string searchString = "";
+    private string _originalCompanyName = "";
+    private bool _isCompanyNameDisabled = true;
+    private bool _isAddUserOpen;
+
+    private DialogOptions dialogOptions = new DialogOptions
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseOnEscapeKey = true,
+        Position = DialogPosition.Center,
+        CloseButton = true,
+        NoHeader = false
+    };
+
+    private void OpenEndpointDialog(EndpointResponse endpoint)
+    {
+        this.endpoint = endpoint;
+        OpenBulkRolesDialog();
+    }
+
+    private async Task OpenBulkRolesDialog()
+    {
+        _isAddUserOpen = true;
+        StateHasChanged();
+    }
+
+    private void ToggleEditMode()
+    {
+        if (_isCompanyNameDisabled)
+        {
+            _originalCompanyName = _company.companyName;
+            _isCompanyNameDisabled = false;
+        }
+        else
+        {
+            _company.companyName = _originalCompanyName;
+            _isCompanyNameDisabled = true;
+        }
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            Snackbar.Add("You are not logged in", Severity.Warning);
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        await LoadCompanyData();
+    }
+
+    private bool FilterFunc(EndpointResponse endpoint)
+    {
+        return true;
+        /*
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (user.userName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (user.email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        return false;
+        */
+    }
+
+
+
+
+
+    private async Task RemoveUserFromCompany(User user)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?userID={user.userID}&companyID={companyID}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("User removed successfully!", Severity.Success);
+                await LoadCompanyData();
+            }
+            else
+            {
+                Snackbar.Add("Failed to remove user", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error removing user: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadCompanyData()
+    {
+        try
+        {
+            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?companyID={companyID}");
+            if (result != null)
+            {
+                _company = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading company data: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void OpenAddUserDialog()
+    {
+        _newUserEmail = string.Empty;
+        _isAddUserOpen = true;
+        StateHasChanged();
+    }
+
+    private void CloseAddUserDialog()
+    {
+        _isAddUserOpen = false;
+        _newUserEmail = string.Empty;
+        StateHasChanged();
+    }
+
+}
+
+
+
+
+
+
+
+    
+    
+
+}
+

@@ -18,4 +18,5 @@ public class EndpointResponse
 {
     public int endpointID { get; set; }
     public required string Name { get; set; }
+    public required string Spec { get; set; }
 }
