@@ -116,7 +116,7 @@
             </div>
         </div>
 
-        <MudTable class="companyTable" Items="@_company" Filter="new Func<Web.EndpointResponse, bool>(FilterFunc)" MultiSelection="false" Hover="true"/>
+        <MudTable class="companyTable" Items="@_company" Filter="new Func<Web.EndpointResponse, bool>(FilterFunc)" MultiSelection="false" Hover="true">
             <ToolBarContent>
                 <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
@@ -126,15 +126,15 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Name"></MudTd>
                 <MudTd DataLabel="Actions">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                  Color="Color.Warning" 
-                                 aria-label="Manage Roles" 
+                                 aria-label="Edit Endpoint" 
                                  Size="Size.Medium"
-                                 OnClick="@(() => OpenEndpointDialog(context))" />
+                                 OnClick="@(() => OpenEndpointDialog(@context))" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
-                                   OnClick="@(() => RemoveUserFromCompany(context))" />
+                                   OnClick="@(() => RemoveEndpoint(@context))" />
                 </MudTd>
             </RowTemplate>
 
@@ -180,11 +180,12 @@
                           StartIcon="@Icons.Material.Filled.Close" 
                           OnClick="CloseAddUserDialog">Cancel</MudButton>
                       
-                <MudButton Color="Color.Primary" 
-                          Variant="Variant.Filled" 
-                          StartIcon="@Icons.Material.Filled.PersonAdd" 
-                          OnClick="@(() => AllocateNewUser(_newUserEmail))"
-                          Disabled="@(!IsValidEmail(_newUserEmail))">Add User</MudButton>
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           OnClick="@(() => CreateEndpoint(_newEndpointName,_newEndpointSpec))">
+                    Add User
+                </MudButton>
             </div>
         </MudPaper>
     </MudOverlay>
@@ -224,20 +225,6 @@
         StateHasChanged();
     }
 
-    private void ToggleEditMode()
-    {
-        if (_isCompanyNameDisabled)
-        {
-            _originalCompanyName = _company.companyName;
-            _isCompanyNameDisabled = false;
-        }
-        else
-        {
-            _company.companyName = _originalCompanyName;
-            _isCompanyNameDisabled = true;
-        }
-    }
-
 
 
     protected override async Task OnInitializedAsync()
@@ -273,12 +260,16 @@
 
 
 
+    private async Task CreateEndpoint(string endpointName, string endpointSpec)
+    {
+        // TODO
+    }
 
-
-    private async Task RemoveUserFromCompany(User user)
+    private async Task RemoveEndpoint(EndpointResponse endpoint)
     {
         try
         {
+            /*
             var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?userID={user.userID}&companyID={companyID}");
             if (response.IsSuccessStatusCode)
             {
@@ -289,6 +280,7 @@
             {
                 Snackbar.Add("Failed to remove user", Severity.Error);
             }
+            */
         }
         catch (Exception ex)
         {
@@ -300,11 +292,13 @@
     {
         try
         {
+            /*
             var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?companyID={companyID}");
             if (result != null)
             {
                 _company = result;
             }
+            */
         }
         catch (Exception ex)
         {
@@ -314,15 +308,17 @@
 
     private void OpenAddUserDialog()
     {
-        _newUserEmail = string.Empty;
+        _newEndpointName = string.Empty;
+        _newEndpointSpec = string.Empty;
         _isAddUserOpen = true;
         StateHasChanged();
     }
 
     private void CloseAddUserDialog()
     {
+        _newEndpointName = String.Empty;
+        _newEndpointSpec = string.Empty;
         _isAddUserOpen = false;
-        _newUserEmail = string.Empty;
         StateHasChanged();
     }
 

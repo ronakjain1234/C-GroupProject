@@ -261,7 +261,8 @@ public class EndPointController : ControllerBase
                     .Select(e => new EndpointResponse
                     {
                         endpointID = e.EndPointID,
-                        Name = e.EndPointName
+                        Name = e.EndPointName,
+                        Spec = e.Specification
                     })
                     .ToList();
 
@@ -322,7 +323,8 @@ public class EndPointController : ControllerBase
                 .Select(e => new EndpointResponse
                 {
                     endpointID = e.EndPointID,
-                    Name = e.EndPointName
+                    Name = e.EndPointName,
+                    Spec = e.Specification
                 })
                 .ToList();
 
