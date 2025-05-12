@@ -202,6 +202,7 @@
     private string _originalCompanyName = "";
     private bool _isCompanyNameDisabled = true;
     private bool _isAddUserOpen;
+    private string okButtonString = "Create Endpoint";
 
     private DialogOptions dialogOptions = new DialogOptions
     {
@@ -216,6 +217,9 @@
     private void OpenEndpointDialog(EndpointResponse endpoint)
     {
         this.endpoint = endpoint;
+        _newEndpointName = endpoint.Name;
+        _newEndpointSpec = endpoint.Spec;
+        okButtonString = "Verify Changes";
         OpenBulkRolesDialog();
     }
 
@@ -323,6 +327,7 @@
     {
         _newEndpointName = string.Empty;
         _newEndpointSpec = string.Empty;
+        okButtonString = "Create E";
         _isAddUserOpen = true;
         StateHasChanged();
     }
