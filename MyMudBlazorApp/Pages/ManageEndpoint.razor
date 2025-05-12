@@ -184,7 +184,7 @@
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Material.Filled.PersonAdd"
                            OnClick="@(() => CreateEndpoint())">
-                    Add Endpoint
+                    @okButtonString
                 </MudButton>
             </div>
         </MudPaper>
@@ -327,7 +327,7 @@
     {
         _newEndpointName = string.Empty;
         _newEndpointSpec = string.Empty;
-        okButtonString = "Create E";
+        okButtonString = "Create Endpoint";
         _isAddUserOpen = true;
         StateHasChanged();
     }
