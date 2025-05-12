@@ -29,7 +29,7 @@
     }
 
     .mainContent {
-        margin-left: 80px;
+        margin-left: 65px;
         padding: 20px;
     }
 
@@ -106,12 +106,6 @@ else {
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
                            Color="Color.Primary"
                            OnClick="@(() => OpenAddUserDialog())" />
-        </MudTooltip>
-
-        <MudTooltip Text="Create New User if not already existing" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1"
-                           Color="Color.Primary"
-                           OnClick="@(() => OpenCreateUserDialog())" />
         </MudTooltip>
 
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
