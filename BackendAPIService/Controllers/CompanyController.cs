@@ -1306,7 +1306,43 @@ public class CompanyController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("getInitials")]
+    public ActionResult<string> GetUserInitials()
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized("Invalid or missing authentication token.");
+            }
 
+            var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userID);
+
+            if (user == null || string.IsNullOrWhiteSpace(user.Name))
+            {
+                return NotFound("User not found or name is missing.");
+            }
+
+            var nameParts = user.Name
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (nameParts.Length == 0)
+            {
+                return BadRequest("Name format is invalid.");
+            }
+
+            var initials = string.Concat(nameParts.Select(part => char.ToUpper(part[0])));
+
+            return Ok(initials);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error fetching initials: " + ex.Message);
+            return StatusCode(500, "An error occurred while fetching user initials.");
+        }
+    }
 }
 
     
