@@ -139,7 +139,7 @@ else if (_isAuthenticated)
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Authentication error!", Severity.Error);
             _isAuthenticated = false;
         }
         finally
@@ -216,12 +216,12 @@ else if (_isAuthenticated)
                     return;
                 }
                 
-                Snackbar.Add($"Failed to create company: {response.StatusCode}", Severity.Error);
+                Snackbar.Add($"Failed to create company!", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to create company: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Failed to create company!", Severity.Error);
             
             // If we get an unauthorized exception, redirect to login
             if (ex is HttpRequestException httpEx && httpEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)

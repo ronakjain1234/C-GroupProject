@@ -488,7 +488,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading roles!", Severity.Error);
         }
     }
 
@@ -508,7 +508,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding roles!", Severity.Error);
         }
     }
 
@@ -557,7 +557,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Authentication error!", Severity.Error);
             _isAuthenticated = false;
             Navigation.NavigateTo("/login", forceLoad: true);
         }
@@ -598,7 +598,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error updating company name: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error updating company name!", Severity.Error);
         }
     }
 
@@ -624,7 +624,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error creating role: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error creating role!", Severity.Error);
         }
     }
 
@@ -653,7 +653,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding role to user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding role to user!", Severity.Error);
         }
     }
 
@@ -676,7 +676,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing role from user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing role from user!", Severity.Error);
         }
     }
 
@@ -697,7 +697,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing user!", Severity.Error);
         }
     }
 
@@ -713,7 +713,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading company data: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading company data!", Severity.Error);
         }
     }
 
@@ -736,7 +736,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding user!", Severity.Error);
         }
     }
     private async Task AllocateNewUser(string newUserEmail)
@@ -765,7 +765,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding user!", Severity.Error);
         }
     }
 
@@ -787,7 +787,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error updating role: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error updating role!", Severity.Error);
         }
 
     }
@@ -810,7 +810,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error deleting company: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error deleting company!", Severity.Error);
         }
     }
 
@@ -895,7 +895,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error making user admin: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error making user admin!", Severity.Error);
         }
     }
 
@@ -933,7 +933,7 @@ else {
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing roles!", Severity.Error);
         }
     }
        

@@ -185,12 +185,12 @@
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Snackbar.Add($"Registration failed: {error}", Severity.Error);
+                Snackbar.Add($"Registration failed!", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+            Snackbar.Add($"An error occurred!", Severity.Error);
         }
     }
 

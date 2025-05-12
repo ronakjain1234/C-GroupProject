@@ -534,7 +534,7 @@
         catch (Exception ex)
         {
             _isAuthenticated = false;
-            Snackbar.Add($"Authentication error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Authentication error!", Severity.Error);
             Navigation.NavigateTo("/login", forceLoad: true);
         }
         finally
@@ -558,7 +558,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading roles!", Severity.Error);
         }
         finally
         {
@@ -622,7 +622,7 @@
             }
             catch (Exception ex)
             {
-                Snackbar.Add($"Error deleting role: {ex.Message}", Severity.Error);
+                Snackbar.Add($"Error deleting role!", Severity.Error);
             }
         }
     }
@@ -657,7 +657,7 @@
             }
             catch (Exception ex)
             {
-                Snackbar.Add($"Error cloning role: {ex.Message}", Severity.Error);
+                Snackbar.Add($"Error cloning role!", Severity.Error);
             }
         }
     }
@@ -786,7 +786,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error creating role: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error creating role!", Severity.Error);
         }
     }
 
@@ -850,7 +850,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error updating role name: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error updating role name!", Severity.Error);
         }
     }
 }
