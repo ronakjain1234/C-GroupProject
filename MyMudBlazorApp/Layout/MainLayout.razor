@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+
 @using MudBlazor
 @inject NavigationManager Navigation
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
@@ -54,7 +56,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // First load if there's already a token
         await LoadUserInitials();
+
+        // Subscribe to navigation events so we reload initials after login/navigation
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object sender, LocationChangedEventArgs args)
+    {
+        // Reload initials on every route change
+        await LoadUserInitials();
+        StateHasChanged();
     }
 
     private async Task LoadUserInitials()
@@ -62,7 +75,11 @@
         try
         {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
-            if (string.IsNullOrEmpty(token)) return;
+            if (string.IsNullOrEmpty(token))
+            {
+                userInitials = "??";
+                return;
+            }
 
             Http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -71,7 +88,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadAsStringAsync();
-                userInitials = result.Replace("\"", ""); // remove quotes if JSON string
+                userInitials = result.Replace("\"", "");
             }
             else
             {
@@ -94,7 +111,8 @@
             "/signup"
         };
 
-        return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
+        return hiddenRoutes.Any(route =>
+            currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task LogoutAsync()
@@ -118,5 +136,11 @@
                 Snackbar.Add($"Logout failed: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe to avoid memory leaks
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }
