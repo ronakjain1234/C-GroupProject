@@ -142,6 +142,7 @@
         if (!string.IsNullOrEmpty(token))
         {
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            Navigation.NavigateTo("/");
         }
     }
 

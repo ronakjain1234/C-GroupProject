@@ -2,8 +2,12 @@
 @using MudBlazor
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject HttpClient Http
 
 <style>
 .signup-container {
@@ -19,17 +23,17 @@
 }
 
 .left-section {
-    width: 50%;    /* Make this exactly 50% of the width */
+    width: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
     background: white;
     box-sizing: border-box;
-    position: absolute;  /* Position it absolutely */
-    left: 0;            /* Align to the left edge */
-    top: 0;             /* Align to the top edge */
-    height: 100%;       /* Full height */
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
 }
 
 .right-section {
@@ -48,24 +52,28 @@
     right: 0;
     top: 0;
 }
-    .signup-card {
-        width: 100%;
-        max-width: 400px;
-        box-shadow: none;
-    }
-    .login-button {
-        background: white;
-        color: black;
-        width: 120px;
-    }
-    .login-button:hover {
-        background: white;  /* Keep the background white when hovered */
-        color: black;        /* Keep the text color black when hovered */
-        border-color: black; /* Ensure the border color stays */
-    }
-    .eye-icon {
-        cursor: pointer;
-    }
+
+.signup-card {
+    width: 100%;
+    max-width: 400px;
+    box-shadow: none;
+}
+
+.login-button {
+    background: white;
+    color: black;
+    width: 120px;
+}
+
+.login-button:hover {
+    background: white;
+    color: black;
+    border-color: black;
+}
+
+.eye-icon {
+    cursor: pointer;
+}
 </style>
 
 <div class="signup-container">
@@ -75,54 +83,56 @@
             <MudCardContent>
                 <MudText Typo="Typo.h4" Class="mb-4 text-center">Create Account</MudText>
 
-                <MudTextField @bind-Value="fullName"
-                            Label="Full Name"
-                            Variant="Variant.Filled"
-                            Class="mb-3"
-                            Required="true"
-                            RequiredError="Full name is required!" />
+                <EditForm Model="@signupModel" OnValidSubmit="HandleSignUp">
+                    <DataAnnotationsValidator />
+                    <MudTextField @bind-Value="signupModel.FullName"
+                                  Label="Full Name"
+                                  Variant="Variant.Filled"
+                                  Class="mb-3"
+                                  Required="true"
+                                  RequiredError="Full name is required!"
+                                  Immediate="true" />
 
-                <MudTextField @bind-Value="email"
-                            Label="Email"
-                            Variant="Variant.Filled"
-                            Class="mb-3"
-                            Required="true"
-                            RequiredError="Email is required!" />
+                    <MudTextField @bind-Value="signupModel.Email"
+                                  Label="Email"
+                                  Variant="Variant.Filled"
+                                  Class="mb-3"
+                                  Required="true"
+                                  RequiredError="Email is required!"
+                                  Immediate="true" />
 
-                <MudTextField @bind-Value="password"
-                            Label="Password"
-                            Variant="Variant.Filled"
-                            InputType="@(showPassword ? InputType.Text : InputType.Password)"
-                            Adornment="Adornment.End"
-                            AdornmentIcon="@Icons.Material.Filled.Visibility"
-                            OnAdornmentClick="TogglePasswordVisibility"
-                            Class="mb-3"
-                            Required="true"
-                            RequiredError="Password is required!" />
+                    <MudTextField @bind-Value="signupModel.Password"
+                                  Label="Password"
+                                  Variant="Variant.Filled"
+                                  InputType="@(showPassword ? InputType.Text : InputType.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Visibility"
+                                  OnAdornmentClick="TogglePasswordVisibility"
+                                  Class="mb-3"
+                                  Required="true"
+                                  RequiredError="Password is required!"
+                                  Immediate="true" />
 
-                <MudTextField @bind-Value="confirmPassword"
-                            Label="Confirm Password"
-                            Variant="Variant.Filled"
-                            InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
-                            Adornment="Adornment.End"
-                            AdornmentIcon="@Icons.Material.Filled.Visibility"
-                            OnAdornmentClick="ToggleConfirmPasswordVisibility"
-                            Class="mb-4"
-                            Required="true"
-                            RequiredError="Please confirm your password!" />
+                    <MudTextField @bind-Value="signupModel.ConfirmPassword"
+                                  Label="Confirm Password"
+                                  Variant="Variant.Filled"
+                                  InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@Icons.Material.Filled.Visibility"
+                                  OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                                  Class="mb-4"
+                                  Required="true"
+                                  RequiredError="Please confirm your password!"
+                                  Immediate="true" />
 
-                <div class="d-flex align-center mb-4">
-                    <MudCheckBox T="bool" @bind-Checked="acceptTerms" />
-                    <MudText Typo="Typo.body2" Class="ml-2">I accept the terms and conditions</MudText>
-                </div>
-
-                <MudButton Variant="Variant.Filled"
-                          Color="Color.Primary"
-                          FullWidth="true"
-                          OnClick="HandleSignUp"
-                          Disabled="@(!IsValidForm())">
-                    Sign Up
-                </MudButton>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true">
+                        Sign Up
+                    </MudButton>
+                    <ValidationSummary />
+                </EditForm>
             </MudCardContent>
         </MudCard>
     </div>
@@ -140,13 +150,9 @@
 </div>
 
 @code {
-    private string fullName = "";
-    private string email = "";
-    private string password = "";
-    private string confirmPassword = "";
+    private SignupModel signupModel = new SignupModel();
     private bool showPassword;
     private bool showConfirmPassword;
-    private bool acceptTerms;
 
     private void TogglePasswordVisibility()
     {
@@ -158,38 +164,56 @@
         showConfirmPassword = !showConfirmPassword;
     }
 
-    private bool IsValidForm()
+    private string GetFirstName() =>
+        signupModel.FullName.Trim().Split(' ').FirstOrDefault() ?? "";
+
+    private string GetLastName()
     {
-        return !string.IsNullOrWhiteSpace(fullName) &&
-               !string.IsNullOrWhiteSpace(email) &&
-               !string.IsNullOrWhiteSpace(password) &&
-               !string.IsNullOrWhiteSpace(confirmPassword) &&
-               password == confirmPassword &&
-               acceptTerms;
+        var parts = signupModel.FullName.Trim().Split(' ');
+        return parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "";
     }
 
     private async Task HandleSignUp()
     {
-        if (!IsValidForm())
-        {
-            if (!acceptTerms)
-            {
-                Snackbar.Add("Please accept the terms and conditions", Severity.Warning);
-                return;
-            }
-            if (password != confirmPassword)
-            {
-                Snackbar.Add("Passwords do not match", Severity.Warning);
-                return;
-            }
-            Snackbar.Add("Please fill in all required fields", Severity.Warning);
-            return;
-        }
+        var url = $"api/user/register?userEmail={Uri.EscapeDataString(signupModel.Email)}&userPassword={Uri.EscapeDataString(signupModel.Password)}&firstName={Uri.EscapeDataString(GetFirstName())}&lastName={Uri.EscapeDataString(GetLastName())}";
 
-        // TODO: Implement actual registration logic here
-        // For now, just simulate a successful registration
-        await Task.Delay(1000);
-        Snackbar.Add("Registration successful! Please login.", Severity.Success);
-        Navigation.NavigateTo("/login");
+        try
+        {
+            var response = await Http.PostAsync(url, null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Registration successful! Please login.", Severity.Success);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Registration failed: {error}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    // Model with data annotations for validation
+    public class SignupModel
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        public string FullName { get; set; } = "";
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Password is required")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long")]
+        public string Password { get; set; } = "";
+
+        [Required(ErrorMessage = "Please confirm your password")]
+        [Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; } = "";
     }
 }
