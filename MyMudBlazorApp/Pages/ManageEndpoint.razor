@@ -94,8 +94,8 @@
         </MudTooltip>
         
 
-        <MudTooltip Text="Add User" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
+        <MudTooltip Text="Add Endpoint" Placement="Placement.Right">
+            <MudIconButton Icon="@Icons.Material.Filled.Add"
                            Color="Color.Primary"
                            OnClick="@(() => OpenAddUserDialog())" />
         </MudTooltip>
@@ -112,6 +112,7 @@
                             Class="mt-2"
                             Typo="Typo.h3"
                             Style="max-width: 250px; color: black;"
+                            T="string"
                             Variant="Variant.Text" />
             </div>
         </div>
@@ -151,8 +152,7 @@
         <MudPaper Elevation="24" Class="pa-4 compact-dialog">
             <div class="d-flex justify-space-between align-center mb-2">
                 <div>
-                    <MudText Typo="Typo.h5">Add User to Company</MudText>
-                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">@_company</MudText>
+                    <MudText Typo="Typo.h5">Create Endpoint</MudText>
                 </div>
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseAddUserDialog" />
             </div>
@@ -184,7 +184,7 @@
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Material.Filled.PersonAdd"
                            OnClick="@(() => CreateEndpoint(_newEndpointName,_newEndpointSpec))">
-                    Add User
+                    Add Endpoint
                 </MudButton>
             </div>
         </MudPaper>
@@ -262,15 +262,32 @@
 
     private async Task CreateEndpoint(string endpointName, string endpointSpec)
     {
-        // TODO
+        try
+        {
+            
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Endpoint added successfully!", Severity.Success);
+                await LoadCompanyData();
+            }
+            else
+            {
+                Snackbar.Add("Failed to add endpoint", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding endpoint: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task RemoveEndpoint(EndpointResponse endpoint)
     {
         try
         {
-            /*
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/company/removeUser?userID={user.userID}&companyID={companyID}");
+            
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("User removed successfully!", Severity.Success);
@@ -280,7 +297,6 @@
             {
                 Snackbar.Add("Failed to remove user", Severity.Error);
             }
-            */
         }
         catch (Exception ex)
         {
