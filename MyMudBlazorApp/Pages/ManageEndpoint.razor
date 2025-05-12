@@ -111,7 +111,7 @@
                             Disabled="@_isCompanyNameDisabled"
                             Class="mt-2"
                             Typo="Typo.h3"
-                            Style="max-width: 250px; color: black;"
+                            Style="max-width: 500px; color: black;"
                             T="string"
                             Variant="Variant.Text" />
             </div>
@@ -127,7 +127,7 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Name"></MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                  Color="Color.Warning" 
@@ -183,7 +183,7 @@
                 <MudButton Color="Color.Primary"
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Material.Filled.PersonAdd"
-                           OnClick="@(() => CreateEndpoint(_newEndpointName,_newEndpointSpec))">
+                           OnClick="@(() => CreateEndpoint())">
                     Add Endpoint
                 </MudButton>
             </div>
@@ -240,7 +240,7 @@
         Http.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-        await LoadCompanyData();
+        await LoadEndpoints();
     }
 
     private bool FilterFunc(EndpointResponse endpoint)
@@ -260,16 +260,16 @@
 
 
 
-    private async Task CreateEndpoint(string endpointName, string endpointSpec)
+    private async Task CreateEndpoint()
     {
         try
         {
-            
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
+            Console.WriteLine(_newEndpointName);
+            var response = await Http.GetAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Endpoint added successfully!", Severity.Success);
-                await LoadCompanyData();
+                await LoadEndpoints();
             }
             else
             {
@@ -286,35 +286,32 @@
     {
         try
         {
-            
-            var response = await Http.DeleteAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
+            var response = await Http.DeleteAsync($"http://localhost:5000/api/endpoint/deleteEndpoint?endpointID={endpoint.endpointID}");
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("User removed successfully!", Severity.Success);
-                await LoadCompanyData();
+                Snackbar.Add("Endpoint removed successfully!", Severity.Success);
+                await LoadEndpoints();
             }
             else
             {
-                Snackbar.Add("Failed to remove user", Severity.Error);
+                Snackbar.Add("Failed to remove endpoint", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing endpoint: {ex.Message}", Severity.Error);
         }
     }
 
-    private async Task LoadCompanyData()
+    private async Task LoadEndpoints()
     {
         try
         {
-            /*
-            var result = await Http.GetFromJsonAsync<Web.CompanyInfoResponse>($"api/company/getCompany?companyID={companyID}");
+            var result = await Http.GetFromJsonAsync<List<EndpointResponse>>($"api/endpoint/get");
             if (result != null)
             {
                 _company = result;
             }
-            */
         }
         catch (Exception ex)
         {
