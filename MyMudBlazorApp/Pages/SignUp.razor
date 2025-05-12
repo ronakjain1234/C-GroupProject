@@ -70,10 +70,6 @@
     color: black;
     border-color: black;
 }
-
-.eye-icon {
-    cursor: pointer;
-}
 </style>
 
 <div class="signup-container">
@@ -106,7 +102,7 @@
                                   Variant="Variant.Filled"
                                   InputType="@(showPassword ? InputType.Text : InputType.Password)"
                                   Adornment="Adornment.End"
-                                  AdornmentIcon="@Icons.Material.Filled.Visibility"
+                                  AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                   OnAdornmentClick="TogglePasswordVisibility"
                                   Class="mb-3"
                                   Required="true"
@@ -118,7 +114,7 @@
                                   Variant="Variant.Filled"
                                   InputType="@(showConfirmPassword ? InputType.Text : InputType.Password)"
                                   Adornment="Adornment.End"
-                                  AdornmentIcon="@Icons.Material.Filled.Visibility"
+                                  AdornmentIcon="@(showConfirmPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                   OnAdornmentClick="ToggleConfirmPasswordVisibility"
                                   Class="mb-4"
                                   Required="true"
@@ -198,7 +194,6 @@
         }
     }
 
-    // Model with data annotations for validation
     public class SignupModel
     {
         [Required(ErrorMessage = "Full name is required")]
