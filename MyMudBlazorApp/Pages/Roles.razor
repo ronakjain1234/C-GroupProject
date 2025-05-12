@@ -1,4 +1,4 @@
-﻿@page "/company/{companyId:int}/roles"
+﻿@page "/company/{companyID:int}/roles"
 
 @using MudBlazor
 @using MyMudBlazorApp.Models
@@ -13,7 +13,7 @@
 
 
 <style>
-
+/* Your existing styles remain the same */
 .mud-table th, .mud-table td {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -23,8 +23,8 @@
 }
 
 .rolesTable {
-    
-    width: 100%; 
+    /* Remove max-height to prevent inner scrolling */
+    width: 100%; /* Use full width of container */
     margin: 0 auto;
 }
 
@@ -67,7 +67,7 @@
     margin-bottom: 16px;
 }
 
-
+/* Styling for tabs */
 .mud-tabs-panels {
     padding: 0 !important;
 }
@@ -91,7 +91,7 @@
     max-height: 80vh;
 }
 
-
+/* Styling for main content tabs */
 .main-tabs {
     margin-top: 16px;
     width: 90%;
@@ -100,8 +100,8 @@
 }
 
 .main-tabs .mud-tabs-panels {
-    min-height: 500px; 
-    overflow-y: auto; 
+    min-height: 500px; /* Set consistent height for all tab panels */
+    overflow-y: auto; /* Add scrolling to the tab panels instead of tables */
 }
 
 .empty-selection {
@@ -145,6 +145,7 @@
 .mainContent {
     margin-left: 80px;
     padding: 20px;
+    padding-top: 84px;
 }
 
 .entirePage {
@@ -153,17 +154,11 @@
     padding: 20px;
 }
 </style>
-@if (!_authChecked)
-{
-    <div class="d-flex justify-center align-center" style="height: 100vh;">
-        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-    </div>
-}
-else {
+
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/company/{CompanyId}"))" />
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/company/{companyId}"))" />
         </MudTooltip>
         <MudTooltip Text="Add Role" Placement="Placement.Right">
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
@@ -217,7 +212,17 @@ else {
                                 <MudTableCheckbox T="Web.Role" Value="context" />
                             </MudTd>
                             <MudTd DataLabel="Role Name" Class="role-name-cell">
-                                <MudTextField Value="@context.roleName" ReadOnly="false" Class="mt-0 mb-0" />
+                                <MudTextField Value="@context.roleName" 
+                                            ReadOnly="false" 
+                                            Class="mt-0 mb-0"
+                                            ValueChanged="@(async (string newName) => await UpdateRoleName(context, newName))"
+                                            Immediate="false"
+                                            OnKeyDown="@(async (KeyboardEventArgs e) => {
+                                                if (e.Key == "Enter") {
+                                                    await UpdateRoleName(context, context.roleName);
+                                                }
+                                            })"
+                                            OnBlur="@(async () => await UpdateRoleName(context, context.roleName))" />
                             </MudTd>
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -421,7 +426,7 @@ else {
 
 @code {
     [Parameter]
-    public int CompanyId { get; set; }
+    public int companyId { get; set; }
     private bool _isAddRoleOpen;
     private string _newRoleName = string.Empty;
     private string _companyName = string.Empty;
@@ -548,7 +553,7 @@ else {
         try
         {
             isLoading = true;
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={CompanyId}&showCustomerAdminRole={false}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyId}&showCustomerAdminRole={false}");
             
             if (result != null)
             {
@@ -604,9 +609,25 @@ else {
         var role = RolesList.FirstOrDefault(r => r.roleName == roleName);
         if (role != null)
         {
-            RolesList.Remove(role);
-            _roleEndpoints.Remove(roleName);
-            StateHasChanged();
+            try
+            {
+                var response = await Http.DeleteAsync($"http://localhost:5000/api/company/deleteRole?companyID={companyId}&roleID={role.roleID}");
+                if (response.IsSuccessStatusCode)
+                {
+                    RolesList.Remove(role);
+                    _roleEndpoints.Remove(roleName);
+                    Snackbar.Add($"Role '{roleName}' deleted successfully!", Severity.Success);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add("Failed to delete role", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error deleting role: {ex.Message}", Severity.Error);
+            }
         }
     }
 
@@ -617,16 +638,31 @@ else {
         
         if (roleToClone != null)
         {
-            var newRoleId = RolesList.Count > 0 ? RolesList.Max(r => r.roleID) + 1 : 1;
-            var newRole = new Web.Role(newRoleId, newRoleName);
-            RolesList.Add(newRole);
-            
-            if (_roleEndpoints.ContainsKey(roleName))
+            try
             {
-                _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+                var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?companyID={companyId}&name={Uri.EscapeDataString(newRoleName)}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    await LoadRoles(); // Refresh the roles list to get the new role
+                    
+                    // Copy the endpoints if they exist
+                    if (_roleEndpoints.ContainsKey(roleName))
+                    {
+                        _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
+                    }
+                    
+                    Snackbar.Add($"Role '{newRoleName}' created successfully!", Severity.Success);
+                    StateHasChanged();
+                }
+                else
+                {
+                    Snackbar.Add($"Failed to clone role '{roleName}'", Severity.Error);
+                }
             }
-            
-            StateHasChanged();
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error cloning role: {ex.Message}", Severity.Error);
+            }
         }
     }
 
@@ -740,7 +776,7 @@ else {
 
         try
         {
-            var response = await Http.PostAsync($"/api/company/createRole?companyID={CompanyId}&name={Uri.EscapeDataString(roleName)}", null);
+            var response = await Http.PostAsync($"/api/company/createRole?companyID={companyId}&name={Uri.EscapeDataString(roleName)}", null);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add($"Role '{roleName}' created successfully!", Severity.Success);
@@ -789,5 +825,36 @@ else {
             config.ActionColor = Color.Surface;
         });
     }
-}
+
+    private async Task UpdateRoleName(Web.Role role, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName) || role.roleName == newName)
+            return;
+
+        try
+        {
+            var response = await Http.PutAsync($"http://localhost:5000/api/company/updateRoles?&roleID={role.roleID}&companyID={companyId}&name={Uri.EscapeDataString(newName)}", null);
+            if (response.IsSuccessStatusCode)
+            {
+                role.roleName = newName;
+                // Update the endpoints dictionary key if it exists
+                if (_roleEndpoints.ContainsKey(role.roleName))
+                {
+                    var endpoints = _roleEndpoints[role.roleName];
+                    _roleEndpoints.Remove(role.roleName);
+                    _roleEndpoints[newName] = endpoints;
+                }
+                Snackbar.Add($"Role name updated to '{newName}'", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update role name", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating role name: {ex.Message}", Severity.Error);
+        }
+    }
 }

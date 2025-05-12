@@ -482,23 +482,19 @@ public class CompanyController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
+
         try
         {
-            
-          
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-           
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            
-            
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -507,28 +503,40 @@ public class CompanyController : ControllerBase
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
 
-        
             var existingCompany = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (existingCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
-            
-            var existingRole = _dbContext.CompanyRoles.Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
-            if (!existingRole)
+            var existingRoleInCompany = _dbContext.CompanyRoles.FirstOrDefault(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
+            if (existingRoleInCompany == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Role does not exist in company" });
             }
 
-           
+            var role = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleID);
+            if (role == null)
+            {
+                return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Role not found." });
+            }
+
+            // Block self-removal of CustomerAdmin role
+            if (userID == mainUserID && role.Name == "CustomerAdmin")
+            {
+                return StatusCode(403, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "You cannot remove the CustomerAdmin role from yourself."
+                });
+            }
+
             var userRole = _dbContext.UserRoles.FirstOrDefault(ur => ur.UserID == userID && ur.RoleID == roleID);
             if (userRole == null)
             {
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "User does not have this role." });
             }
 
-          
             _dbContext.UserRoles.Remove(userRole);
             _dbContext.SaveChanges();
 
@@ -540,6 +548,7 @@ public class CompanyController : ControllerBase
             return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while removing role from user." });
         }
     }
+
 
     [HttpGet]
     [Route("getRolesInCompany")]
@@ -782,7 +791,7 @@ public class CompanyController : ControllerBase
 
     [HttpPut]
     [Route("updateRoles")]
-    public ActionResult UpdateRoleName(int roleID, string name)
+    public ActionResult UpdateRoleName(int roleID, int companyID, string name)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -798,24 +807,43 @@ public class CompanyController : ControllerBase
         {
             try
             {
+                // Validate that this role actually belongs to the company
+                bool roleBelongsToCompany = _dbContext.CompanyRoles
+                    .Any(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
+
+                if (!roleBelongsToCompany)
+                {
+                    return BadRequest(new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "Role does not belong to specified company."
+                    });
+                }
+
+                // Get user's roles
                 var userRoleIds = _dbContext.UserRoles
                     .Where(ur => ur.UserID == userID)
                     .Select(ur => ur.RoleID)
                     .ToList();
 
+                // Get roles within the company the user has
                 var companyRoleIds = _dbContext.CompanyRoles
                     .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                     .Select(cr => cr.RoleID)
                     .ToList();
 
-                
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
                 if (!hasCustomerAdminRole)
                 {
-                    return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+                    return StatusCode(403, new Web.SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User does not have CustomerAdmin access."
+                    });
                 }
+
                 var role = _dbContext.Roles.Find(roleID);
                 if (role == null)
                 {
@@ -832,21 +860,6 @@ public class CompanyController : ControllerBase
                     {
                         Success = false,
                         Message = "Cannot rename role to 'CustomerAdmin'."
-                    });
-                }
-
-                // Get the companyID associated with this role
-                var companyID = _dbContext.CompanyRoles
-                    .Where(cr => cr.RoleID == roleID)
-                    .Select(cr => cr.CompanyID)
-                    .FirstOrDefault();
-
-                if (companyID == 0)
-                {
-                    return StatusCode(500, new Web.SimpleErrorResponse
-                    {
-                        Success = false,
-                        Message = "Associated company not found for this role."
                     });
                 }
 
@@ -888,6 +901,7 @@ public class CompanyController : ControllerBase
             }
         }
     }
+
 
 
 

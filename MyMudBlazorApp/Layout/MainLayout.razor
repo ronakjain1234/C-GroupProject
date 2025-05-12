@@ -1,9 +1,13 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
 @inject NavigationManager Navigation
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <MudThemeProvider />
 <MudPopoverProvider />
+<MudSnackbarProvider />
 
 <div class="page">
     <main>
@@ -28,7 +32,12 @@
         @if (!ShouldHideAppBar())
         {
             <MudAppBar Class="app-bar" Color="Color.Primary" Fixed="true">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" />
+                <MudTooltip Text="Logout">
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" 
+                                  Color="Color.Inherit" 
+                                  Edge="Edge.Start" 
+                                  OnClick="LogoutAsync" />
+                </MudTooltip>
                 <MudSpacer />
                 <MudAvatar Color="Color.Secondary" Size="Size.Medium">RJ</MudAvatar>
             </MudAppBar>
@@ -52,5 +61,34 @@
         };
 
         return hiddenRoutes.Any(route => currentPath.EndsWith(route, StringComparison.OrdinalIgnoreCase));
+    }
+    
+    private async Task LogoutAsync()
+    {
+        // Show confirmation dialog
+        bool? result = await DialogService.ShowMessageBox(
+            "Logout",
+            "Are you sure you want to logout?",
+            yesText: "Logout", 
+            cancelText: "Cancel");
+            
+        if (result == true)
+        {
+            try
+            {
+                // Remove auth token from local storage
+                await LocalStorage.RemoveItemAsync("authToken");
+                
+                // Show success message
+                Snackbar.Add("You have been logged out successfully", Severity.Success);
+                
+                // Redirect to login page
+                Navigation.NavigateTo("/login", true);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Logout failed: {ex.Message}", Severity.Error);
+            }
+        }
     }
 }
