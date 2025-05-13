@@ -1,4 +1,4 @@
-@page "/company/{companyId:int}"
+﻿@page "/company/{companyId:int}"
 @using System.Net.Http.Json
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @using DatabaseHandler.Data.Models.Web.ResponseObjects;
@@ -10,7 +10,7 @@
 
 
 
-<PageTitle>@_company.companyName</PageTitle>
+
 
 <style>
     .companySideBar {
@@ -29,7 +29,7 @@
     }
 
     .mainContent {
-        margin-left: 80px;
+        margin-left: 65px;
         padding: 20px;
         padding-top: 84px;
     }
@@ -87,6 +87,15 @@
     }
 </style>
 
+@if (_isLoading)
+{
+    <div class="d-flex justify-center align-center" style="height: 100vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+
+else {
+<PageTitle>@_company.companyName</PageTitle>
 <div class="companySideBar">
     <div class="sideBarButtons">
         <MudTooltip Text="Back" Placement="Placement.Right">
@@ -98,12 +107,6 @@
             <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
                            Color="Color.Primary"
                            OnClick="@(() => OpenAddUserDialog())" />
-        </MudTooltip>
-
-        <MudTooltip Text="Create New User if not already existing" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1"
-                           Color="Color.Primary"
-                           OnClick="@(() => OpenCreateUserDialog())" />
         </MudTooltip>
 
         <MudTooltip Text="Manage Roles" Placement="Placement.Right">
@@ -446,6 +449,10 @@
     private bool _isCreateUserOpen;
     private HashSet<Web.Role> _selectedRoles = new();
     private List<Web.Role> AvailableRoles = new();
+    
+    private bool _isLoading = true;
+    private bool _isAuthenticated = false;
+
     private DialogOptions dialogOptions = new DialogOptions
     {
         MaxWidth = MaxWidth.Small,
@@ -462,7 +469,7 @@
     {
         if (_selectedItems.Any())
         {
-            await LoadAvailableRoles();
+            await LoadAvailableRoles(false);
             _isBulkRolesOpen = true;
             StateHasChanged();
         }
@@ -475,11 +482,11 @@
         StateHasChanged();
     }
 
-    private async Task LoadAvailableRoles()
+    private async Task LoadAvailableRoles(bool showCustomerAdminRole)
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}");
+            var result = await Http.GetFromJsonAsync<Web.GetRolesInCompanyResponse>($"api/company/getRolesInCompany?companyID={companyID}&showCustomerAdminRole={showCustomerAdminRole}");
             if (result != null)
             {
                 AvailableRoles = result.roles;
@@ -487,7 +494,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading roles!", Severity.Error);
         }
     }
 
@@ -503,11 +510,11 @@
                 }
             }
             await LoadCompanyData();
-            Snackbar.Add($"Roles added to users successfully!", Severity.Success);
+            //Snackbar.Add($"Roles added to users successfully!", Severity.Success);
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding roles!", Severity.Error);
         }
     }
 
@@ -535,20 +542,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var token = await LocalStorage.GetItemAsync<string>("authToken");
-
-        if (string.IsNullOrEmpty(token))
+        try
         {
-            Snackbar.Add("You are not logged in", Severity.Warning);
-            Navigation.NavigateTo("/login");
-            return;
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _isAuthenticated = false;
+                Snackbar.Add("You are not logged in", Severity.Warning);
+                _isLoading = false;
+                Navigation.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            _isAuthenticated = true;
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            await LoadCompanyData();
         }
-
-        Http.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-        await LoadCompanyData();
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Authentication error!", Severity.Error);
+            _isAuthenticated = false;
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
+
 
     private bool FilterFunc(Web.User user)
     {
@@ -580,7 +604,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error updating company name: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error updating company name!", Severity.Error);
         }
     }
 
@@ -606,7 +630,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error creating role: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error creating role!", Severity.Error);
         }
     }
 
@@ -625,8 +649,10 @@
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
-                var roleName = role?.roleName ?? "Unknown Role";
+                var roleName = role?.roleName ?? "selected";
                 await LoadCompanyData();
+                Snackbar.Add($"Role '{roleName}' added to user successfully!", Severity.Success);
+
             }
             else
             {
@@ -635,7 +661,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding role to user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding role to user!", Severity.Error);
         }
     }
 
@@ -647,7 +673,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
-                var roleName = role?.roleName ?? "Unknown Role";
+                var roleName = role?.roleName ?? "selected";
                 Snackbar.Add($"Role '{roleName}' removed from user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
@@ -658,7 +684,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing role from user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing role from user!", Severity.Error);
         }
     }
 
@@ -679,7 +705,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing user!", Severity.Error);
         }
     }
 
@@ -695,7 +721,9 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading company data: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading company data!", Severity.Error);
+            Navigation.NavigateTo("/");
+
         }
     }
 
@@ -718,7 +746,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding user!", Severity.Error);
         }
     }
     private async Task AllocateNewUser(string newUserEmail)
@@ -747,7 +775,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error adding user: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error adding user!", Severity.Error);
         }
     }
 
@@ -769,7 +797,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error updating role: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error updating role!", Severity.Error);
         }
 
     }
@@ -792,7 +820,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error deleting company: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error deleting company!", Severity.Error);
         }
     }
 
@@ -907,7 +935,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error making user admin: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error making user admin!", Severity.Error);
         }
     }
 
@@ -915,7 +943,7 @@
     {
         if (_selectedItems.Any())
         {
-            await LoadAvailableRoles();
+            await LoadAvailableRoles(true);
             _isBulkRemoveRolesOpen = true;
             StateHasChanged();
         }
@@ -940,14 +968,14 @@
                 }
             }
             await LoadCompanyData();
-            Snackbar.Add("Roles removed from users successfully!", Severity.Success);
+            //Snackbar.Add("Roles removed from users successfully!", Severity.Success);
             CloseBulkRemoveRolesDialog();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error removing roles: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error removing roles!", Severity.Error);
         }
     }
-
+       
 }
 

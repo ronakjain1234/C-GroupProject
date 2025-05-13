@@ -65,50 +65,36 @@
     color: black;
     border-color: black;
 }
-.eye-icon {
-    cursor: pointer;
-}
 </style>
 
 <div class="login-container">
-    <!-- Left Side - Login Form -->
     <div class="left-section">
         <MudCard Class="login-card">
             <MudCardContent>
                 <MudText Typo="Typo.h4" Class="mb-4 text-center">Login to Your Account</MudText>
 
-                <MudTextField @bind-Value="email" 
-                              Label="Email" 
-                              Variant="Variant.Filled" 
+                <MudTextField @bind-Value="email"
+                              Label="Email"
+                              Variant="Variant.Filled"
                               Class="mb-3"
                               Required="true"
-                              RequiredError="Email is required!" />
+                              RequiredError="Email is required!"
+                              Immediate="true" />
 
-                <MudTextField @bind-Value="password" 
-                              Label="Password" 
-                              Variant="Variant.Filled" 
+                <MudTextField @bind-Value="password"
+                              Label="Password"
+                              Variant="Variant.Filled"
                               InputType="@(showPassword ? InputType.Text : InputType.Password)"
                               Adornment="Adornment.End"
-                              AdornmentIcon="@Icons.Material.Filled.Visibility"
+                              AdornmentIcon="@(showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                               OnAdornmentClick="TogglePasswordVisibility"
-                              Class="mb-3"
+                              Class="mb-4"
                               Required="true"
-                              RequiredError="Password is required!" />
+                              RequiredError="Password is required!"
+                              Immediate="true" />
 
-                <div class="d-flex justify-space-between align-center mb-4">
-                    <div class="d-flex align-center">
-                        <MudCheckBox T="bool" @bind-Checked="rememberMe" />
-                        <MudText Typo="Typo.body2" Class="ml-2">Remember me</MudText>
-                    </div>
-                    <MudButton Variant="Variant.Text" 
-                               Color="Color.Primary" 
-                               OnClick="@(() => Navigation.NavigateTo("/forgot-password"))">
-                        Forgot Password?
-                    </MudButton>
-                </div>
-
-                <MudButton Variant="Variant.Filled" 
-                           Color="Color.Primary" 
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
                            FullWidth="true"
                            OnClick="HandleLogin"
                            Disabled="@(!IsValidForm())">
@@ -118,11 +104,10 @@
         </MudCard>
     </div>
 
-    <!-- Right Side - Sign Up Section -->
     <div class="right-section">
         <MudText Typo="Typo.h3" Class="mb-2">New Here?</MudText>
         <MudText Typo="Typo.h5" Class="mb-4">Sign up and discover a great amount of new opportunities</MudText>
-        <MudButton Variant="Variant.Outlined" 
+        <MudButton Variant="Variant.Outlined"
                    Class="sign-up-button"
                    OnClick="@(() => Navigation.NavigateTo("/signup"))">
             Sign Up
@@ -133,7 +118,6 @@
 @code {
     private string email = "";
     private string password = "";
-    private bool rememberMe;
     private bool showPassword;
 
     protected override async Task OnInitializedAsync()
@@ -142,6 +126,7 @@
         if (!string.IsNullOrEmpty(token))
         {
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            Navigation.NavigateTo("/");
         }
     }
 
@@ -152,51 +137,50 @@
 
     private bool IsValidForm()
     {
-        return !string.IsNullOrWhiteSpace(email) && 
+        return !string.IsNullOrWhiteSpace(email) &&
                !string.IsNullOrWhiteSpace(password);
     }
 
     private async Task HandleLogin()
-{
-    if (!IsValidForm())
     {
-        Snackbar.Add("Please fill in all required fields", Severity.Warning);
-        return;
-    }
-
-    try
-    {
-        var formContent = new FormUrlEncodedContent(new[]
+        if (!IsValidForm())
         {
-            new KeyValuePair<string, string>("email", email),
-            new KeyValuePair<string, string>("password", password)
-        });
-
-        var response = await Http.PostAsync("api/user/login", formContent);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
-
-            await LocalStorage.SetItemAsync("authToken", loginResponse.Token);
-            Http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", loginResponse.Token);
-
-            Snackbar.Add("Login successful!", Severity.Success);
-            Navigation.NavigateTo("/");
+            Snackbar.Add("Please fill in all required fields", Severity.Warning);
+            return;
         }
-        else
+
+        try
         {
-            var error = await response.Content.ReadAsStringAsync();
-            Snackbar.Add($"Login failed: {error}", Severity.Error);
+            var formContent = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("email", email),
+                new KeyValuePair<string, string>("password", password)
+            });
+
+            var response = await Http.PostAsync("api/user/login", formContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+                await LocalStorage.SetItemAsync("authToken", loginResponse.Token);
+                Http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", loginResponse.Token);
+
+                Snackbar.Add("Login successful!", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Login failed!", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Login failed!", Severity.Error);
         }
     }
-    catch (Exception ex)
-    {
-        Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-    }
-}
-
 
     public class LoginResponse
     {
