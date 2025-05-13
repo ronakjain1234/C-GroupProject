@@ -19,7 +19,7 @@ public class EndPointController : ControllerBase
     
     [HttpPost]
     [Route("createEndpoint")]
-    public ActionResult CreateEndpoint(string name, string spec)
+    public ActionResult CreateEndpoint(string name, [FromBody] string spec)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -34,8 +34,7 @@ public class EndPointController : ControllerBase
         {
             try
             {
-                //bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
-                bool allowed = true;
+                bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
                 if (!allowed)
                 {
                     return Unauthorized(new SimpleErrorResponse

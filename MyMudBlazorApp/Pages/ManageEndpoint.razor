@@ -285,7 +285,7 @@
         try
         {
             Console.WriteLine(_newEndpointName);
-            var response = await Http.GetAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}&spec={_newEndpointSpec}");
+            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}",_newEndpointSpec);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Endpoint added successfully!", Severity.Success);
@@ -306,7 +306,7 @@
     {
         try
         {
-            var response = await Http.GetAsync($"http://localhost:5000/api/endpoint/updateEndpoint?endpointID={id}&name={_newEndpointName}&spec={_newEndpointSpec}");
+            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/updateEndpoint?endpointID={id}&name={_newEndpointName}",_newEndpointSpec);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Endpoint updated successfully!", Severity.Success);
