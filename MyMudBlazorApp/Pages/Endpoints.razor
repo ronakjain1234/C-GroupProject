@@ -1,6 +1,11 @@
 ﻿@page "/endpoints"
-@using MudBlazor
 @inject NavigationManager Navigation
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@using MudBlazor
+@using System.Net.Http.Json
+@using System.Text.Json
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <style>
     .companySideBar {
@@ -41,9 +46,10 @@
 
     .endpoints-iframe {
         width: 100%;
-        height: calc(100vh - 200px);
+        height: 600px;
         border: none;
         border-radius: 8px;
+        margin-bottom: 32px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 </style>
@@ -61,7 +67,68 @@
         <div class="d-flex align-center mb-10">
             <MudText Typo="Typo.h3" Style="color: black;">Endpoints</MudText>
         </div>
-        
-        <iframe src="http://localhost:5000/swagger/index.html" class="endpoints-iframe"></iframe>
+
+        @if (IsLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        }
+        else if (Endpointss?.Any() == true)
+        {
+            @foreach (var endpoint in Endpointss)
+            {
+                <MudText Typo="Typo.h6" Class="mb-1">@endpoint.Name</MudText>
+                <iframe class="endpoints-iframe" src="@($"http://localhost:5000/api/endpoint/getSpec?endpointID={endpoint.EndpointID}")"></iframe>
+            }
+        }
+        else
+        {
+            <MudText>No endpoints available.</MudText>
+        }
     </div>
 </div>
+
+@code {
+    private List<EndpointResponse>? Endpointss;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrEmpty(token))
+        {
+            Snackbar.Add("You are not logged in", Severity.Warning);
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Http.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        
+        try
+        {
+            IsLoading = true;
+
+            var response = await Http.GetFromJsonAsync<List<EndpointResponse>>("http://localhost:5000/api/endpoint/getAll", new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            Endpointss = response;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Failed to load endpoints: " + ex.Message,Severity.Error);
+            Endpointss = new();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public class EndpointResponse
+    {
+        public int EndpointID { get; set; }
+        public string Name { get; set; } = "";
+    }
+}

@@ -74,6 +74,7 @@ public class Program
             {
                 policy.WithOrigins("http://localhost:5084")
                       .AllowAnyHeader()
+                      .AllowCredentials()
                       .AllowAnyMethod();
             });
         });

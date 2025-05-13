@@ -492,4 +492,72 @@ public class EndPointController : ControllerBase
             }
         }
     }
+    [HttpGet]
+    [Route("getAll")]
+    public ActionResult<List<EndpointResponse>> GetEndpoints()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
+
+        if (_dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID))
+        { 
+            List<EndpointResponse> endpoints = _dbContext.EndPoints
+                .Select(e => new EndpointResponse
+                {
+                    endpointID = e.EndPointID,
+                    Name = e.EndPointName,
+                    Spec = e.Specification
+                })
+                .ToList();
+            return endpoints;
+        }
+
+        List<int> roleIDs = _dbContext.UserRoles.Where(role => role.UserID == userID).Select(e => e.RoleID).ToList();
+        List<int> endpointIds = new();
+        foreach (var roleID in roleIDs)
+        {
+            var list = _dbContext.RoleEndPoints.Where(roleEndpoint => roleEndpoint.RoleID == roleID).Select(e => e.EndPointID)
+                .ToList();
+            endpointIds.AddRange(list);
+        }
+
+        List<EndpointResponse> endpointts = new();
+        foreach (var endpointID in endpointIds)
+        {
+            List<EndpointResponse> list = _dbContext.EndPoints.Where(endpoint => endpoint.EndPointID == endpointID)
+                .Select(e => new EndpointResponse
+                {
+                    endpointID = e.EndPointID,
+                    Name = e.EndPointName,
+                    Spec = e.Specification
+                })
+                .ToList();
+            endpointts.AddRange(list);
+        }
+        
+        return endpointts;
+    }
+
+    [HttpGet]
+    [Route("getSpec")]
+    public ActionResult<String> getSpec(int endpointID)
+    {
+        List<EndpointResponse> list = _dbContext.EndPoints.Where(endpoint => endpoint.EndPointID == endpointID)
+            .Select(e => new EndpointResponse
+            {
+                endpointID = e.EndPointID,
+                Name = e.EndPointName,
+                Spec = e.Specification
+            })
+            .ToList();
+
+        return list.First().Spec;
+    } 
 }   
