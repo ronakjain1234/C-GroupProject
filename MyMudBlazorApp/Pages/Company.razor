@@ -94,148 +94,149 @@
     </div>
 }
 
-else {
-<PageTitle>@_company.companyName</PageTitle>
-<div class="companySideBar">
-    <div class="sideBarButtons">
-        <MudTooltip Text="Back" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))" />
-        </MudTooltip>
-        
+else
+{
+    <PageTitle>@_company.companyName</PageTitle>
+    <div class="companySideBar">
+        <div class="sideBarButtons">
+            <MudTooltip Text="Back" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/"))"/>
+            </MudTooltip>
 
-        <MudTooltip Text="Add User" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
-                           Color="Color.Primary"
-                           OnClick="@(() => OpenAddUserDialog())" />
-        </MudTooltip>
 
-        <MudTooltip Text="Manage Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts"
-                          Color="Color.Primary"
-                          OnClick="@(() => Navigation.NavigateTo($"http://localhost:5084/company/{companyID}/roles"))" />
-        </MudTooltip>
+            <MudTooltip Text="Add User" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.PersonAdd"
+                               Color="Color.Primary"
+                               OnClick="@(() => OpenAddUserDialog())"/>
+            </MudTooltip>
 
-        <MudTooltip Text="Bulk Manage Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.GroupAdd"
-                           Color="Color.Primary"
-                           Disabled="@(!_selectedItems.Any())"
-                           OnClick="@OpenBulkRolesDialog" />
-        </MudTooltip>
+            <MudTooltip Text="Manage Roles" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.ManageAccounts"
+                               Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo($"http://localhost:5084/company/{companyID}/roles"))"/>
+            </MudTooltip>
 
-        <MudTooltip Text="Make Admin" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.AdminPanelSettings"
-                           Color="Color.Primary"
-                           Disabled="@(!_selectedItems.Any())"
-                           OnClick="@MakeSelectedUserAdmin" />
-        </MudTooltip>
+            <MudTooltip Text="Bulk Manage Roles" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.GroupAdd"
+                               Color="Color.Primary"
+                               Disabled="@(!_selectedItems.Any())"
+                               OnClick="@OpenBulkRolesDialog"/>
+            </MudTooltip>
 
-        <MudTooltip Text="Bulk Remove Roles" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle"
-                           Color="Color.Primary"
-                           Disabled="@(!_selectedItems.Any())"
-                           OnClick="@OpenBulkRemoveRolesDialog" />
-        </MudTooltip>
+            <MudTooltip Text="Make Admin" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.AdminPanelSettings"
+                               Color="Color.Primary"
+                               Disabled="@(!_selectedItems.Any())"
+                               OnClick="@MakeSelectedUserAdmin"/>
+            </MudTooltip>
 
-        <MudTooltip Text="Delete Company" Placement="Placement.Right">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                           Color="Color.Error"
-                           aria-label="Delete Company"
-                           Class="deleteCompanyButton"
-                           OnClick="@(() => DeleteCompany())" />
-        </MudTooltip>
-    </div>
-</div>
+            <MudTooltip Text="Bulk Remove Roles" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.RemoveCircle"
+                               Color="Color.Primary"
+                               Disabled="@(!_selectedItems.Any())"
+                               OnClick="@OpenBulkRemoveRolesDialog"/>
+            </MudTooltip>
 
-<div class="entirePage">
-    <div class="mainContent">
-        <div class="companyTitle mb-10">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <MudTextField @bind-Value="_company.companyName"
-                            Placeholder="Company Name"
-                            Disabled="@_isCompanyNameDisabled"
-                            Class="mt-2"
-                            Typo="Typo.h3"
-                            Style="max-width: 250px; color: black;"
-                            Variant="Variant.Text" />
-
-                <MudTooltip Text="@(_isCompanyNameDisabled ? "Edit Company" : "Cancel Edit")">
-                    <MudIconButton Icon="@(_isCompanyNameDisabled ? Icons.Material.Filled.Edit : Icons.Material.Filled.Close)"
-                                 Color="Color.Warning"
-                                 aria-label="Toggle Edit Mode"
-                                 OnClick="@ToggleEditMode" />
-                </MudTooltip>
-
-                <MudTooltip Text="Save Changes">
-                    <MudIconButton Icon="@Icons.Material.Filled.Save"
-                                 Color="Color.Success"
-                                 Disabled="@_isCompanyNameDisabled"
-                                 aria-label="Save Company Name"
-                                 OnClick="@SaveCompanyName" />
-                </MudTooltip>
-            </div>
+            <MudTooltip Text="Delete Company" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error"
+                               aria-label="Delete Company"
+                               Class="deleteCompanyButton"
+                               OnClick="@(() => DeleteCompany())"/>
+            </MudTooltip>
         </div>
+    </div>
 
-        <MudTable class="companyTable" Items="@_company.users" Filter="new Func<Web.User, bool>(FilterFunc)" MultiSelection="true" SelectionChangeable="true" Hover="true"
-                  @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
-            <ToolBarContent>
-                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>Name</MudTh>
-                <MudTh>Email</MudTh>
-                <MudTh>Roles</MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
+    <div class="entirePage">
+        <div class="mainContent">
+            <div class="companyTitle mb-10">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <MudTextField @bind-Value="_company.companyName"
+                                  Placeholder="Company Name"
+                                  Disabled="@_isCompanyNameDisabled"
+                                  Class="mt-2"
+                                  Typo="Typo.h3"
+                                  Style="max-width: 250px; color: black;"
+                                  Variant="Variant.Text"/>
 
-            <RowTemplate>
-                <MudTd DataLabel="Name">@context.userName</MudTd>
-                <MudTd DataLabel="Email">@context.email</MudTd>
-                <MudTd DataLabel="Roles">
-                    <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                        <ActivatorContent>
-                            <MudButton Variant="Variant.Text" 
-                                     Color="Color.Primary" 
-                                     EndIcon="@Icons.Material.Filled.ArrowDropDown">
-                                @(context.roles.Count > 0 ? $"{context.roles.Count} Roles" : "No Roles")
-                            </MudButton>
-                        </ActivatorContent>
-                        <ChildContent>
-                            @if (context.roles.Any())
-                            {
-                                @foreach (var role in context.roles)
+                    <MudTooltip Text="@(_isCompanyNameDisabled ? "Edit Company" : "Cancel Edit")">
+                        <MudIconButton Icon="@(_isCompanyNameDisabled ? Icons.Material.Filled.Edit : Icons.Material.Filled.Close)"
+                                       Color="Color.Warning"
+                                       aria-label="Toggle Edit Mode"
+                                       OnClick="@ToggleEditMode"/>
+                    </MudTooltip>
+
+                    <MudTooltip Text="Save Changes">
+                        <MudIconButton Icon="@Icons.Material.Filled.Save"
+                                       Color="Color.Success"
+                                       Disabled="@_isCompanyNameDisabled"
+                                       aria-label="Save Company Name"
+                                       OnClick="@SaveCompanyName"/>
+                    </MudTooltip>
+                </div>
+            </div>
+
+            <MudTable class="companyTable" Items="@_company.users" Filter="new Func<Web.User, bool>(FilterFunc)" MultiSelection="true" SelectionChangeable="true" Hover="true"
+                      @bind-SelectedItems="_selectedItems" SelectOnRowClick="false">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Email</MudTh>
+                    <MudTh>Roles</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.userName</MudTd>
+                    <MudTd DataLabel="Email">@context.email</MudTd>
+                    <MudTd DataLabel="Roles">
+                        <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Primary"
+                                           EndIcon="@Icons.Material.Filled.ArrowDropDown">
+                                    @(context.roles.Count > 0 ? $"{context.roles.Count} Roles" : "No Roles")
+                                </MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                @if (context.roles.Any())
                                 {
-                                    <MudMenuItem>
-                                        <MudText>@role.roleName</MudText>
+                                    @foreach (var role in context.roles)
+                                    {
+                                        <MudMenuItem>
+                                            <MudText>@role.roleName</MudText>
+                                        </MudMenuItem>
+                                    }
+                                }
+                                else
+                                {
+                                    <MudMenuItem Disabled="true">
+                                        <MudText>No roles assigned</MudText>
                                     </MudMenuItem>
                                 }
-                            }
-                            else
-                            {
-                                <MudMenuItem Disabled="true">
-                                    <MudText>No roles assigned</MudText>
-                                </MudMenuItem>
-                            }
-                        </ChildContent>
-                    </MudMenu>
-                </MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" 
-                                 Color="Color.Warning" 
-                                 aria-label="Manage Roles" 
-                                 Size="Size.Medium"
-                                 OnClick="@(() => OpenUserRolesDialog(context))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
-                                   OnClick="@(() => RemoveUserFromCompany(context))" />
-                </MudTd>
-            </RowTemplate>
+                            </ChildContent>
+                        </MudMenu>
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Warning"
+                                       aria-label="Manage Roles"
+                                       Size="Size.Medium"
+                                       OnClick="@(() => OpenUserRolesDialog(context))"/>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Remove Role" Size="Size.Medium"
+                                       OnClick="@(() => RemoveUserFromCompany(context))"/>
+                    </MudTd>
+                </RowTemplate>
 
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
+                <PagerContent>
+                    <MudTablePager/>
+                </PagerContent>
+            </MudTable>
+        </div>
     </div>
-</div>
-
+}
 @if (_isAddUserOpen)
 {
     <MudOverlay Visible="_isAddUserOpen" DarkBackground="true" AutoClose="false">
