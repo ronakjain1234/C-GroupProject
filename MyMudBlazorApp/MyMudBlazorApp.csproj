@@ -17,4 +17,8 @@
     <ProjectReference Include="..\DatabaseHandler\DatabaseHandler.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\swagger\index.html" />
+  </ItemGroup>
+
 </Project>

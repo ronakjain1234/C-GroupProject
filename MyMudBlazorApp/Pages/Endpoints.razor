@@ -77,7 +77,9 @@
             @foreach (var endpoint in Endpointss)
             {
                 <MudText Typo="Typo.h6" Class="mb-1">@endpoint.Name</MudText>
-                <iframe class="endpoints-iframe" src="@($"http://localhost:5000/api/endpoint/getSpec?endpointID={endpoint.EndpointID}")"></iframe>
+                <iframe class="endpoints-iframe"
+                        src="@($"http://localhost:5084/swagger/index.html?url=http://localhost:5000/api/endpoint/getSpec?endpointID={endpoint.EndpointID}")">
+                </iframe>
             }
         }
         else
