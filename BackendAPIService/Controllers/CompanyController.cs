@@ -566,6 +566,18 @@ public class CompanyController : ControllerBase
 
         try
         {
+            var hasAccess = _dbContext.UserCompanies
+                .Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
+
+            if (!hasAccess)
+            {
+                return StatusCode(403, new Web.SimpleErrorResponse 
+                {
+                    Success = false,
+                    Message = "User does not have access to this company."
+                });
+            }
+            
             var rolesQuery = from cr in _dbContext.CompanyRoles
                             join r in _dbContext.Roles on cr.RoleID equals r.RoleID
                             where cr.CompanyID == companyID
