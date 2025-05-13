@@ -284,8 +284,13 @@
 
         try
         {
-            Console.WriteLine(_newEndpointName);
-            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/createEndpoint?name={_newEndpointName}",_newEndpointSpec);
+            var localEndpoint = new EndpointResponse
+            {
+                Name = _newEndpointName,
+                Spec = _newEndpointSpec
+            };
+            Console.WriteLine(localEndpoint);
+            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/createEndpoint",localEndpoint);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Endpoint added successfully!", Severity.Success);
@@ -300,13 +305,21 @@
         {
             Snackbar.Add($"Error adding endpoint: {ex.Message}", Severity.Error);
         }
+
+        CloseAddUserDialog();
     }
 
     private async Task UpdateEndpoint(int id)
     {
         try
         {
-            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/updateEndpoint?endpointID={id}&name={_newEndpointName}",_newEndpointSpec);
+            var localEndpoint = new EndpointResponse()
+            {
+                endpointID = endpoint.endpointID,
+                Name = _newEndpointName,
+                Spec = _newEndpointSpec
+            };
+            var response = await Http.PostAsJsonAsync($"http://localhost:5000/api/endpoint/updateEndpoint",localEndpoint);
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add("Endpoint updated successfully!", Severity.Success);
@@ -321,6 +334,8 @@
         {
             Snackbar.Add($"Error updating endpoint: {ex.Message}", Severity.Error);
         }
+
+        CloseAddUserDialog();
     }
 
     private async Task RemoveEndpoint(EndpointResponse endpoint)

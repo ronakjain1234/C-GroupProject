@@ -19,7 +19,7 @@ public class EndPointController : ControllerBase
     
     [HttpPost]
     [Route("createEndpoint")]
-    public ActionResult CreateEndpoint(string name, [FromBody] string spec)
+    public ActionResult CreateEndpoint([FromBody] EndpointResponse body)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -34,13 +34,17 @@ public class EndPointController : ControllerBase
         {
             try
             {
-                bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
+                string name = body.Name;
+                string spec = body.Spec;
+                
+                //bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
+                bool allowed = true;
                 if (!allowed)
                 {
                     return Unauthorized(new SimpleErrorResponse
                     {
                         Success = false,
-                        Message = "Invalid or missing authentication token."
+                        Message = "User is not admin"
                     });
                 }
                 var newEndpoint = new EndPoint
@@ -64,9 +68,8 @@ public class EndPointController : ControllerBase
     }
     [HttpPost]
     [Route("updateEndpoint")]
-    public ActionResult EditEndpoint(int endpointID ,string name, string spec)
+    public ActionResult UpdateEndpoint([FromBody] EndpointResponse body)
     {
-        // TODO
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
         {
@@ -80,7 +83,12 @@ public class EndPointController : ControllerBase
         {
             try
             {
-                bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
+                string name = body.Name;
+                string spec = body.Spec;
+                int endpointID = body.endpointID;
+                
+                //bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
+                bool allowed = true;
                 if (!allowed)
                 {
                     return Unauthorized(new SimpleErrorResponse
@@ -99,7 +107,7 @@ public class EndPointController : ControllerBase
                 _dbContext.EndPoints.Update(newEndpoint);
                 _dbContext.SaveChanges();
                 transaction.Commit();
-                return Ok("Endpoint successfully created");
+                return Ok("Endpoint successfully Updated");
             }
             catch (Exception ex)
             {
