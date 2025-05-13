@@ -1,4 +1,4 @@
-@page "/company/{companyId:int}"
+﻿@page "/company/{companyId:int}"
 @using System.Net.Http.Json
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @using DatabaseHandler.Data.Models.Web.ResponseObjects;
@@ -504,7 +504,7 @@ else {
                 }
             }
             await LoadCompanyData();
-            Snackbar.Add($"Roles added to users successfully!", Severity.Success);
+            //Snackbar.Add($"Roles added to users successfully!", Severity.Success);
         }
         catch (Exception ex)
         {
@@ -643,8 +643,10 @@ else {
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
-                var roleName = role?.roleName ?? "Unknown Role";
+                var roleName = role?.roleName ?? "selected";
                 await LoadCompanyData();
+                Snackbar.Add($"Role '{roleName}' added to user successfully!", Severity.Success);
+
             }
             else
             {
@@ -665,7 +667,7 @@ else {
             if (response.IsSuccessStatusCode)
             {
                 var role = user.roles.FirstOrDefault(r => r.roleID == roleID);
-                var roleName = role?.roleName ?? "Unknown Role";
+                var roleName = role?.roleName ?? "selected";
                 Snackbar.Add($"Role '{roleName}' removed from user successfully!", Severity.Success);
                 await LoadCompanyData();
             }
@@ -928,7 +930,7 @@ else {
                 }
             }
             await LoadCompanyData();
-            Snackbar.Add("Roles removed from users successfully!", Severity.Success);
+            //Snackbar.Add("Roles removed from users successfully!", Severity.Success);
             CloseBulkRemoveRolesDialog();
         }
         catch (Exception ex)
