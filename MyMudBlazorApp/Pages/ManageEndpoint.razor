@@ -157,19 +157,16 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseAddUserDialog" />
             </div>
             
-            <MudPaper Elevation="0" Class="pa-4">
+            <MudPaper Elevation="1" Class="pa-6">
                 <MudTextField @bind-Value="_newEndpointName"
                               Label="Endpoint Name"
                               Variant="Variant.Outlined"
                               FullWidth="true"
-                              Class="mt-4"
-                              Immediate="true"/>
-                <MudTextField @bind-Value="_newEndpointSpec"
-                              Label="Endpoint Spec"
-                              Variant="Variant.Outlined"
-                              FullWidth="true"
-                              Class="mt-4"
-                              Immediate="true"/>
+                              Class="mb-4"
+                              Immediate="true" />
+
+                <InputFile OnChange="HandleFileSelected" class="mb-4" />
+                
             </MudPaper>
 
             <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
@@ -194,6 +191,18 @@
 
 
 @code {
+    
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null)
+            return;
+
+        using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB max
+        using var reader = new StreamReader(stream);
+        _newEndpointSpec = await reader.ReadToEndAsync();
+    }
+    
     private EndpointResponse endpoint;
     private string _newEndpointName = string.Empty;
     private string _newEndpointSpec = string.Empty;
@@ -202,6 +211,7 @@
     private string _originalCompanyName = "";
     private bool _isCompanyNameDisabled = true;
     private bool _isAddUserOpen;
+    private int pressedID;
     private string okButtonString = "Create Endpoint";
 
     private DialogOptions dialogOptions = new DialogOptions
@@ -266,6 +276,12 @@
 
     private async Task CreateEndpoint()
     {
+        if (okButtonString == "Verify Changes")
+        {
+            UpdateEndpoint(endpoint.endpointID);
+            return;
+        }
+
         try
         {
             Console.WriteLine(_newEndpointName);
@@ -283,6 +299,27 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Error adding endpoint: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task UpdateEndpoint(int id)
+    {
+        try
+        {
+            var response = await Http.GetAsync($"http://localhost:5000/api/endpoint/updateEndpoint?endpointID={id}&name={_newEndpointName}&spec={_newEndpointSpec}");
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Endpoint updated successfully!", Severity.Success);
+                await LoadEndpoints();
+            }
+            else
+            {
+                Snackbar.Add("Failed to update endpoint", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating endpoint: {ex.Message}", Severity.Error);
         }
     }
 
