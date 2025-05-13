@@ -559,5 +559,34 @@ public class EndPointController : ControllerBase
             .ToList();
 
         return list.First().Spec;
-    } 
+    }
+
+    [HttpGet]
+    [Route("getCompanies")]
+    public ActionResult<List<int>> getCompanies(int endpointID)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "Invalid or missing authentication token."
+            });
+        }
+
+        if (userID != 1)
+        {
+            return Unauthorized(new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "User is not admin"
+            });
+        }
+
+        List<int> companies = _dbContext.CompanyEndPoints.Where(companyEndpoint => companyEndpoint.EndPointID == endpointID)
+            .Select(companyEndpoint => companyEndpoint.CompanyID).ToList();
+        return companies;
+    }
+    
 }   
