@@ -94,7 +94,7 @@ public class EndPointController : ControllerBase
                     return Unauthorized(new SimpleErrorResponse
                     {
                         Success = false,
-                        Message = "Invalid or missing authentication token."
+                        Message = "User is not admin."
                     });
                 }
                 var newEndpoint = new EndPoint
