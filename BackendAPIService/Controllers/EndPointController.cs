@@ -575,7 +575,8 @@ public class EndPointController : ControllerBase
             });
         }
 
-        if (userID != 1)
+        
+        if (_dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == 1))
         {
             return Unauthorized(new SimpleErrorResponse
             {

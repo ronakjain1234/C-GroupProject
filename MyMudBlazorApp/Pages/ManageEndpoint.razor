@@ -264,28 +264,27 @@
     private int pressedID;
     private string okButtonString = "Create Endpoint";
     private bool _addEndpointToCompanyOpen = false;
-    private List<localCompany> companies;
+    private List<localCompany> companies = new List<localCompany>();
     private bool selectAll = false;
 
     private async void updateCompanies()
     {
         try
         {
-            var response = await Http.GetAsync($"http://localhost:5000/api/company/get");
-            if (response.IsSuccessStatusCode)
+            var response = await Http.GetFromJsonAsync<List<DatabaseHandler.Data.Models.Database.Company>>($"api/company/getAllForEndpointPage");
+            if (response == null)
             {
-                var list = response.As<List<DatabaseHandler.Data.Models.Database.Company>>() ?? new();
-                foreach (var item in list)
-                {
-                    var localcompany = new localCompany()
-                    {
-                        company = item,
-                        isSelected = false
-                    };
-                    companies.Add(localcompany);
-                }
+                
             }
-            Snackbar.Add($"Error occured loading companies",Severity.Error);
+            foreach (var item in response)
+            {
+                var localcompany = new localCompany()
+                {
+                    company = item,
+                    isSelected = false
+                };
+                companies.Add(localcompany);
+            }
         }
         catch (Exception e)
         {
@@ -302,29 +301,21 @@
                 Name = _newEndpointName,
                 Spec = _newEndpointSpec
             };
-            Console.WriteLine(localEndpoint);
-            var response = await Http.GetAsync($"http://localhost:5000/api/endpoint/getCompanies?endpointID={endpointID}");
-            if (response.IsSuccessStatusCode)
+            var response = await Http.GetFromJsonAsync<List<int>>($"api/company/getAllForEndpointPage");
+            var list = response.As<List<int>>() ?? new List<int>();
+            foreach (int thing in list)
             {
-                var list = response.As<List<int>>() ?? new List<int>();
-                foreach (int thing in list)
+                foreach (var company in companies)
                 {
-                    foreach (var company in companies)
+                    if (company.company.CompanyID == thing)
                     {
-                        if (company.company.CompanyID == thing)
-                        {
-                            company.isSelected = true;
-                        }
-                        else
-                        {
-                            company.isSelected = false;
-                        }
+                        company.isSelected = true;
+                    }
+                    else
+                    {
+                        company.isSelected = false;
                     }
                 }
-            }
-            else
-            {
-                Snackbar.Add("Failed to add endpoint", Severity.Error);
             }
         }
         catch (Exception ex)

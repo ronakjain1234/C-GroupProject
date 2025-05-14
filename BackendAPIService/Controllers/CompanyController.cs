@@ -83,6 +83,39 @@ public class CompanyController : ControllerBase
             });
         }
     }
+    
+    [HttpGet]
+    [Route("getAllForEndpointPage")]
+    public ActionResult<List<Web.GetAllCompaniesResponse>> GetAllCompanies()
+    {
+        try
+        {
+       
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized(new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Invalid or missing authentication token."
+                });
+            }
+
+            var result = _dbContext.Companies.ToList();
+            
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: {0}", ex.Message);
+            return StatusCode(500, new Web.SimpleErrorResponse
+            {
+                Message = "An error occurred while fetching companies.",
+                Success = false
+            });
+        }
+    }
 
     
     public class CreateCompanyRequest
