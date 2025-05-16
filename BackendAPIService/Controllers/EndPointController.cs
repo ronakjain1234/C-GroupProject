@@ -590,4 +590,74 @@ public class EndPointController : ControllerBase
         return companies;
     }
     
+    [HttpPost]
+    [Route("setCompanyState")]
+    public ActionResult setCompanyState([FromBody]List<localCompany> localCompanies, [FromQuery] int endpointID)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized(new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Invalid or missing authentication token."
+                });
+            }
+
+            /*
+            if (_dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == 1))
+            {
+                return Unauthorized(new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User is not admin"
+                });
+            }
+            */
+
+            foreach (var company in localCompanies)
+            {
+                var foundObjects = _dbContext.CompanyEndPoints.Where(e =>
+                    e.CompanyID == company.company.CompanyID && e.EndPointID == endpointID).ToList();
+                bool alreadyExists = false;
+                foreach (var companyEndpoint in foundObjects)
+                {
+                    if (companyEndpoint.CompanyID == company.company.CompanyID && companyEndpoint.EndPointID == endpointID)
+                    {
+                        alreadyExists = true;
+                    }
+                }
+                if (!company.isSelected)
+                {
+                    if (alreadyExists)
+                    {
+                        var valueInDB = _dbContext.CompanyEndPoints.Where(e =>
+                            e.CompanyID == company.company.CompanyID && e.EndPointID == endpointID).ToList();
+                        _dbContext.CompanyEndPoints.Remove(valueInDB[0]);
+                    }
+                }
+                if (company.isSelected)
+                {
+                    if (alreadyExists)
+                    {
+                        _dbContext.CompanyEndPoints.Add(new CompanyEndPoint()
+                        {
+                            CompanyID = company.company.CompanyID,
+                            EndPointID = endpointID,
+                            LastChange = DateTime.Now
+                        });
+                    }
+                }
+            }
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
 }   

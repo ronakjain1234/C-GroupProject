@@ -207,15 +207,11 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseEndpointCompanyDialog" />
             </div>
             
-            <MudTable Items="companies" Dense="true">
+            <MudTable Items="companies" Dense="true" MultiSelection="true" @bind-SelectedItems="selectedItems_" SelectOnRowClick="true">
                 <HeaderContent>
-                    <MudTh><MudCheckBox T="bool" Checked="selectAll" @onchange="ToggleSelectAll" /></MudTh>
                     <MudTh>Name</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd>
-                        <MudCheckBox T="bool" @bind-Checked="@context.isSelected" />
-                    </MudTd>
                     <MudTd>@context.company.CompanyName</MudTd>
                 </RowTemplate>
             </MudTable>
@@ -223,15 +219,15 @@
             <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
 
             <div class="d-flex justify-end gap-2">
-                <MudButton Color="Color.Error" 
-                           Variant="Variant.Filled" 
-                           StartIcon="@Icons.Material.Filled.Close" 
+                <MudButton Color="Color.Error"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Close"
                            OnClick="CloseEndpointCompanyDialog">Cancel</MudButton>
-                      
+
                 <MudButton Color="Color.Primary"
                            Variant="Variant.Filled"
                            StartIcon="@Icons.Material.Filled.PersonAdd"
-                           OnClick="@(() => CreateEndpoint())">
+                           OnClick="@(() => VerifyChangeInCompanyDialog())">
                     Confirm
                 </MudButton>
             </div>
@@ -264,7 +260,8 @@
     private int pressedID;
     private string okButtonString = "Create Endpoint";
     private bool _addEndpointToCompanyOpen = false;
-    private List<localCompany> companies = new List<localCompany>();
+    private List<localCompany> companies = new ();
+    private HashSet<localCompany> selectedItems_ = new ();
     private bool selectAll = false;
 
     private async void updateCompanies()
@@ -272,18 +269,14 @@
         try
         {
             var response = await Http.GetFromJsonAsync<List<DatabaseHandler.Data.Models.Database.Company>>($"api/company/getAllForEndpointPage");
-            if (response == null)
+            var list = response.As<List<DatabaseHandler.Data.Models.Database.Company>>() ?? new List<DatabaseHandler.Data.Models.Database.Company>();
+            foreach (var thing in list)
             {
-                
-            }
-            foreach (var item in response)
-            {
-                var localcompany = new localCompany()
+                companies.Add(new localCompany
                 {
-                    company = item,
+                    company = thing,
                     isSelected = false
-                };
-                companies.Add(localcompany);
+                });
             }
         }
         catch (Exception e)
@@ -296,25 +289,14 @@
     {
         try
         {
-            var localEndpoint = new EndpointResponse
-            {
-                Name = _newEndpointName,
-                Spec = _newEndpointSpec
-            };
-            var response = await Http.GetFromJsonAsync<List<int>>($"api/company/getAllForEndpointPage");
+            var response = await Http.GetFromJsonAsync<List<int>>($"api/endpoint/getCompanies");
             var list = response.As<List<int>>() ?? new List<int>();
-            foreach (int thing in list)
+            selectedItems_.Clear();
+            foreach (var company in companies)
             {
-                foreach (var company in companies)
+                if (list.Contains(company.company.CompanyID))
                 {
-                    if (company.company.CompanyID == thing)
-                    {
-                        company.isSelected = true;
-                    }
-                    else
-                    {
-                        company.isSelected = false;
-                    }
+                    selectedItems_.Add(company);
                 }
             }
         }
@@ -502,15 +484,6 @@
         _isAddUserOpen = false;
         StateHasChanged();
     }
-    
-    private void ToggleSelectAll(ChangeEventArgs e)
-    {
-        selectAll = (bool)e.Value;
-        foreach (var company in companies)
-        {
-            company.isSelected = selectAll;
-        }
-    }
 
     private async Task ShowCompaniesDialog(EndpointResponse endpoint)
     {
@@ -526,13 +499,41 @@
         StateHasChanged();
     }
 
-
-
-
-    class localCompany
+    public void VerifyChangeInCompanyDialog()
     {
-        public DatabaseHandler.Data.Models.Database.Company company;
-        public bool isSelected;
+        foreach (var company in selectedItems_)
+        {
+            foreach (var localComapny in companies)
+            {
+                if (localComapny.company.CompanyID == company.company.CompanyID)
+                {
+                    company.isSelected = true;
+                }
+            }
+        }
+        _addEndpointToCompanyOpen = false;
+        AddCompaniesToEndpoint();
+        StateHasChanged();
+    }
+
+
+    private async void AddCompaniesToEndpoint()
+    {
+        try
+        {
+            var result = await Http.PostAsJsonAsync($"api/endpoint/setCompanyState?endpointID={endpoint.endpointID}",companies);
+            if (result.IsSuccessStatusCode)
+            {
+            }
+            else
+            {
+                Snackbar.Add($"Error posting selected company data{result.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error posting selected company data: {ex.Message}", Severity.Error);
+        }
     }
     
 

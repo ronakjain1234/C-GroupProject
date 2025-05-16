@@ -86,7 +86,7 @@ public class CompanyController : ControllerBase
     
     [HttpGet]
     [Route("getAllForEndpointPage")]
-    public ActionResult<List<Web.GetAllCompaniesResponse>> GetAllCompanies()
+    public ActionResult<List<Company>> GetAllCompanies()
     {
         try
         {
