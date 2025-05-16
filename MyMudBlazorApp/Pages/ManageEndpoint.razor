@@ -291,7 +291,6 @@
         {
             var response = await Http.GetFromJsonAsync<List<int>>($"api/endpoint/getCompanies?endpointID={endpoint.endpointID}");
             var list = response.As<List<int>>() ?? new List<int>();
-            selectedItems_.Clear();
             foreach (var company in companies)
             {
                 if (list.Contains(company.company.CompanyID))
@@ -304,6 +303,7 @@
                     company.isSelected = false;
                 }
             }
+            StateHasChanged();
         }
         catch (Exception ex)
         {
@@ -495,6 +495,7 @@
     private void ShowCompaniesDialog(EndpointResponse endpoint)
     {
         this.endpoint = endpoint;
+        selectedItems_.Clear();
         updateAddedToCompanies(endpoint.endpointID);
         _addEndpointToCompanyOpen = true;
         StateHasChanged();
