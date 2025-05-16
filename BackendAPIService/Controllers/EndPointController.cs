@@ -640,7 +640,7 @@ public class EndPointController : ControllerBase
                 }
                 if (company.isSelected)
                 {
-                    if (alreadyExists)
+                    if (!alreadyExists)
                     {
                         _dbContext.CompanyEndPoints.Add(new CompanyEndPoint()
                         {

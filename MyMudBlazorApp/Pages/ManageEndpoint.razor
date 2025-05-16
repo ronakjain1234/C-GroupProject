@@ -297,6 +297,11 @@
                 if (list.Contains(company.company.CompanyID))
                 {
                     selectedItems_.Add(company);
+                    company.isSelected = true;
+                }
+                else
+                {
+                    company.isSelected = false;
                 }
             }
         }
