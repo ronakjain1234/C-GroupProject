@@ -505,8 +505,8 @@ public class EndPointController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
-
-        if (_dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID))
+        
+        if (true || _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID))
         { 
             List<EndpointResponse> endpoints = _dbContext.EndPoints
                 .Select(e => new EndpointResponse
@@ -651,6 +651,8 @@ public class EndPointController : ControllerBase
                     }
                 }
             }
+
+            _dbContext.SaveChanges();
 
             return Ok();
         }

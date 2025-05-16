@@ -289,7 +289,7 @@
     {
         try
         {
-            var response = await Http.GetFromJsonAsync<List<int>>($"api/endpoint/getCompanies");
+            var response = await Http.GetFromJsonAsync<List<int>>($"api/endpoint/getCompanies?endpointID={endpoint.endpointID}");
             var list = response.As<List<int>>() ?? new List<int>();
             selectedItems_.Clear();
             foreach (var company in companies)
@@ -405,6 +405,7 @@
         }
 
         CloseAddUserDialog();
+        await LoadEndpoints();
     }
 
     private async Task UpdateEndpoint(int id)
@@ -461,7 +462,8 @@
     {
         try
         {
-            var result = await Http.GetFromJsonAsync<List<EndpointResponse>>($"api/endpoint/get");
+            _company.Clear();
+            var result = await Http.GetFromJsonAsync<List<EndpointResponse>>($"api/endpoint/getAll");
             if (result != null)
             {
                 _company = result;
@@ -490,7 +492,7 @@
         StateHasChanged();
     }
 
-    private async Task ShowCompaniesDialog(EndpointResponse endpoint)
+    private void ShowCompaniesDialog(EndpointResponse endpoint)
     {
         this.endpoint = endpoint;
         updateAddedToCompanies(endpoint.endpointID);
