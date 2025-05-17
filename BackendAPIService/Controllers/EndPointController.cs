@@ -291,7 +291,7 @@ public class EndPointController : ControllerBase
     
     [HttpGet]
     [Route("getEndpointsForRole")]
-    public ActionResult<List<EndpointResponse>> GetEndpointsForRole(int roleID)
+    public ActionResult<List<int>> GetEndpointsForRole(int roleID)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -304,51 +304,9 @@ public class EndPointController : ControllerBase
         }
         try
         {
-            
-            var userCompanies = _dbContext.UserCompanies
-                .Where(uc => uc.UserID == userID)
-                .Select(uc => uc.CompanyID)
-                .ToList();
+            var list = _dbContext.RoleEndPoints.Where(e => e.RoleID == roleID).Select(e => e.EndPointID).ToList();
 
-            if (!userCompanies.Any())
-            {
-                return StatusCode(403, new SimpleErrorResponse
-                {
-                    Success = false,
-                    Message = "User does not belong to any companies."
-                });
-            }
-
-            
-            var roleAccessible = _dbContext.CompanyRoles
-                .Any(cr => userCompanies.Contains(cr.CompanyID) && cr.RoleID == roleID);
-
-            if (!roleAccessible)
-            {
-                return StatusCode(403, new SimpleErrorResponse
-                {
-                    Success = false,
-                    Message = "User does not have access to this role."
-                });
-            }
-
-            
-            var endpointIDs = _dbContext.Set<RoleEndPoint>()
-                .Where(re => re.RoleID == roleID)
-                .Select(re => re.EndPointID)
-                .ToList();
-
-            var endpointList = _dbContext.EndPoints
-                .Where(e => endpointIDs.Contains(e.EndPointID))
-                .Select(e => new EndpointResponse
-                {
-                    endpointID = e.EndPointID,
-                    Name = e.EndPointName,
-                    Spec = e.Specification
-                })
-                .ToList();
-
-            return Ok(endpointList);
+            return Ok(list);
         }
         catch (Exception ex)
         {
@@ -660,6 +618,96 @@ public class EndPointController : ControllerBase
         {
             return StatusCode(500, ex.Message);
         }
+    }
+
+    [HttpPost]
+    [Route("setRoleState")]
+    public ActionResult setCompanyState([FromBody] List<LocalEndpoint> localCompanies, [FromQuery] int roleID)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized(new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Invalid or missing authentication token."
+                });
+            }
+            foreach (var company in localCompanies)
+            {
+                var foundObjects = _dbContext.RoleEndPoints.Where(e =>
+                    e.RoleID == roleID && e.EndPointID == company.endpointID).ToList();
+                bool alreadyExists = false;
+                foreach (var companyEndpoint in foundObjects)
+                {
+                    if (companyEndpoint.EndPointID == company.endpointID && companyEndpoint.RoleID == roleID)
+                    {
+                        alreadyExists = true;
+                    }
+                }
+                if (!company.isSelected)
+                {
+                    if (alreadyExists)
+                    {
+                        var valueInDB = _dbContext.RoleEndPoints.Where(e =>
+                            e.EndPointID == company.endpointID && e.RoleID == roleID).ToList();
+                        _dbContext.RoleEndPoints.Remove(valueInDB[0]);
+                    }
+                }
+                if (company.isSelected)
+                {
+                    if (!alreadyExists)
+                    {
+                        _dbContext.RoleEndPoints.Add(new RoleEndPoint()
+                        {
+                            RoleID = roleID,
+                            EndPointID = company.endpointID,
+                            LastChange = DateTime.Now
+                        });
+                    }
+                }
+            }
+
+            _dbContext.SaveChanges();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    [HttpGet]
+    [Route("getAllCompanyEndpoints")]
+    public ActionResult<List<LocalEndpoint>> getAllCompanyEndpoints(int companyID)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
+            {
+                return Unauthorized(new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Invalid or missing authentication token."
+                });
+            }
+
+            var list = _dbContext.CompanyEndPoints.Where(e => e.CompanyID == companyID).Select(e => new LocalEndpoint
+            {
+                endpointID = e.EndPointID,
+                Name = _dbContext.EndPoints.Where(e=>e.EndPointID==e.EndPointID).Select(e=>e.EndPointName).FirstOrDefault(),
+                Spec = ""
+            }).ToList();
+            
+            return Ok(list);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+        
     }
     
 }   

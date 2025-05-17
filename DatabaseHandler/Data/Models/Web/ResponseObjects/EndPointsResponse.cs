@@ -26,3 +26,11 @@ public class EndpointResponse
     public required string Name { get; set; }
     public required string Spec { get; set; }
 }
+
+public class LocalEndpoint
+{
+    public int endpointID { get; set; }
+    public required string Name { get; set; }
+    public required string Spec { get; set; }
+    public bool isSelected {get; set;}
+}

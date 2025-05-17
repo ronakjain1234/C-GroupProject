@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Web
 @using System.Net.Http.Json
+@using MudBlazor.Extensions
 @using Web = DatabaseHandler.Data.Models.Web.ResponseObjects;
 @inject ISnackbar Snackbar
 @inject HttpClient Http
@@ -223,8 +224,8 @@
                             <MudTd DataLabel="Actions">
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                                     <MudButton StartIcon="@Icons.Material.Filled.Add" 
-                                              OnClick="() => AddEndpoint(context.roleName)"
-                                              Size="Size.Small">Add Group</MudButton>
+                                              OnClick="() => ShowEndpointDialog(context)"
+                                              Size="Size.Small">Add Endpoints</MudButton>
                                     <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
                                               OnClick="() => CloneRole(context.roleName)"
                                               Size="Size.Small">Clone</MudButton>
@@ -342,79 +343,40 @@
     </MudOverlay>
 }
 
-@if (_isOpen)
+@if (_addEndpointToCompanyOpen)
 {
-    <MudOverlay Visible="_isOpen" DarkBackground="true" AutoClose="false">
+    <MudOverlay Visible="_addEndpointToCompanyOpen" DarkBackground="true" AutoClose="false">
         <MudPaper Elevation="24" Class="pa-4 compact-dialog">
             <div class="d-flex justify-space-between align-center mb-2">
                 <div>
-                    <MudText Typo="Typo.h5">Endpoint Management</MudText>
-                    <MudText Typo="Typo.subtitle1" Color="Color.Primary">Role: @_currentRole</MudText>
+                    <MudText Typo="Typo.h5">Add Endpoints to Roles</MudText>
                 </div>
-                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDialog" />
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseEndpointCompanyDialog" />
             </div>
             
-            <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0" Class="swipeable-tabs" Centered="true">
-                <MudTabPanel Text="Module ESMA" Style="padding: 0">
-                    <MudPaper Elevation="0" Class="endpoint-paper">
-                        <MudTable Items="@EsmaEndpoints" Dense="true" Hover="true" Class="endpoint-table"
-                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
-                                 @bind-SelectedItems="_selectedEsmaEndpoints">
-                            <HeaderContent>
-                                <MudTh Style="width: 80px;">
-                                    <MudTableHeaderCheckbox T="Endpoint" />
-                                </MudTh>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Description</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd Style="width: 80px;">
-                                    <MudTableCheckbox T="Endpoint" Value="context" />
-                                </MudTd>
-                                <MudTd>@context.Name</MudTd>
-                                <MudTd>@context.Description</MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudPaper>
-                </MudTabPanel>
-                
-                <MudTabPanel Text="Module Calculations" Style="padding: 0">
-                    <MudPaper Elevation="0" Class="endpoint-paper">
-                        <MudTable Items="@CalculationEndpoints" Dense="true" Hover="true" Class="endpoint-table"
-                                 Elevation="0" Style="background-color: white;" MultiSelection="true"
-                                 @bind-SelectedItems="_selectedCalculationEndpoints">
-                            <HeaderContent>
-                                <MudTh Style="width: 80px;">
-                                    <MudTableHeaderCheckbox T="Endpoint" />
-                                </MudTh>
-                                <MudTh>Name</MudTh>
-                                <MudTh>Description</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd Style="width: 80px;">
-                                    <MudTableCheckbox T="Endpoint" Value="context" />
-                                </MudTd>
-                                <MudTd>@context.Name</MudTd>
-                                <MudTd>@context.Description</MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudPaper>
-                </MudTabPanel>
-            </MudTabs>
+            <MudTable Items="Endpoints" Dense="true" MultiSelection="true" @bind-SelectedItems="selectedItems_" SelectOnRowClick="true">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Name</MudTd>
+                </RowTemplate>
+            </MudTable>
 
             <MudDivider DividerType="DividerType.Middle" Class="my-3"/>
 
             <div class="d-flex justify-end gap-2">
-                <MudButton Color="Color.Error" 
-                          Variant="Variant.Filled" 
-                          StartIcon="@Icons.Material.Filled.Close" 
-                          OnClick="CloseDialog">Close</MudButton>
-                      
-                <MudButton Color="Color.Primary" 
-                          Variant="Variant.Filled" 
-                          StartIcon="@Icons.Material.Filled.Save" 
-                          OnClick="SaveAndClose"
-                          Disabled="@(!HasSelectedEndpoints())">Save Selection</MudButton>
+                <MudButton Color="Color.Error"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Close"
+                           OnClick="CloseEndpointCompanyDialog">Cancel</MudButton>
+
+                <MudButton Color="Color.Primary"
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                           OnClick="@(() => VerifyChangeInCompanyDialog())">
+                    Confirm
+                </MudButton>
             </div>
         </MudPaper>
     </MudOverlay>
@@ -439,6 +401,11 @@
     private bool isLoading = true;
     private bool _isAuthenticated = false;
     private bool _authChecked = false;
+
+    private bool _addEndpointToCompanyOpen = false;
+    private List<Web.LocalEndpoint> Endpoints = new ();
+    private HashSet<Web.LocalEndpoint> selectedItems_ = new ();
+    int roleID = 0;
 
 
     public class Endpoint
@@ -529,6 +496,7 @@
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             ConfigureSnackbar();
+            LoadEndpoints();
             await LoadRoles();
         }
         catch (Exception ex)
@@ -854,4 +822,100 @@
             Snackbar.Add($"Error updating role name!", Severity.Error);
         }
     }
+    
+    private void ShowEndpointDialog(Web.Role role)
+    {
+        roleID = role.roleID;
+        selectedItems_.Clear();
+        updateAddedToCompanies();
+        _addEndpointToCompanyOpen = true;
+        StateHasChanged();
+    }
+    
+    public void CloseEndpointCompanyDialog()
+    {
+        _addEndpointToCompanyOpen = false;
+        StateHasChanged();
+    }
+
+    public void VerifyChangeInCompanyDialog()
+    {
+        foreach (var endpoint in selectedItems_)
+        {
+            foreach (var localEndpoint in Endpoints)
+            {
+                if (localEndpoint.endpointID == endpoint.endpointID)
+                {
+                    localEndpoint.isSelected = true;
+                    break;
+                }
+            }
+        }
+        _addEndpointToCompanyOpen = false;
+        AddCompaniesToEndpoint();
+        StateHasChanged();
+    }
+    
+    private async void AddCompaniesToEndpoint()
+    {
+        try
+        {
+            var result = await Http.PostAsJsonAsync($"api/endpoint/setRoleState?roleID={roleID}",Endpoints);
+            if (result.IsSuccessStatusCode)
+            {
+            }
+            else
+            {
+                Snackbar.Add($"Error posting selected endpoint data{result.ReasonPhrase}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error posting selected endpoint data: {ex.Message}", Severity.Error);
+        }
+    }
+    
+    private async void updateAddedToCompanies()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<List<int>>($"api/endpoint/getEndpointsForRole?roleID={roleID}");
+            var list = response.As<List<int>>() ?? new List<int>();
+            foreach (var endpoint in Endpoints)
+            {
+                if (list.Contains(endpoint.endpointID))
+                {
+                    selectedItems_.Add(endpoint);
+                    endpoint.isSelected = true;
+                }
+                else
+                {
+                    endpoint.isSelected = false;
+                }
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error adding endpoint: {ex.Message}", Severity.Error);
+        }
+    }
+    
+    private async void LoadEndpoints()
+    {
+        try
+        {
+            Endpoints.Clear();
+            var result = await Http.GetFromJsonAsync<List<Web.LocalEndpoint>>($"api/endpoint/getAllCompanyEndpoints");
+            if (result != null)
+            {
+                Endpoints = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading endpoint data: {ex.Message}", Severity.Error);
+        }
+    }
+    
 }
