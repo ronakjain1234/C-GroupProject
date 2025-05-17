@@ -697,7 +697,7 @@ public class EndPointController : ControllerBase
             var list = _dbContext.CompanyEndPoints.Where(e => e.CompanyID == companyID).Select(e => new LocalEndpoint
             {
                 endpointID = e.EndPointID,
-                Name = _dbContext.EndPoints.Where(e=>e.EndPointID==e.EndPointID).Select(e=>e.EndPointName).FirstOrDefault(),
+                Name = _dbContext.EndPoints.Where(innerE=>innerE.EndPointID==e.EndPointID).Select(e=>e.EndPointName).FirstOrDefault(),
                 Spec = ""
             }).ToList();
             
