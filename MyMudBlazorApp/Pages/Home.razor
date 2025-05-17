@@ -137,7 +137,7 @@ else if (_isAuthenticated)
 
             await LoadCompanies();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Snackbar.Add($"Authentication error!", Severity.Error);
             _isAuthenticated = false;
@@ -212,6 +212,7 @@ else if (_isAuthenticated)
                     await LocalStorage.RemoveItemAsync("authToken");
                     _isAuthenticated = false;
                     Snackbar.Add("Your session has expired", Severity.Warning);
+                    await Task.Delay(100);
                     Navigation.NavigateTo("/login", forceLoad: true);
                     return;
                 }
