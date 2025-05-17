@@ -906,7 +906,7 @@
         try
         {
             Endpoints.Clear();
-            var result = await Http.GetFromJsonAsync<List<Web.LocalEndpoint>>($"api/endpoint/getAllCompanyEndpoints");
+            var result = await Http.GetFromJsonAsync<List<Web.LocalEndpoint>>($"api/endpoint/getAllCompanyEndpoints?companyID={companyId}");
             if (result != null)
             {
                 Endpoints = result;
