@@ -65,8 +65,14 @@ else if (_isAuthenticated)
             </MudGrid>
 
             <div class="pt-12 d-flex justify-center w-100 mb-10">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog" Class="mr-4">
                     Create Company
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Settings" OnClick="@(() => Navigation.NavigateTo("/manageEndpoints"))" Class="mr-4">
+                    Manage Endpoints
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Api" OnClick="@(() => Navigation.NavigateTo("/endpoints"))">
+                    API Endpoints
                 </MudButton>
             </div>
         </div>
