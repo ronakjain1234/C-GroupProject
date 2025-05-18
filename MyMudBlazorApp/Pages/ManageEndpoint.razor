@@ -349,17 +349,12 @@
 
     private bool FilterFunc(EndpointResponse endpoint)
     {
-        return true;
-        /*
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
-        if (user.userName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        if (user.email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (endpoint.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         return false;
-        */
     }
 
 
