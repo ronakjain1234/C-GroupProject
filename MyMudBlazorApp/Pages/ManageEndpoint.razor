@@ -496,13 +496,17 @@
 
     public void VerifyChangeInCompanyDialog()
     {
+        foreach (var localCompany in companies)
+        {
+            localCompany.isSelected = false;
+        }
         foreach (var company in selectedItems_)
         {
             foreach (var localComapny in companies)
             {
                 if (localComapny.company.CompanyID == company.company.CompanyID)
                 {
-                    company.isSelected = true;
+                    localComapny.isSelected = true;
                 }
             }
         }
