@@ -1401,10 +1401,7 @@ public class CompanyController : ControllerBase
             return StatusCode(500, "An error occurred while fetching user initials.");
         }
     }
-    private bool IsUserInCompany(int userID, int companyID)
-    {
-        return _dbContext.UserCompanies.Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
-    }
+    
 }
 
     
