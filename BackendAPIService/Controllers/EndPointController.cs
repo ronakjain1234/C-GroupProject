@@ -263,41 +263,6 @@ public class EndPointController : ControllerBase
             }
         }
     }
-
-    [HttpGet]
-    [Route("get")]
-    public ActionResult<List<EndpointResponse>> GetAllEndpoints()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
-        {
-            return Unauthorized(new SimpleErrorResponse
-            {
-                Success = false,
-                Message = "Invalid or missing authentication token."
-            });
-        }
-        bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
-        if (!isSystemAdmin)
-        {
-            return StatusCode(403, new SimpleErrorResponse
-            {
-                Success = false,
-                Message = "User does not have access to the company or access has expired."
-            });
-        }
-        List<EndpointResponse> endpoints = _dbContext.EndPoints
-            .Select(e => new EndpointResponse
-            {
-                endpointID = e.EndPointID,
-                Name = e.EndPointName,
-                Spec = e.Specification
-            })
-            .ToList();
-
-
-        return endpoints;
-    }
     
     [HttpGet]
     [Route("getEndpointsForRole")]
