@@ -35,6 +35,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ModuleEndPoint> ModuleEndPoints { get; set; }
     public DbSet<RoleEndPoint> RoleEndPoints { get; set; }
     public DbSet<EndPointParameter> EndPointParameters { get; set; }
+    public DbSet<UserBearer> UserBearer { get; set; }
     
 
 
