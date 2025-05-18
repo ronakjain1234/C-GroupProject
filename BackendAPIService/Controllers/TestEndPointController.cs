@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace BackendAPIService.Controllers;
 
 [ApiController]
-[Route("api/testendpoint/")]
+[Route("api/testendpoint")]
 public class TestEndpointController : ControllerBase
 {
 
-    [HttpPost]
+    [HttpGet]
     [Route("testing")]
     public string TestEndpoint()
     {
