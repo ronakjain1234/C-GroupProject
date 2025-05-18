@@ -250,6 +250,16 @@ public class CompanyController : ControllerBase
         }
         try
         {
+            bool companyNameExists = _dbContext.Companies.Any(c => c.CompanyName.ToLower() == newCompanyName.ToLower());
+
+            if (companyNameExists)
+            {
+                return StatusCode(404, new Web.SimpleErrorResponse()
+                {
+                    Success = false,
+                    Message = "Company name already exists."
+                });
+            }
 
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == userID)
