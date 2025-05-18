@@ -363,75 +363,6 @@
     private HashSet<Web.LocalEndpoint> selectedItems_ = new ();
     int roleID = 0;
 
-
-    public class Endpoint
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Module { get; set; }
-        public string Path { get; set; }
-        public string Method { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-    private List<Endpoint> EsmaEndpoints = new()
-    {
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 1",
-            Description = "Retrieves ESMA financial data",
-            Module = "ESMA",
-            Path = "/api/esma/financial-data",
-            Method = "GET",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 2",
-            Description = "Updates ESMA market statistics",
-            Module = "ESMA",
-            Path = "/api/esma/market-stats",
-            Method = "POST",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test ESMA Endpoint 3",
-            Description = "Fetches ESMA regulatory reports",
-            Module = "ESMA",
-            Path = "/api/esma/regulatory-reports",
-            Method = "GET",
-            IsActive = true
-        }
-    };
-
-    private List<Endpoint> CalculationEndpoints = new()
-    {
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 1",
-            Description = "Performs risk assessment calculations",
-            Module = "Calculations",
-            Path = "/api/calc/risk-assessment",
-            Method = "POST",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 2",
-            Description = "Calculates market volatility metrics",
-            Module = "Calculations",
-            Path = "/api/calc/volatility",
-            Method = "GET",
-            IsActive = true
-        },
-        new Endpoint { 
-            Name = "Test Calculation Endpoint 3",
-            Description = "Generates performance analytics",
-            Module = "Calculations",
-            Path = "/api/calc/performance",
-            Method = "GET",
-            IsActive = true
-        }
-    };
-
-    private IEnumerable<Endpoint> AllEndpoints => EsmaEndpoints.Concat(CalculationEndpoints);
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -607,7 +538,6 @@
 
         var commonEndpoints = GetCommonEndpoints(roles);
         
-        PreSelectEndpoints(commonEndpoints);
         
         OpenDialog();
     }
@@ -638,19 +568,7 @@
 
         return commonEndpoints;
     }
-
-    private void PreSelectEndpoints(HashSet<string> endpointNames)
-    {
-        if (endpointNames == null || !endpointNames.Any()) return;
-
-        _selectedEsmaEndpoints = new HashSet<Endpoint>(
-            EsmaEndpoints.Where(e => endpointNames.Contains(e.Name))
-        );
-
-        _selectedCalculationEndpoints = new HashSet<Endpoint>(
-            CalculationEndpoints.Where(e => endpointNames.Contains(e.Name))
-        );
-    }
+    
 
     private bool HasSelectedEndpoints() => 
         _selectedEsmaEndpoints.Any() || _selectedCalculationEndpoints.Any();
@@ -796,6 +714,10 @@
 
     public void VerifyChangeInCompanyDialog()
     {
+        foreach (var thing in Endpoints)
+        {
+            thing.isSelected = false;
+        }
         foreach (var endpoint in selectedItems_)
         {
             foreach (var localEndpoint in Endpoints)
@@ -839,14 +761,11 @@
             var list = response.As<List<int>>() ?? new List<int>();
             foreach (var endpoint in Endpoints)
             {
+                endpoint.isSelected = false;
                 if (list.Contains(endpoint.endpointID))
                 {
                     selectedItems_.Add(endpoint);
                     endpoint.isSelected = true;
-                }
-                else
-                {
-                    endpoint.isSelected = false;
                 }
             }
             StateHasChanged();
