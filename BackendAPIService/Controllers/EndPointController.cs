@@ -104,7 +104,10 @@ public class EndPointController : ControllerBase
                     Specification = spec,
                     LastChange = DateTime.UtcNow
                 };
-                _dbContext.EndPoints.Update(newEndpoint);
+                var item = _dbContext.EndPoints.Where(e => e.EndPointID == endpointID).FirstOrDefault();
+                item.EndPointName = newEndpoint.EndPointName;
+                item.Specification = spec;
+                _dbContext.EndPoints.Update(item);
                 _dbContext.SaveChanges();
                 transaction.Commit();
                 return Ok("Endpoint successfully Updated");
