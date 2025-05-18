@@ -22,6 +22,18 @@ public class TestEndpointController : ControllerBase
     [Route("testing")]
     public string TestEndpoint()
     {
+        var authHeader = HttpContext.Request.Headers["Authorization"].ToString();
+
+        if (authHeader != null && authHeader.StartsWith("Bearer "))
+        {
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+            
+            return $"Token received: {token}";
+        }
+        else
+        {
+            return "No Authorization";
+        }
         return "DTU is the best technical university in the EU";    
     }
     
