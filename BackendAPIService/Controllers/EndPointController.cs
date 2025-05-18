@@ -37,9 +37,8 @@ public class EndPointController : ControllerBase
                 string name = body.Name;
                 string spec = body.Spec;
                 
-                //bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
-                bool allowed = true;
-                if (!allowed)
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                if (!isSystemAdmin)
                 {
                     return Unauthorized(new SimpleErrorResponse
                     {
@@ -87,9 +86,8 @@ public class EndPointController : ControllerBase
                 string spec = body.Spec;
                 int endpointID = body.endpointID;
                 
-                //bool allowed = _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID);
-                bool allowed = true;
-                if (!allowed)
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                if (!isSystemAdmin)
                 {
                     return Unauthorized(new SimpleErrorResponse
                     {
@@ -140,8 +138,9 @@ public class EndPointController : ControllerBase
             {
                 var userCompany = _dbContext.UserCompanies
                     .FirstOrDefault(uc => uc.CompanyID == companyID && uc.UserID == userID);
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-                if (userCompany == null)
+                if (userCompany == null && !isSystemAdmin)
                 {
                     return StatusCode(403, new SimpleErrorResponse 
                     { 
@@ -215,8 +214,8 @@ public class EndPointController : ControllerBase
             {
                 var userCompany = _dbContext.UserCompanies
                     .FirstOrDefault(uc => uc.CompanyID == companyID && uc.UserID == userID);
-
-                if (userCompany == null)
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                if (userCompany == null && !isSystemAdmin)
                 {
                     return StatusCode(403, new SimpleErrorResponse 
                     { 
@@ -278,7 +277,15 @@ public class EndPointController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
-
+        bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+        if (!isSystemAdmin)
+        {
+            return StatusCode(403, new SimpleErrorResponse
+            {
+                Success = false,
+                Message = "User does not have access to the company or access has expired."
+            });
+        }
         List<EndpointResponse> endpoints = _dbContext.EndPoints
             .Select(e => new EndpointResponse
             {
@@ -339,8 +346,10 @@ public class EndPointController : ControllerBase
             
             var hasAccess = _dbContext.UserCompanies
                 .Any(uc => uc.CompanyID == companyID && uc.UserID == userID);
+            
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-            if (!hasAccess)
+            if (!hasAccess && !isSystemAdmin)
             {
                 return StatusCode(403, new SimpleErrorResponse
                 {
@@ -401,6 +410,15 @@ public class EndPointController : ControllerBase
         {
             try
             {
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                if (!isSystemAdmin)
+                {
+                    return StatusCode(500, new SimpleErrorResponse
+                    {
+                        Success = false,
+                        Message = "User is not admin."
+                    });
+                }
                 
                 var endpoint = _dbContext.EndPoints.FirstOrDefault(e => e.EndPointID == endpointID);
                 if (endpoint == null)
@@ -466,8 +484,8 @@ public class EndPointController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
-        
-        if (true || _dbContext.UserRoles.Any(userRole => userRole.RoleID == 1 && userRole.UserID == userID))
+        bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+        if (isSystemAdmin)
         { 
             List<EndpointResponse> endpoints = _dbContext.EndPoints
                 .Select(e => new EndpointResponse
@@ -536,8 +554,8 @@ public class EndPointController : ControllerBase
             });
         }
 
-        /*
-        if (_dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == 1))
+        bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+        if (!isSystemAdmin)
         {
             return Unauthorized(new SimpleErrorResponse
             {
@@ -545,7 +563,6 @@ public class EndPointController : ControllerBase
                 Message = "User is not admin"
             });
         }
-        */
 
         List<int> companies = _dbContext.CompanyEndPoints.Where(companyEndpoint => companyEndpoint.EndPointID == endpointID)
             .Select(companyEndpoint => companyEndpoint.CompanyID).ToList();
@@ -568,8 +585,8 @@ public class EndPointController : ControllerBase
                 });
             }
 
-            /*
-            if (_dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == 1))
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+            if (!isSystemAdmin)
             {
                 return Unauthorized(new SimpleErrorResponse
                 {
@@ -577,7 +594,6 @@ public class EndPointController : ControllerBase
                     Message = "User is not admin"
                 });
             }
-            */
 
             foreach (var company in localCompanies)
             {
@@ -639,6 +655,21 @@ public class EndPointController : ControllerBase
                     Message = "Invalid or missing authentication token."
                 });
             }
+            var companyID = _dbContext.CompanyRoles.Where(e=> e.CompanyID == roleID).Select(e => e.CompanyID).FirstOrDefault();
+
+            var companyRoleIDs = _dbContext.CompanyRoles.Where(e => companyID == e.CompanyID).Select(e => e.RoleID).ToList();
+
+            companyRoleIDs.Sort();
+            bool isCustomerAdmin = _dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == companyRoleIDs[0]);
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+            if (!isSystemAdmin && !isCustomerAdmin)
+            {
+                return StatusCode(403, new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User is not admin"
+                });
+            }
             foreach (var company in localCompanies)
             {
                 var foundObjects = _dbContext.RoleEndPoints.Where(e =>
@@ -695,6 +726,20 @@ public class EndPointController : ControllerBase
                 {
                     Success = false,
                     Message = "Invalid or missing authentication token."
+                });
+            }
+            
+            var companyRoleIDs = _dbContext.CompanyRoles.Where(e => companyID == e.CompanyID).Select(e => e.RoleID).ToList();
+
+            companyRoleIDs.Sort();
+            bool isCustomerAdmin = _dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == companyRoleIDs[0]);
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+            if (!isSystemAdmin && !isCustomerAdmin)
+            {
+                return StatusCode(403, new SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User is not admin"
                 });
             }
 

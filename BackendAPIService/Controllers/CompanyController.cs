@@ -26,7 +26,6 @@ public class CompanyController : ControllerBase
     {
         try
         {
-
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
             {
@@ -48,10 +47,14 @@ public class CompanyController : ControllerBase
             {
                 return Ok(new List<Web.GetAllCompaniesResponse>()); // No companies
             }
-
+            
             var companiesQuery = _dbContext.Companies
                 .Where(c => companyIds.Contains(c.CompanyID));
-
+            
+            if (Utility.IsUserInCompany(userID, 1, _dbContext))
+            {
+                companiesQuery = _dbContext.Companies;
+            }
 
             if (!string.IsNullOrWhiteSpace(searchString))
             {
@@ -101,10 +104,16 @@ public class CompanyController : ControllerBase
                 });
             }
 
-            var result = _dbContext.Companies.ToList();
-
-
-            return Ok(result);
+            if (Utility.IsUserInCompany(userID, 1, _dbContext))
+            {
+                var result = _dbContext.Companies.ToList();
+                return Ok(result);
+            }
+            return StatusCode(401, new Web.SimpleErrorResponse()
+            {
+                Success = false,
+                Message = "User is not admin"
+            });
         }
         catch (Exception ex)
         {
@@ -256,7 +265,8 @@ public class CompanyController : ControllerBase
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-            if (!hasCustomerAdminRole)
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+            if (!hasCustomerAdminRole && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
@@ -316,7 +326,9 @@ public class CompanyController : ControllerBase
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-            if (!hasCustomerAdminRole)
+            bool isSystemAdmin = Utility.IsUserInCompany(mainUserID, 1, _dbContext);
+            
+            if (!hasCustomerAdminRole && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
@@ -416,8 +428,10 @@ public class CompanyController : ControllerBase
 
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+            
+            bool isSystemAdmin = Utility.IsUserInCompany(mainUserID, 1, _dbContext);
 
-            if (!hasCustomerAdminRole)
+            if (!hasCustomerAdminRole && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
@@ -471,8 +485,10 @@ public class CompanyController : ControllerBase
 
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+            
+            bool isSystemAdmin = Utility.IsUserInCompany(mainUserID, 1, _dbContext);
 
-            if (!hasCustomerAdminRole)
+            if (!hasCustomerAdminRole && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
@@ -544,7 +560,9 @@ public class CompanyController : ControllerBase
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-            if (!hasCustomerAdminRole)
+            bool isSystemAdmin = Utility.IsUserInCompany(mainUserID, 1, _dbContext);
+            
+            if (!hasCustomerAdminRole && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
@@ -615,7 +633,9 @@ public class CompanyController : ControllerBase
             var hasAccess = _dbContext.UserCompanies
                 .Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
 
-            if (!hasAccess)
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+            
+            if (!hasAccess && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse
                 {
@@ -690,7 +710,9 @@ public class CompanyController : ControllerBase
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-                if (!hasCustomerAdminRole)
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                
+                if (!hasCustomerAdminRole && !isSystemAdmin)
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse
                     {
@@ -783,8 +805,10 @@ public class CompanyController : ControllerBase
 
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+                
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-                if (!hasCustomerAdminRole)
+                if (!hasCustomerAdminRole && !isSystemAdmin)
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
                 }
@@ -892,8 +916,10 @@ public class CompanyController : ControllerBase
 
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+                
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-                if (!hasCustomerAdminRole)
+                if (!hasCustomerAdminRole && !isSystemAdmin)
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse
                     {
@@ -980,8 +1006,10 @@ public class CompanyController : ControllerBase
         {
             var hasAccess = _dbContext.UserCompanies
                 .Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
+            
+            bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-            if (!hasAccess)
+            if (!hasAccess && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse
                 {
@@ -1091,8 +1119,10 @@ public class CompanyController : ControllerBase
 
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+                
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
 
-                if (!hasCustomerAdminRole)
+                if (!hasCustomerAdminRole && !isSystemAdmin)
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
                 }
@@ -1185,7 +1215,9 @@ public class CompanyController : ControllerBase
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-                if (!hasCustomerAdminRole)
+                bool isSystemAdmin = Utility.IsUserInCompany(userID, 1, _dbContext);
+                
+                if (!hasCustomerAdminRole && !isSystemAdmin)
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
                 }
@@ -1287,8 +1319,10 @@ public class CompanyController : ControllerBase
 
             var hasCustomerAdminAccess = _dbContext.Roles
                 .Any(r => mainUserCompanyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
+            
+            bool isSystemAdmin = Utility.IsUserInCompany(mainUserID, 1, _dbContext);
 
-            if (!hasCustomerAdminAccess)
+            if (!hasCustomerAdminAccess && !isSystemAdmin)
             {
                 return StatusCode(403, new Web.SimpleErrorResponse
                 {
