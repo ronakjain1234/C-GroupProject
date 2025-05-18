@@ -151,6 +151,21 @@
     min-height: 100vh;
     padding: 20px;
 }
+
+.tiny-button {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    min-width: 0;
+    height: 35px;
+}
+
+.tiny-icon-button {
+    padding: 2px;
+    font-size: 16px;
+    min-width: 0;
+    height: 35px;
+}
+
 </style>
 
 <div class="companySideBar">
@@ -225,13 +240,13 @@
                                 <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                                     <MudButton StartIcon="@Icons.Material.Filled.Add" 
                                               OnClick="() => ShowEndpointDialog(context)"
-                                              Size="Size.Small">Add Endpoints</MudButton>
+                                              Class="tiny-button">Add Endpoints</MudButton>
                                     <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" 
                                               OnClick="() => CloneRole(context.roleName)"
-                                              Size="Size.Small">Clone</MudButton>
+                                              Class="tiny-button" >Clone</MudButton>
                                     <MudIconButton Icon="@Icons.Material.Filled.Delete" 
                                                  Color="Color.Error"
-                                                 Size="Size.Small"
+                                                Class="tiny-icon-button"
                                                  OnClick="() => RemoveRole(context.roleName)" />
                                 </MudButtonGroup>
                             </MudTd>
