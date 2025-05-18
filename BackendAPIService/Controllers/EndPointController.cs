@@ -470,6 +470,16 @@ public class EndPointController : ControllerBase
             var list = _dbContext.RoleEndPoints.Where(roleEndpoint => roleEndpoint.RoleID == roleID).Select(e => e.EndPointID)
                 .ToList();
             endpointIds.AddRange(list);
+            var roleNames = _dbContext.Roles.Where(e => e.RoleID == roleID).Select(e => e.Name).ToList();
+            int companyID = _dbContext.CompanyRoles.Where(e => e.RoleID == roleID).Select(e => e.CompanyID)
+                .FirstOrDefault();
+            for (int i = 0; i < roleNames.Count; i++)
+            {
+                if (roleNames[i] == "CustomerAdmin")
+                {
+                    endpointIds.AddRange(_dbContext.CompanyEndPoints.Where(e => e.CompanyID == companyID).Select(selection => selection.EndPointID).ToList());
+                }
+            }
         }
 
         List<EndpointResponse> endpointts = new();
@@ -607,7 +617,7 @@ public class EndPointController : ControllerBase
 
     [HttpPost]
     [Route("setRoleState")]
-    public ActionResult setCompanyState([FromBody] List<LocalEndpoint> localCompanies, [FromQuery] int roleID)
+    public ActionResult SetRoleState([FromBody] List<LocalEndpoint> localCompanies, [FromQuery] int roleID)
     {
         try
         {
@@ -620,7 +630,7 @@ public class EndPointController : ControllerBase
                     Message = "Invalid or missing authentication token."
                 });
             }
-            var companyID = _dbContext.CompanyRoles.Where(e=> e.CompanyID == roleID).Select(e => e.CompanyID).FirstOrDefault();
+            var companyID = _dbContext.CompanyRoles.Where(e=> e.RoleID == roleID).Select(e => e.CompanyID).FirstOrDefault();
 
             var companyRoleIDs = _dbContext.CompanyRoles.Where(e => companyID == e.CompanyID).Select(e => e.RoleID).ToList();
 

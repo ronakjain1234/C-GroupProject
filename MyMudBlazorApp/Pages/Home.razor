@@ -68,9 +68,12 @@ else if (_isAuthenticated)
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateCompanyDialog" Class="mr-4">
                     Create Company
                 </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Settings" OnClick="@(() => Navigation.NavigateTo("/manageEndpoints"))" Class="mr-4">
-                    Manage Endpoints
-                </MudButton>
+            @if (_isAdmin)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Settings" OnClick="@(() => Navigation.NavigateTo("/manageEndpoints"))" Class="mr-4">
+                        Manage Endpoints
+                    </MudButton>
+                }
                 <MudButton Variant="Variant.Filled" Color="Color.Info" StartIcon="@Icons.Material.Filled.Api" OnClick="@(() => Navigation.NavigateTo("/endpoints"))">
                     API Endpoints
                 </MudButton>
@@ -112,6 +115,7 @@ else if (_isAuthenticated)
     private bool _isLoading = true;
     private bool _isAuthenticated = false;
     private bool _isCreateCompanyOpen = false;
+    private bool _isAdmin = false;
     private string _newCompanyName = "";
 
     private List<GetAllCompaniesResponse> FilteredCompanies =>
@@ -173,6 +177,15 @@ else if (_isAuthenticated)
                 await LocalStorage.RemoveItemAsync("authToken");
                 _isAuthenticated = false;
                 Navigation.NavigateTo("/login", forceLoad: true);
+            }
+        }
+
+        _isAdmin = false;
+        foreach (var company in Companies)
+        {
+            if (company.companyID == 1)
+            {
+                _isAdmin = true;
             }
         }
     }
