@@ -536,7 +536,7 @@ public class EndPointController : ControllerBase
             });
         }
 
-        
+        /*
         if (_dbContext.UserRoles.Any(e => e.UserID == userID && e.RoleID == 1))
         {
             return Unauthorized(new SimpleErrorResponse
@@ -545,6 +545,7 @@ public class EndPointController : ControllerBase
                 Message = "User is not admin"
             });
         }
+        */
 
         List<int> companies = _dbContext.CompanyEndPoints.Where(companyEndpoint => companyEndpoint.EndPointID == endpointID)
             .Select(companyEndpoint => companyEndpoint.CompanyID).ToList();
