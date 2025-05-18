@@ -391,13 +391,25 @@ public class CompanyController : ControllerBase
         {
 
             var userRoleIds = _dbContext.UserRoles
+                .Where(ur => ur.UserID == userID)
+                .Select(ur => ur.RoleID)
+                .ToList();
+            foreach (var roleId in userRoleIds)
+            {
+                var result = _dbContext.UserRoles.Where(e => e.RoleID == roleId && e.UserID == userID).ToList();
+                foreach (var userRole in result)
+                {
+                    _dbContext.UserRoles.Remove(userRole);
+                }
+            }
+            var mainUserRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
 
             var companyRoleIds = _dbContext.CompanyRoles
-                .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
+                .Where(cr => cr.CompanyID == companyID && mainUserRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
