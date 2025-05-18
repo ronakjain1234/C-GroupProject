@@ -74,6 +74,7 @@
         }
         else if (Endpointss?.Any() == true)
         {
+            <MudText>@bearer</MudText>
             <MudSelect T="EndpointResponse" Label="Select an endpoint" @bind-Value="SelectedEndpoint" Dense="true">
                 @foreach (var endpoint in Endpointss)
                 {
@@ -99,6 +100,7 @@
     private List<EndpointResponse>? Endpointss;
     private EndpointResponse? SelectedEndpoint;
     private bool IsLoading = true;
+    private string bearer = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,6 +139,27 @@
         finally
         {
             IsLoading = false;
+        }
+        
+        try
+        {
+            IsLoading = true;
+
+            var response = await Http.GetAsync("http://localhost:5000/api/testendpoint/generateBearerToken");
+            if (response.IsSuccessStatusCode)
+            {
+                string responseString = await response.Content.ReadAsStringAsync();
+                bearer = responseString;
+            }
+            else
+            {
+                Snackbar.Add("Failed to generate bearer token", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Failed to load endpoints: " + ex.Message, Severity.Error);
+            Endpointss = new();
         }
     }
 }
