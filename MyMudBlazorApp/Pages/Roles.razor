@@ -236,66 +236,7 @@
                                 </MudButtonGroup>
                             </MudTd>
                         </RowTemplate>
-                        <PagerContent>
-                            <div class="d-flex align-center">
-                                <MudTablePager />
-                                <MudSpacer />
-                                <MudButton Color="Color.Primary" 
-                                          Variant="Variant.Outlined"
-                                          StartIcon="@Icons.Material.Filled.Settings"
-                                          OnClick="MakeChoicesForSelectedRoles"
-                                          Disabled="@(!_selectedItems.Any())"
-                                          Size="Size.Small"
-                                          Class="ml-4">Make Choices</MudButton>
-                            </div>
-                        </PagerContent>
                     </MudTable>
-                </div>
-            </MudTabPanel>
-            
-            <MudTabPanel Text="Selected Endpoints">
-                <div class="tab-content-container">
-                    @if (!_roleEndpoints.Any())
-                    {
-                        <div class="empty-selection">
-                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large" Class="mb-2" />
-                            <MudText Typo="Typo.h6">No endpoint selections available</MudText>
-                            <MudText Typo="Typo.body2" Class="mt-2">
-                                Select a role and click "Add Group" to assign endpoints.
-                            </MudText>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="endpoint-selection-container">
-                            @foreach (var roleEndpoints in _roleEndpoints)
-                            {
-                                <MudPaper Elevation="2" Class="pa-4 mt-4">
-                                    <MudText Typo="Typo.h6" GutterBottom="true" Class="mb-2">
-                                        Selected Endpoints for Role: @roleEndpoints.Key
-                                    </MudText>
-                                    <MudTable Items="@roleEndpoints.Value" Dense="true" Hover="false" ReadOnly="true" FixedHeader="true">
-                                        <ColGroup>
-                                            <col style="width: 50px;" />
-                                            <col />
-                                        </ColGroup>
-                                        <RowTemplate>
-                                            <MudTd>
-                                                <MudIcon Icon="@Icons.Material.Filled.Link" />
-                                            </MudTd>
-                                            <MudTd DataLabel="Endpoint">@context</MudTd>
-                                        </RowTemplate>
-                                        <NoRecordsContent>
-                                            <div class="empty-selection">
-                                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Medium" Class="mb-2" />
-                                                <MudText Typo="Typo.body1">No endpoints assigned to this role</MudText>
-                                            </div>
-                                        </NoRecordsContent>
-                                    </MudTable>
-                                </MudPaper>
-                            }
-                        </div>
-                    }
                 </div>
             </MudTabPanel>
         </MudTabs>
