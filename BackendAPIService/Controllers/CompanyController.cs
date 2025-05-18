@@ -14,19 +14,19 @@ namespace BackendAPIService.Controllers;
 public class CompanyController : ControllerBase
 {
     private readonly ApplicationDbContext _dbContext;
-    
+
     public CompanyController(ApplicationDbContext context)
     {
         _dbContext = context;
     }
-    
+
     [HttpGet]
     [Route("get")]
-    public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int limit = 50,int offset = 0, string? searchString = null)
+    public ActionResult<List<Web.GetAllCompaniesResponse>> GetCompanies(int limit = 50, int offset = 0, string? searchString = null)
     {
         try
         {
-       
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
             {
@@ -36,7 +36,7 @@ public class CompanyController : ControllerBase
                     Message = "Invalid or missing authentication token."
                 });
             }
-            
+
 
             var companyIds = _dbContext.UserCompanies
                 .Where(uc => uc.UserID == userID)
@@ -52,14 +52,14 @@ public class CompanyController : ControllerBase
             var companiesQuery = _dbContext.Companies
                 .Where(c => companyIds.Contains(c.CompanyID));
 
-            
+
             if (!string.IsNullOrWhiteSpace(searchString))
             {
                 companiesQuery = companiesQuery
                     .Where(c => c.CompanyName.Contains(searchString, StringComparison.OrdinalIgnoreCase));
             }
 
-           
+
             var result = companiesQuery
                 .OrderBy(c => c.CompanyName)
                 .Skip(offset)
@@ -83,14 +83,14 @@ public class CompanyController : ControllerBase
             });
         }
     }
-    
+
     [HttpGet]
     [Route("getAllForEndpointPage")]
     public ActionResult<List<Company>> GetAllCompanies()
     {
         try
         {
-       
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
             {
@@ -102,7 +102,7 @@ public class CompanyController : ControllerBase
             }
 
             var result = _dbContext.Companies.ToList();
-            
+
 
             return Ok(result);
         }
@@ -117,7 +117,7 @@ public class CompanyController : ControllerBase
         }
     }
 
-    
+
     public class CreateCompanyRequest
     {
         public required string companyName { get; set; }
@@ -240,8 +240,8 @@ public class CompanyController : ControllerBase
             });
         }
         try
-        { 
-           
+        {
+
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == userID)
                 .Select(ur => ur.RoleID)
@@ -252,7 +252,7 @@ public class CompanyController : ControllerBase
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-            
+
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -279,7 +279,8 @@ public class CompanyController : ControllerBase
             return StatusCode(200, new Web.SimpleErrorResponse { Success = true, Message = "Successfully updated the company." });
 
 
-        } catch(Exception ex)  
+        }
+        catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
             return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "An error occurred while editing the company." });
@@ -301,26 +302,26 @@ public class CompanyController : ControllerBase
         }
         try
         {
-        var userRoleIds = _dbContext.UserRoles
-            .Where(ur => ur.UserID == mainUserID)
-            .Select(ur => ur.RoleID)
-            .ToList();
+            var userRoleIds = _dbContext.UserRoles
+                .Where(ur => ur.UserID == mainUserID)
+                .Select(ur => ur.RoleID)
+                .ToList();
 
-        var companyRoleIds = _dbContext.CompanyRoles
-            .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
-            .Select(cr => cr.RoleID)
-            .ToList();
+            var companyRoleIds = _dbContext.CompanyRoles
+                .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
+                .Select(cr => cr.RoleID)
+                .ToList();
 
-        
-        var hasCustomerAdminRole = _dbContext.Roles
-            .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-        if (!hasCustomerAdminRole)
-        {
-            return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
-        }
+            var hasCustomerAdminRole = _dbContext.Roles
+                .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
-          
+            if (!hasCustomerAdminRole)
+            {
+                return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
+            }
+
+
             var userEmailEntry = _dbContext.UserEmail.FirstOrDefault(ue => ue.Email == email);
             if (userEmailEntry == null)
             {
@@ -335,14 +336,14 @@ public class CompanyController : ControllerBase
                 return StatusCode(404, new Web.SimpleErrorResponse { Success = false, Message = "Company not found." });
             }
 
-            
+
             bool userExists = _dbContext.UserCompanies.Any(uc => uc.UserID == userId && uc.CompanyID == companyID);
             if (userExists)
             {
                 return StatusCode(409, new Web.SimpleErrorResponse { Success = false, Message = "User is already associated with this company." });
             }
 
-            
+
             var newUser = new Database.MixedTables.UserCompany
             {
                 UserID = userId,
@@ -362,7 +363,7 @@ public class CompanyController : ControllerBase
         }
     }
 
-    
+
     [HttpDelete]
     [Route("removeUser")]
     public ActionResult<Web.SimpleErrorResponse> RemoveUser(int userID, int companyID)
@@ -388,19 +389,19 @@ public class CompanyController : ControllerBase
 
         try
         {
-       
+
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
                 .ToList();
 
-           
+
             var companyRoleIds = _dbContext.CompanyRoles
                 .Where(cr => cr.CompanyID == companyID && userRoleIds.Contains(cr.RoleID))
                 .Select(cr => cr.RoleID)
                 .ToList();
 
-          
+
             var hasCustomerAdminRole = _dbContext.Roles
                 .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -408,7 +409,7 @@ public class CompanyController : ControllerBase
             {
                 return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
             }
-                
+
             var userCompany = _dbContext.UserCompanies
                 .FirstOrDefault(uc => uc.UserID == userID && uc.CompanyID == companyID);
 
@@ -443,9 +444,9 @@ public class CompanyController : ControllerBase
                 Message = "Invalid or missing authentication token."
             });
         }
-        try 
+        try
         {
-          
+
             var userRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
@@ -604,19 +605,19 @@ public class CompanyController : ControllerBase
 
             if (!hasAccess)
             {
-                return StatusCode(403, new Web.SimpleErrorResponse 
+                return StatusCode(403, new Web.SimpleErrorResponse
                 {
                     Success = false,
                     Message = "User does not have access to this company."
                 });
             }
-            
-            var rolesQuery = from cr in _dbContext.CompanyRoles
-                            join r in _dbContext.Roles on cr.RoleID equals r.RoleID
-                            where cr.CompanyID == companyID
-                            select new { r.RoleID, r.Name };
 
-            
+            var rolesQuery = from cr in _dbContext.CompanyRoles
+                             join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                             where cr.CompanyID == companyID
+                             select new { r.RoleID, r.Name };
+
+
             if (!showCustomerAdminRole)
             {
                 rolesQuery = rolesQuery.Where(role => role.Name != "CustomerAdmin");
@@ -663,7 +664,7 @@ public class CompanyController : ControllerBase
         {
             try
             {
-                
+
                 var userRoleIds = _dbContext.UserRoles
                     .Where(ur => ur.UserID == userID)
                     .Select(ur => ur.RoleID)
@@ -686,7 +687,7 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-           
+
                 var companyRole = _dbContext.CompanyRoles
                     .FirstOrDefault(cr => cr.CompanyID == companyID && cr.RoleID == roleID);
 
@@ -699,14 +700,14 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var userRolesToDelete = _dbContext.UserRoles
                     .Where(ur => ur.RoleID == roleID)
                     .ToList();
 
                 _dbContext.UserRoles.RemoveRange(userRolesToDelete);
 
-             
+
                 _dbContext.CompanyRoles.Remove(companyRole);
 
                 bool roleUsedElsewhere = _dbContext.CompanyRoles
@@ -740,9 +741,9 @@ public class CompanyController : ControllerBase
     }
 
 
-   [HttpPost]
-   [Route("createRole")]
-   public ActionResult<int> CreateRole(int companyID, string name)
+    [HttpPost]
+    [Route("createRole")]
+    public ActionResult<int> CreateRole(int companyID, string name)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userID))
@@ -767,7 +768,7 @@ public class CompanyController : ControllerBase
                     .Select(cr => cr.RoleID)
                     .ToList();
 
-                
+
                 var hasCustomerAdminRole = _dbContext.Roles
                     .Any(r => companyRoleIds.Contains(r.RoleID) && r.Name == "CustomerAdmin");
 
@@ -775,11 +776,11 @@ public class CompanyController : ControllerBase
                 {
                     return StatusCode(403, new Web.SimpleErrorResponse { Success = false, Message = "User does not have CustomerAdmin access." });
                 }
-               
+
                 var existingRoleIdInCompany = (from r in _dbContext.Roles
-                                            join cr in _dbContext.CompanyRoles on r.RoleID equals cr.RoleID
-                                            where cr.CompanyID == companyID && r.Name == name
-                                            select r.RoleID).FirstOrDefault();
+                                               join cr in _dbContext.CompanyRoles on r.RoleID equals cr.RoleID
+                                               where cr.CompanyID == companyID && r.Name == name
+                                               select r.RoleID).FirstOrDefault();
 
                 if (existingRoleIdInCompany != 0)
                 {
@@ -802,16 +803,16 @@ public class CompanyController : ControllerBase
                     _dbContext.SaveChanges();
                 }
 
-                
+
                 bool roleExistsInCompany = _dbContext.CompanyRoles
                     .Any(cr => cr.CompanyID == companyID && cr.RoleID == role.RoleID);
 
                 if (roleExistsInCompany)
                 {
-                    return StatusCode(500, new Web.SimpleErrorResponse {Success = false, Message = "Role exists in company"});
+                    return StatusCode(500, new Web.SimpleErrorResponse { Success = false, Message = "Role exists in company" });
                 }
 
-                
+
                 var companyRole = new CompanyRole
                 {
                     CompanyID = companyID,
@@ -821,7 +822,7 @@ public class CompanyController : ControllerBase
                 _dbContext.CompanyRoles.Add(companyRole);
                 _dbContext.SaveChanges();
 
-                
+
                 transaction.Commit();
                 return role.RoleID;
             }
@@ -829,7 +830,7 @@ public class CompanyController : ControllerBase
             {
                 transaction.Rollback();
                 Console.WriteLine("An error occured: {0}", ex.Message);
-                return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while creating roles."});
+                return StatusCode(500, new Web.SimpleErrorResponse { Message = "An error occurred while creating roles." });
             }
         }
     }
@@ -910,11 +911,11 @@ public class CompanyController : ControllerBase
 
                 // Check for duplicate name within the same company
                 bool nameExists = (from cr in _dbContext.CompanyRoles
-                                join r in _dbContext.Roles on cr.RoleID equals r.RoleID
-                                where cr.CompanyID == companyID &&
-                                        r.RoleID != roleID &&
-                                        r.Name.ToLower() == name.Trim().ToLower()
-                                select r).Any();
+                                   join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                                   where cr.CompanyID == companyID &&
+                                           r.RoleID != roleID &&
+                                           r.Name.ToLower() == name.Trim().ToLower()
+                                   select r).Any();
 
                 if (nameExists)
                 {
@@ -950,8 +951,8 @@ public class CompanyController : ControllerBase
 
 
 
-   [HttpGet] 
-   [Route("getCompany")]
+    [HttpGet]
+    [Route("getCompany")]
     public ActionResult<Web.CompanyInfoResponse> GetCompany(int companyID)
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -970,7 +971,7 @@ public class CompanyController : ControllerBase
 
             if (!hasAccess)
             {
-                return StatusCode(403, new Web.SimpleErrorResponse 
+                return StatusCode(403, new Web.SimpleErrorResponse
                 {
                     Success = false,
                     Message = "User does not have access to this company."
@@ -980,7 +981,7 @@ public class CompanyController : ControllerBase
             var company = _dbContext.Companies.FirstOrDefault(c => c.CompanyID == companyID);
             if (company == null)
             {
-                return NotFound(new Web.SimpleErrorResponse 
+                return NotFound(new Web.SimpleErrorResponse
                 {
                     Success = false,
                     Message = "Company not found."
@@ -1041,7 +1042,7 @@ public class CompanyController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine("Error: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse 
+            return StatusCode(500, new Web.SimpleErrorResponse
             {
                 Message = "An error occurred while fetching the company data."
             });
@@ -1094,35 +1095,35 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var userCompanies = _dbContext.UserCompanies
                     .Where(uc => uc.CompanyID == companyID)
                     .ToList();
 
                 var userIDs = userCompanies.Select(uc => uc.UserID).ToList();
 
-                
+
                 var userRolesToRemove = _dbContext.UserRoles
                     .Where(ur => userIDs.Contains(ur.UserID))
                     .ToList();
                 _dbContext.UserRoles.RemoveRange(userRolesToRemove);
 
-                
+
                 var endPoints = _dbContext.CompanyEndPoints
                     .Where(cep => cep.CompanyID == companyID)
                     .ToList();
                 _dbContext.CompanyEndPoints.RemoveRange(endPoints);
 
-                
+
                 var roles = _dbContext.CompanyRoles
                     .Where(cr => cr.CompanyID == companyID)
                     .ToList();
                 _dbContext.CompanyRoles.RemoveRange(roles);
 
-                
+
                 _dbContext.UserCompanies.RemoveRange(userCompanies);
 
-               
+
                 _dbContext.Companies.Remove(company);
 
                 _dbContext.SaveChanges();
@@ -1187,7 +1188,7 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var roleExists = _dbContext.Roles.Any(r => r.RoleID == roleID);
                 if (!roleExists)
                 {
@@ -1198,7 +1199,7 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var endpointExists = _dbContext.EndPoints.Any(ep => ep.EndPointID == endPointID);
                 if (!endpointExists)
                 {
@@ -1209,7 +1210,7 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var alreadyExists = _dbContext.Set<RoleEndPoint>()
                     .Any(rep => rep.RoleID == roleID && rep.EndPointID == endPointID);
 
@@ -1222,7 +1223,7 @@ public class CompanyController : ControllerBase
                     });
                 }
 
-                
+
                 var roleEndPoint = new RoleEndPoint
                 {
                     RoleID = roleID,
@@ -1261,7 +1262,7 @@ public class CompanyController : ControllerBase
         }
         try
         {
-            
+
             var mainUserRoleIds = _dbContext.UserRoles
                 .Where(ur => ur.UserID == mainUserID)
                 .Select(ur => ur.RoleID)
@@ -1277,25 +1278,25 @@ public class CompanyController : ControllerBase
 
             if (!hasCustomerAdminAccess)
             {
-                return StatusCode(403, new Web.SimpleErrorResponse 
-                { 
-                    Success = false, 
-                    Message = "Main user does not have CustomerAdmin access." 
+                return StatusCode(403, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "Main user does not have CustomerAdmin access."
                 });
             }
 
-            
+
             var customerAdminRoleID = (from cr in _dbContext.CompanyRoles
-                                    join r in _dbContext.Roles on cr.RoleID equals r.RoleID
-                                    where cr.CompanyID == companyID && r.Name == "CustomerAdmin"
-                                    select cr.RoleID).FirstOrDefault();
+                                       join r in _dbContext.Roles on cr.RoleID equals r.RoleID
+                                       where cr.CompanyID == companyID && r.Name == "CustomerAdmin"
+                                       select cr.RoleID).FirstOrDefault();
 
             if (customerAdminRoleID == 0)
             {
-                return StatusCode(500, new Web.SimpleErrorResponse 
-                { 
-                    Success = false, 
-                    Message = "CustomerAdmin role does not exist in the company." 
+                return StatusCode(500, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "CustomerAdmin role does not exist in the company."
                 });
             }
 
@@ -1304,10 +1305,10 @@ public class CompanyController : ControllerBase
 
             if (!isUserInCompany)
             {
-                return StatusCode(400, new Web.SimpleErrorResponse 
-                { 
-                    Success = false, 
-                    Message = "User is not part of the company." 
+                return StatusCode(400, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User is not part of the company."
                 });
             }
 
@@ -1316,14 +1317,14 @@ public class CompanyController : ControllerBase
 
             if (alreadyHasRole)
             {
-                return StatusCode(400, new Web.SimpleErrorResponse 
-                { 
-                    Success = false, 
-                    Message = "User already has the CustomerAdmin role." 
+                return StatusCode(400, new Web.SimpleErrorResponse
+                {
+                    Success = false,
+                    Message = "User already has the CustomerAdmin role."
                 });
             }
 
-        
+
             var newUserRole = new Database.MixedTables.UserRole
             {
                 UserID = userID,
@@ -1334,19 +1335,19 @@ public class CompanyController : ControllerBase
             _dbContext.UserRoles.Add(newUserRole);
             _dbContext.SaveChanges();
 
-            return Ok(new Web.SimpleErrorResponse 
-            { 
-                Success = true, 
-                Message = "User has been made an admin successfully." 
+            return Ok(new Web.SimpleErrorResponse
+            {
+                Success = true,
+                Message = "User has been made an admin successfully."
             });
         }
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: {0}", ex.Message);
-            return StatusCode(500, new Web.SimpleErrorResponse 
-            { 
-                Success = false, 
-                Message = "An error occurred while assigning admin role." 
+            return StatusCode(500, new Web.SimpleErrorResponse
+            {
+                Success = false,
+                Message = "An error occurred while assigning admin role."
             });
         }
     }
@@ -1387,6 +1388,10 @@ public class CompanyController : ControllerBase
             Console.WriteLine("Error fetching initials: " + ex.Message);
             return StatusCode(500, "An error occurred while fetching user initials.");
         }
+    }
+    private bool IsUserInCompany(int userID, int companyID)
+    {
+        return _dbContext.UserCompanies.Any(uc => uc.UserID == userID && uc.CompanyID == companyID);
     }
 }
 
