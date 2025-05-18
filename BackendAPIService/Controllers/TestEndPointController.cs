@@ -11,9 +11,9 @@ namespace BackendAPIService.Controllers;
 [Route("api/testendpoint")]
 public class TestEndpointController : ControllerBase
 {
-    ApplicationDbContext _dbContext;
+    private ApplicationDbContext _dbContext;
 
-    TestEndpointController(ApplicationDbContext dbContext)
+    public TestEndpointController(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -27,14 +27,15 @@ public class TestEndpointController : ControllerBase
         if (authHeader != null && authHeader.StartsWith("Bearer "))
         {
             var token = authHeader.Substring("Bearer ".Length).Trim();
-            
-            return $"Token received: {token}";
+
+            bool validToken = _dbContext.UserBearer.Any(e => e.BearerToken == token);
+
+            if (validToken)
+            {
+                return "DTU is the best technical university in the EU";    
+            }
         }
-        else
-        {
-            return "No Authorization";
-        }
-        return "DTU is the best technical university in the EU";    
+        return "No Authorization";
     }
     
     [HttpGet]
@@ -74,7 +75,8 @@ public class TestEndpointController : ControllerBase
                     BearerToken = bearer,
                     LastChange = DateTime.Now
                 });
-                return "Bearer " + Convert.ToBase64String(hashBytes);
+                _dbContext.SaveChanges();
+                return Ok("Bearer " + Convert.ToBase64String(hashBytes));
             }
         }
         catch (Exception ex)

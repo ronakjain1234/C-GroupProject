@@ -140,7 +140,7 @@
         {
             IsLoading = false;
         }
-        
+
         try
         {
             IsLoading = true;
@@ -153,13 +153,16 @@
             }
             else
             {
-                Snackbar.Add("Failed to generate bearer token", Severity.Error);
+                Snackbar.Add($"Failed to generate bearer token{response}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add("Failed to load endpoints: " + ex.Message, Severity.Error);
-            Endpointss = new();
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 }
