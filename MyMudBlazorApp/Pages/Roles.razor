@@ -90,7 +90,7 @@
     max-height: 80vh;
 }
 
-/* Styling for main content tabs */
+
 .main-tabs {
     margin-top: 16px;
     width: 90%;
@@ -99,8 +99,8 @@
 }
 
 .main-tabs .mud-tabs-panels {
-    min-height: 500px; /* Set consistent height for all tab panels */
-    overflow-y: auto; /* Add scrolling to the tab panels instead of tables */
+    min-height: 500px; 
+    overflow-y: auto; 
 }
 
 .empty-selection {
@@ -345,7 +345,7 @@
     private string _newRoleName = string.Empty;
     private string _companyName = string.Empty;
 
-    private int currentUserID = 1; // You might get this from auth state
+    private int currentUserID = 1; 
     private string searchString1 = "";
     private bool _isOpen;
     private string _currentRole = "";
@@ -386,7 +386,7 @@
             LoadEndpoints();
             await LoadRoles();
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             _isAuthenticated = false;
             Snackbar.Add($"Authentication error!", Severity.Error);
@@ -411,7 +411,7 @@
                 RolesList = result.roles;
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error loading roles!", Severity.Error);
             Navigation.NavigateTo("/");
@@ -476,7 +476,7 @@
                     Snackbar.Add("Failed to delete role", Severity.Error);
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 Snackbar.Add($"Error deleting role!", Severity.Error);
             }
@@ -495,9 +495,9 @@
                 var response = await Http.PostAsync($"http://localhost:5000/api/company/createRole?companyID={companyId}&name={Uri.EscapeDataString(newRoleName)}", null);
                 if (response.IsSuccessStatusCode)
                 {
-                    await LoadRoles(); // Refresh the roles list to get the new role
+                    await LoadRoles(); 
                     
-                    // Copy the endpoints if they exist
+                    
                     if (_roleEndpoints.ContainsKey(roleName))
                     {
                         _roleEndpoints[newRoleName] = new HashSet<string>(_roleEndpoints[roleName]);
@@ -511,7 +511,7 @@
                     Snackbar.Add($"Failed to clone role '{roleName}'", Severity.Error);
                 }
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 Snackbar.Add($"Error cloning role!", Severity.Error);
             }
@@ -627,7 +627,7 @@
                 Snackbar.Add($"Failed to create role '{roleName}'", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error creating role!", Severity.Error);
         }
@@ -676,7 +676,7 @@
             if (response.IsSuccessStatusCode)
             {
                 role.roleName = newName;
-                // Update the endpoints dictionary key if it exists
+                
                 if (_roleEndpoints.ContainsKey(role.roleName))
                 {
                     var endpoints = _roleEndpoints[role.roleName];
@@ -691,7 +691,7 @@
                 Snackbar.Add("Failed to update role name", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error updating role name!", Severity.Error);
         }

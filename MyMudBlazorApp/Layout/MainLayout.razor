@@ -56,16 +56,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // First load if there's already a token
+        
         await LoadUserInitials();
 
-        // Subscribe to navigation events so we reload initials after login/navigation
+        
         Navigation.LocationChanged += OnLocationChanged;
     }
 
     private async void OnLocationChanged(object sender, LocationChangedEventArgs args)
     {
-        // Reload initials on every route change
+       
         await LoadUserInitials();
         StateHasChanged();
     }
@@ -140,7 +140,7 @@
 
     public void Dispose()
     {
-        // Unsubscribe to avoid memory leaks
+        
         Navigation.LocationChanged -= OnLocationChanged;
     }
 }

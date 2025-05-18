@@ -426,7 +426,6 @@ public class EndPointController : ControllerBase
             }
             catch (Exception ex)
             {
-                // Rollback the transaction if any error occurs
                 transaction.Rollback();
                 Console.WriteLine("An error occurred: {0}", ex.Message);
                 return StatusCode(500, new SimpleErrorResponse

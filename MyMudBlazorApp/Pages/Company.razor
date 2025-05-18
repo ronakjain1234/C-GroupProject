@@ -547,7 +547,7 @@ else
                 AvailableRoles = result.roles;
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error loading roles!", Severity.Error);
         }
@@ -565,9 +565,9 @@ else
                 }
             }
             await LoadCompanyData();
-            //Snackbar.Add($"Roles added to users successfully!", Severity.Success);
+            
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error adding roles!", Severity.Error);
         }
@@ -616,7 +616,7 @@ else
 
             await LoadCompanyData();
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Authentication error!", Severity.Error);
             _isAuthenticated = false;
@@ -657,7 +657,7 @@ else
                 Snackbar.Add($"Failed to update company name. Please try again later.", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error updating company name!", Severity.Error);
         }
@@ -683,7 +683,7 @@ else
                 Snackbar.Add($"Failed to create role '{roleName}'", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error creating role!", Severity.Error);
         }
@@ -714,7 +714,7 @@ else
                 Snackbar.Add($"Failed to add role to user", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error adding role to user!", Severity.Error);
         }
@@ -737,7 +737,7 @@ else
                 Snackbar.Add($"Failed to remove role from user", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error removing role from user!", Severity.Error);
         }
@@ -758,7 +758,7 @@ else
                 Snackbar.Add("Failed to remove user", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error removing user!", Severity.Error);
         }
@@ -774,7 +774,7 @@ else
                 _company = result;
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error loading company data!", Severity.Error);
             Navigation.NavigateTo("/");
@@ -799,7 +799,7 @@ else
                 Snackbar.Add("Failed to add user", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error adding user!", Severity.Error);
         }
@@ -828,7 +828,7 @@ else
                 Snackbar.Add("Failed to add user to the company.", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error adding user!", Severity.Error);
         }
@@ -850,7 +850,7 @@ else
                 Snackbar.Add($"Failed to update role from '{currentRole}' to '{newRole}'", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error updating role!", Severity.Error);
         }
@@ -873,7 +873,7 @@ else
                 Snackbar.Add("Failed to delete company", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error deleting company!", Severity.Error);
         }
@@ -999,7 +999,7 @@ else
                 Snackbar.Add("Failed to make user admin", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error making user admin!", Severity.Error);
         }
@@ -1034,10 +1034,10 @@ else
                 }
             }
             await LoadCompanyData();
-            //Snackbar.Add("Roles removed from users successfully!", Severity.Success);
+            
             CloseBulkRemoveRolesDialog();
         }
-        catch (Exception ex)
+        catch (Exception )
         {
             Snackbar.Add($"Error removing roles!", Severity.Error);
         }
